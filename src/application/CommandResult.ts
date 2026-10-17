@@ -1,4 +1,5 @@
 import type { NodeReference, NodeSnapshot, TreeSnapshot } from './SceneSnapshot.js';
+import type { SvgPoint } from '../domain/SvgAttributes.js';
 
 export interface CommandHelp {
   readonly syntax: string;
@@ -12,6 +13,10 @@ export type CommandResult =
   | { readonly kind: 'tree'; readonly snapshot: TreeSnapshot }
   | { readonly kind: 'show'; readonly node: NodeSnapshot }
   | { readonly kind: 'created'; readonly node: NodeReference; readonly parent: NodeReference | null }
+  | { readonly kind: 'restored'; readonly node: NodeReference; readonly parent: NodeReference | null }
+  | { readonly kind: 'moved'; readonly node: NodeReference; readonly position: SvgPoint | null; readonly dx: number; readonly dy: number; readonly undo: boolean }
+  | { readonly kind: 'scaled'; readonly node: NodeReference; readonly factor: number; readonly undo: boolean }
+  | { readonly kind: 'updated'; readonly node: NodeReference; readonly attribute: string; readonly value: string | number | undefined }
   | { readonly kind: 'deleted'; readonly node: NodeReference };
 
 export type ExecutionResult =

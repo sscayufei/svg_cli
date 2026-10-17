@@ -2,6 +2,8 @@
 export type SvgAttributes = Readonly<Record<string, string | number>>;
 export type SvgGeometry = Readonly<Record<string, number>>;
 
+export interface SvgPoint { readonly x: number; readonly y: number; }
+
 /** Geometric meaning only; no CLI or XML syntax. */
 export type SvgGeometryDescription =
   | { readonly kind: 'properties'; readonly values: SvgGeometry }

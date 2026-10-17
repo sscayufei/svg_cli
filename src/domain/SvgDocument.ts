@@ -1,4 +1,5 @@
 import { SvgGroup } from './SvgGroup.js';
+import { ChangeSet } from './ChangeSet.js';
 import type { SvgNode } from './SvgNode.js';
 import { insertGroupChild, removeGroupChild, setNodeLocation } from './internal/TreeAccess.js';
 
@@ -107,6 +108,23 @@ export class SvgDocument implements Iterable<SvgNode> {
       descendant[setNodeLocation](this, descendant === node ? parent ?? this : descendant.parent);
       this.#idIndex.set(descendant.id, descendant);
     }
+  }
+
+  /** Prepare a reversible deletion, preserving parent, insertion index and identity. */
+  public planDelete(id: string): ChangeSet {
+    const node = this.requireById(id);
+    const parent = node.parent instanceof SvgGroup ? node.parent : null;
+    const index = (parent === null ? this.children : parent.children).indexOf(node);
+    return new ChangeSet([{
+      apply: () => {
+        const siblings = parent === null ? this.children : parent.children;
+        if (this.findById(id) !== node || siblings[index] !== node) {
+          throw new Error(`node position changed: ${id}`);
+        }
+        this.remove(id);
+      },
+      revert: () => this.insert(node, index, parent),
+    }]);
   }
 
   /** Detach a subtree without destroying its internal structure or identities. */

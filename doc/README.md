@@ -51,8 +51,25 @@
 - 依赖审核：domain 仅依赖本层，application 依赖 domain，CLI 仅依赖 application 和本层；应用/CLI 不导入内部 TreeAccess。没有 switch(tag) 或新增形状类型分派。ResultFormatter 的结果联合类型分支只负责展示结果，不构造或路由命令。
 - 变更范围：新增应用层、Tokenizer/Dispatcher/格式器、ShapeFactory/SvgNumber 和三份测试；扩展模型查询/画布基础能力，更新现有 CLI 与 smoke test、README。未新增依赖、历史栈、文件读写或后续编辑命令。
 - 文档同步：按用户确认更新本地 ARCHITECTURE/DEVELOPMENT_PLAN/CODEX_PROMPT，保留三文件原有 Git 忽略规则；关键决定在本文中受版本控制。
+- Git commit SHA：`7bf0221`（M2 命令入口）。
+- 验收状态：用户已验收并提交，随后授权 M3。
+
+## M3 — 2026-10-17 — 基础编辑与失败原子性
+
+- 起点：M2 提交 `7bf0221`，工作区干净；只实施 M3。
+- 用户确认：普通 g 的 fill/stroke/stroke-width 仅写在组上，按 SVG 继承，不覆盖孩子的显式样式；scale 只改变几何位置与尺寸，不改变 stroke-width 或文本内容。
+- 实现范围：新增 MoveCommand、ScaleCommand、SetAttributeCommand、DeleteCommand；NodeEditCommand 封装共同执行/撤销/重做状态；接入既有 Dispatcher、Executor 和 CLI 格式器。
+- 领域重构：GeometryState 为封装的几何值对象，形状类声明本类型的坐标轴及非负尺寸字段；统一数值校验与字段局部变更，避免五类叶子重复实现。SvgGroup 以 Composite 委托子节点准备变更，不根据 tag 分派。
+- 原子性：先准备并校验全部子孙的改动，再应用 ChangeSet。每个步骤本身原子；若后续步骤失败，回滚已完成步骤。revert 失败也回滚已撤销步骤，记录保持可重试。当前领域写入步骤为受控赋值或已预校验的树操作。
+- 撤销记录：move/scale 保存受影响字段的旧/新值，不依赖减位移或乘倒数；set 只保存单属性旧值/缺席状态；delete 保存同一节点/子树、父容器和原插入索引。不复制整份文档。
+- 复核修正：初版样式记录捕获整个样式对象，改为单属性旧值，防止还原 fill 时覆盖其他样式。新增样式独立记录、组继承和命令重复调用状态回归。
+- 测试过程：新增三个测试文件先验证失败基线；首轮实现 93/93 通过，复核补测后最终 9 个文件、95/95 通过（新增 29 项）。
+- 实际执行：`npm.cmd run build` 通过；`npm.cmd test` 95/95 通过；UTF-8 管道运行 `node dist/cli/main.js`，中文 set、组 move/scale、tree、整组 delete 及删除后子孙不可寻址均符合预期；`git diff --check` 通过。Vitest 使用已授权的沙箱外运行权限。
+- 依赖审核：domain 仅依赖本层；application 通过领域行为修改模型；CLI 只构建请求与显示结构化结果。两处名称分派仍为 Dispatcher/ShapeFactory；未向应用或 CLI 暴露 TreeAccess，也未引入 any。
+- 变更范围：两个领域类、五个命令层类、三份测试；更新领域几何封装、Dispatcher/结果协议、帮助阶段标记和项目说明。没有新增依赖，没有实现 M4 的分组重排或 M5 历史栈。
+- 文档偏差：增加 GeometryState、ChangeSet 和 NodeEditCommand，已记录理由并同步本地架构/提示文档；保留这些本地文件既有忽略规则。
 - Git commit SHA：待用户验收后提交。
-- 验收状态：待用户验收；未授权进入 M3。
+- 验收状态：待用户验收；未授权进入 M4。
 
 ## 后续需确认的事项
 

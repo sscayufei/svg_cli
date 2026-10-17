@@ -7,6 +7,10 @@ import { HelpCommand } from '../application/commands/HelpCommand.js';
 import { InitCommand } from '../application/commands/InitCommand.js';
 import { ShowCommand } from '../application/commands/ShowCommand.js';
 import { TreeCommand } from '../application/commands/TreeCommand.js';
+import { MoveCommand } from '../application/commands/MoveCommand.js';
+import { ScaleCommand } from '../application/commands/ScaleCommand.js';
+import { SetAttributeCommand } from '../application/commands/SetAttributeCommand.js';
+import { DeleteCommand } from '../application/commands/DeleteCommand.js';
 import type { CommandToken } from './CommandToken.js';
 import { CommandTokenizer } from './CommandTokenizer.js';
 
@@ -40,6 +44,22 @@ export class CommandDispatcher {
         this.count(a, 1, 1, 'show <id>');
         return new ShowCommand(this.session, a[0]?.value ?? '');
       } }],
+      ['move', { syntax: 'move <id> <dx> <dy>', description: 'translate a shape or group', build: a => {
+        this.count(a, 3, 3, 'move <id> <dx> <dy>');
+        return new MoveCommand(this.session, a[0]?.value ?? '', a[1]?.value ?? '', a[2]?.value ?? '');
+      } }],
+      ['scale', { syntax: 'scale <id> <factor>', description: 'scale all geometry by a positive factor', build: a => {
+        this.count(a, 2, 2, 'scale <id> <factor>');
+        return new ScaleCommand(this.session, a[0]?.value ?? '', a[1]?.value ?? '');
+      } }],
+      ['set', { syntax: 'set <id> <attr> <value>', description: 'set a whitelisted attribute', build: a => {
+        this.count(a, 3, 3, 'set <id> <attr> <value>');
+        return new SetAttributeCommand(this.session, a[0]?.value ?? '', a[1]?.value ?? '', a[2]?.value ?? '');
+      } }],
+      ['delete', { syntax: 'delete <id>', description: 'delete a shape and its descendants', build: a => {
+        this.count(a, 1, 1, 'delete <id>');
+        return new DeleteCommand(this.session, a[0]?.value ?? '');
+      } }],
       ['help', { syntax: 'help', description: 'show command syntax', build: a => {
         this.count(a, 0, 0, 'help');
         return new HelpCommand([
@@ -51,8 +71,7 @@ export class CommandDispatcher {
           { syntax: 'create text <id> <x> <y> "content"', description: 'text' },
           { syntax: 'create g <id>', description: 'empty group; all creates accept in <containerId>' },
         ], [
-          'read <file.svg>', 'save [file.svg]', 'move <id> <dx> <dy>', 'scale <id> <factor>',
-          'set <id> <attr> <value>', 'delete <id>', 'group <newGid> <id1> <id2>...',
+          'read <file.svg>', 'save [file.svg]', 'group <newGid> <id1> <id2>...',
           'ungroup <gid>', 'addto <gid> <id>', 'front <id>', 'back <id>', 'undo', 'redo',
         ]);
       } }],

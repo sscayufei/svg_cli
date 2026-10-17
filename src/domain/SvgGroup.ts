@@ -1,4 +1,5 @@
 import type { SvgGeometry, SvgStyle } from './SvgAttributes.js';
+import { ChangeSet } from './ChangeSet.js';
 import { SvgNode } from './SvgNode.js';
 import { insertGroupChild, removeGroupChild } from './internal/TreeAccess.js';
 
@@ -18,6 +19,14 @@ export class SvgGroup extends SvgNode {
 
   public getGeometry(): SvgGeometry {
     return Object.freeze({});
+  }
+
+  protected override buildMove(dx: number, dy: number): ChangeSet {
+    return ChangeSet.combine(this.#children.map(child => child.planMove(dx, dy)));
+  }
+
+  protected override buildScale(factor: number): ChangeSet {
+    return ChangeSet.combine(this.#children.map(child => child.planScale(factor)));
   }
 
   /** @internal Structural writes belong exclusively to SvgDocument. */

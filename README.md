@@ -2,11 +2,13 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前已实现 M0～M2：工程骨架、领域模型和可用的创建/查询 CLI。
+当前已实现 M0～M3：工程骨架、领域模型、创建/查询 CLI 和基础编辑。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
-M2 将模型接入 CLI，支持 `init`、`canvas` 查询/修改、六类型 `create` 及 `in`、`tree [id]`、`show <id>`、`help`。`init 400` 使用默认高度 600；`canvas` 修改要求同时给出宽高。其余编辑命令、SVG 读写和 Undo/Redo 尚未实现，`help` 会列明阶段边界。
+M2 将模型接入 CLI，支持 `init`、`canvas` 查询/修改、六类型 `create` 及 `in`、`tree [id]`、`show <id>`、`help`。`init 400` 使用默认高度 600；`canvas` 修改要求同时给出宽高。
+
+M3 支持 `move <id> <dx> <dy>`、`scale <id> <factor>`、`set <id> <attr> <value>` 和 `delete <id>`。容器移动/缩放递归覆盖子孙，缩放同时改变位置与尺寸；比例必须为正，数值溢出使整个操作失败。组样式只写入组自身，按 SVG 继承规则生效，保留孩子的显式样式；stroke-width 和文本内容不会随 scale 改变。分组重排、SVG 读写和 Undo/Redo 命令尚未实现，`help` 会列明阶段边界。
 
 ## 环境与运行
 
@@ -26,6 +28,11 @@ create rect start 120 100 160 60 #4a90d9 in node1
 create text start-label 155 135 "开始" in node1
 tree
 show start
+move node1 10 20
+scale node1 0.5
+set start-label text "完成"
+tree
+delete node1
 ```
 
 双引号包裹带空格参数；引号内支持 `\"` 和 `\\`，其他反斜杠原样保留。空文本 `""` 合法；只有未加引号的尾部 `in <containerId>` 才作为父容器子句。数值支持十进制小数和指数形式，拒绝 NaN、Infinity、十六进制和带单位的参数。
@@ -41,7 +48,7 @@ node dist/cli/main.js
 git diff --check
 ```
 
-`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。应用测试验证 CreateCommand 的最小撤销记录和失败恢复，CLI 测试覆盖完整嵌套会话、错误文案、画布修改、注释、引号和 EOF。撤销协议已具备，但历史栈及 undo/redo 命令按计划留到 M5。
+`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状的编辑、容器递归、数值溢出时不变、浮点原值恢复、属性缺席恢复及删除/恢复后的 ID、父引用和顺序。各编辑命令的撤销协议可通过应用 API 测试，但历史栈及 undo/redo 命令按计划留到 M5。
 
 ## 文档与迭代
 
