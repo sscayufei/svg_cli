@@ -13,6 +13,10 @@ export class ResultFormatter {
       case 'created':
         return [`${this.#nodes.reference(result.node)} created${result.parent === null ? '' : ` in ${this.#nodes.reference(result.parent)}`}`];
       case 'deleted': return [`${this.#nodes.reference(result.node)} deleted`];
+      case 'grouped': return [`${this.#nodes.reference(result.node)} created with ${result.count} children`];
+      case 'ungrouped': return [`${this.#nodes.reference(result.node)} ungrouped`];
+      case 'reparented': return [`${this.#nodes.reference(result.node)} moved into ${result.parent === null ? 'svg' : this.#nodes.reference(result.parent)}`];
+      case 'ordered': return [`${this.#nodes.reference(result.node)} ${result.undo ? 'order restored' : `moved to ${result.direction}`}`];
       case 'restored': return [`${this.#nodes.reference(result.node)} restored into ${result.parent === null ? 'svg' : this.#nodes.reference(result.parent)}`];
       case 'moved': {
         const direction = result.undo ? 'moved back' : 'moved';
@@ -29,7 +33,7 @@ export class ResultFormatter {
       case 'help': return [
         ...result.entries.map(entry => `${entry.syntax} — ${entry.description}`),
         'EOF — exit (Ctrl+Z then Enter on Windows; Ctrl+D on Unix).',
-        `Not implemented in M3: ${result.pending.join('; ')}`,
+        `Not implemented in M4: ${result.pending.join('; ')}`,
       ];
     }
   }

@@ -13,6 +13,10 @@ export type CommandResult =
   | { readonly kind: 'tree'; readonly snapshot: TreeSnapshot }
   | { readonly kind: 'show'; readonly node: NodeSnapshot }
   | { readonly kind: 'created'; readonly node: NodeReference; readonly parent: NodeReference | null }
+  | { readonly kind: 'grouped'; readonly node: NodeReference; readonly count: number }
+  | { readonly kind: 'ungrouped'; readonly node: NodeReference }
+  | { readonly kind: 'reparented'; readonly node: NodeReference; readonly parent: NodeReference | null }
+  | { readonly kind: 'ordered'; readonly node: NodeReference; readonly direction: 'front' | 'back'; readonly undo: boolean }
   | { readonly kind: 'restored'; readonly node: NodeReference; readonly parent: NodeReference | null }
   | { readonly kind: 'moved'; readonly node: NodeReference; readonly position: SvgPoint | null; readonly dx: number; readonly dy: number; readonly undo: boolean }
   | { readonly kind: 'scaled'; readonly node: NodeReference; readonly factor: number; readonly undo: boolean }

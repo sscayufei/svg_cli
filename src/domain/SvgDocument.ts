@@ -110,6 +110,58 @@ export class SvgDocument implements Iterable<SvgNode> {
     }
   }
 
+  /** Relocate inside this document without unregistering any subtree IDs. */
+  public planRelocate(id: string, parent: SvgGroup | null, index: number): ChangeSet {
+    const node = this.requireById(id);
+    const before = this.validateRelocation(node, parent, index);
+    return new ChangeSet([{
+      apply: () => {
+        this.assertLocation(node, before.parent, before.index);
+        this.relocate(node, parent, index);
+      },
+      revert: () => {
+        this.assertLocation(node, parent, index);
+        this.relocate(node, before.parent, before.index);
+      },
+    }]);
+  }
+
+  private validateRelocation(node: SvgNode, parent: SvgGroup | null, index: number): { parent: SvgGroup | null; index: number } {
+    const candidate: SvgNode | null = parent;
+    if (candidate !== null && !(candidate instanceof SvgGroup)) throw new Error(`not a container: ${candidate.id}`);
+    if (node.document !== this || this.findById(node.id) !== node) throw new Error(`node ownership changed: ${node.id}`);
+    if (parent !== null && (parent.document !== this || this.findById(parent.id) !== parent)) {
+      throw new Error(`container does not belong to this document: ${parent.id}`);
+    }
+    let ancestor: SvgGroup | SvgDocument | null = parent;
+    while (ancestor instanceof SvgGroup) {
+      if (ancestor === node) throw new Error(`cannot move a container into itself or its descendant: ${node.id}`);
+      ancestor = ancestor.parent;
+    }
+    if (node.parent !== this && !(node.parent instanceof SvgGroup)) throw new Error(`invalid scene graph parent: ${node.id}`);
+    const source = node.parent instanceof SvgGroup ? node.parent : null;
+    const sourceIndex = (source === null ? this.children : source.children).indexOf(node);
+    const maximum = (parent === null ? this.children : parent.children).length - (source === parent ? 1 : 0);
+    if (!Number.isInteger(index) || index < 0 || index > maximum) throw new Error('invalid child index');
+    if (sourceIndex < 0) throw new Error(`invalid scene graph position: ${node.id}`);
+    return { parent: source, index: sourceIndex };
+  }
+
+  private assertLocation(node: SvgNode, parent: SvgGroup | null, index: number): void {
+    if (node.parent !== (parent ?? this) || (parent === null ? this.children : parent.children)[index] !== node) {
+      throw new Error(`node position changed: ${node.id}`);
+    }
+  }
+
+  private relocate(node: SvgNode, parent: SvgGroup | null, index: number): void {
+    const source = this.validateRelocation(node, parent, index);
+    if (source.parent === null) this.#children.splice(source.index, 1);
+    else source.parent[removeGroupChild](source.index);
+    if (parent === null) this.#children.splice(index, 0, node);
+    else parent[insertGroupChild](index, node);
+    node[setNodeLocation](this, parent ?? this);
+  }
+
   /** Prepare a reversible deletion, preserving parent, insertion index and identity. */
   public planDelete(id: string): ChangeSet {
     const node = this.requireById(id);

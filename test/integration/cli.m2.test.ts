@@ -42,7 +42,7 @@ describe('M2 CLI transcripts', () => {
     const { output, errors } = run(['canvas', 'tree', 'show r', 'create g g', 'help']);
     expect(errors.split('\n')).toEqual(Array(4).fill("error: no document. use 'init' or 'read' first"));
     expect(output).toContain('create <type> <id>');
-    expect(output).toContain('Not implemented in M3:');
+    expect(output).toContain('Not implemented in M4:');
   });
 
   it('rejects failed creations without leaving nodes or partially created containers', () => {

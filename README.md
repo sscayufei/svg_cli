@@ -2,13 +2,15 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前已实现 M0～M3：工程骨架、领域模型、创建/查询 CLI 和基础编辑。
+当前已实现 M0～M4：工程骨架、领域模型、创建/查询 CLI、基础编辑和层级/顺序操作。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
 M2 将模型接入 CLI，支持 `init`、`canvas` 查询/修改、六类型 `create` 及 `in`、`tree [id]`、`show <id>`、`help`。`init 400` 使用默认高度 600；`canvas` 修改要求同时给出宽高。
 
-M3 支持 `move <id> <dx> <dy>`、`scale <id> <factor>`、`set <id> <attr> <value>` 和 `delete <id>`。容器移动/缩放递归覆盖子孙，缩放同时改变位置与尺寸；比例必须为正，数值溢出使整个操作失败。组样式只写入组自身，按 SVG 继承规则生效，保留孩子的显式样式；stroke-width 和文本内容不会随 scale 改变。分组重排、SVG 读写和 Undo/Redo 命令尚未实现，`help` 会列明阶段边界。
+M3 支持 `move <id> <dx> <dy>`、`scale <id> <factor>`、`set <id> <attr> <value>` 和 `delete <id>`。容器移动/缩放递归覆盖子孙，缩放同时改变位置与尺寸；比例必须为正，数值溢出使整个操作失败。组样式只写入组自身，按 SVG 继承规则生效，保留孩子的显式样式；stroke-width 和文本内容不会随 scale 改变。
+
+M4 支持 `group <newGid> <id1> <id2>...`、`ungroup <gid>`、`addto <gid> <id>`、`front <id>`、`back <id>`。新组使用首参数节点的原父级/位置，成员按原文档顺序排列；跨父分组允许，同父移除选中节点后校正位置。ungroup 仅允许嵌套组，根级组按实验要求禁止解散；孩子占据原组位置。addto 放在目标容器末尾，front/back 只调整同级顺序。结构操作不改几何和显式样式，继承随父级变化；因此解散带样式的组可能改变外观。SVG 读写和 CLI Undo/Redo 尚未实现。
 
 ## 环境与运行
 
@@ -48,7 +50,7 @@ node dist/cli/main.js
 git diff --check
 ```
 
-`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状的编辑、容器递归、数值溢出时不变、浮点原值恢复、属性缺席恢复及删除/恢复后的 ID、父引用和顺序。各编辑命令的撤销协议可通过应用 API 测试，但历史栈及 undo/redo 命令按计划留到 M5。
+`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状编辑、失败原子性、精确浮点恢复、属性缺席、子树 ID/父引用、跨父分组、同级顺序，以及结构事务中途失败和撤销重试。各编辑命令的撤销协议可通过应用 API 测试，但历史栈及 undo/redo 命令按计划留到 M5。
 
 ## 文档与迭代
 

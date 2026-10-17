@@ -11,6 +11,11 @@ import { MoveCommand } from '../application/commands/MoveCommand.js';
 import { ScaleCommand } from '../application/commands/ScaleCommand.js';
 import { SetAttributeCommand } from '../application/commands/SetAttributeCommand.js';
 import { DeleteCommand } from '../application/commands/DeleteCommand.js';
+import { GroupCommand } from '../application/commands/GroupCommand.js';
+import { UngroupCommand } from '../application/commands/UngroupCommand.js';
+import { AddToCommand } from '../application/commands/AddToCommand.js';
+import { FrontCommand } from '../application/commands/FrontCommand.js';
+import { BackCommand } from '../application/commands/BackCommand.js';
 import type { CommandToken } from './CommandToken.js';
 import { CommandTokenizer } from './CommandTokenizer.js';
 
@@ -60,6 +65,22 @@ export class CommandDispatcher {
         this.count(a, 1, 1, 'delete <id>');
         return new DeleteCommand(this.session, a[0]?.value ?? '');
       } }],
+      ['group', { syntax: 'group <newGid> <id1> <id2>...', description: 'group existing shapes in document order', build: a => {
+        this.count(a, 3, Infinity, 'group <newGid> <id1> <id2>...');
+        return new GroupCommand(this.session, a[0]?.value ?? '', a.slice(1).map(token => token.value));
+      } }],
+      ['ungroup', { syntax: 'ungroup <gid>', description: 'promote a nested group\'s children', build: a => {
+        this.count(a, 1, 1, 'ungroup <gid>'); return new UngroupCommand(this.session, a[0]?.value ?? '');
+      } }],
+      ['addto', { syntax: 'addto <gid> <id>', description: 'move an existing shape into a container', build: a => {
+        this.count(a, 2, 2, 'addto <gid> <id>'); return new AddToCommand(this.session, a[0]?.value ?? '', a[1]?.value ?? '');
+      } }],
+      ['front', { syntax: 'front <id>', description: 'move to the last sibling slot (painted in front)', build: a => {
+        this.count(a, 1, 1, 'front <id>'); return new FrontCommand(this.session, a[0]?.value ?? '');
+      } }],
+      ['back', { syntax: 'back <id>', description: 'move to the first sibling slot', build: a => {
+        this.count(a, 1, 1, 'back <id>'); return new BackCommand(this.session, a[0]?.value ?? '');
+      } }],
       ['help', { syntax: 'help', description: 'show command syntax', build: a => {
         this.count(a, 0, 0, 'help');
         return new HelpCommand([
@@ -71,8 +92,7 @@ export class CommandDispatcher {
           { syntax: 'create text <id> <x> <y> "content"', description: 'text' },
           { syntax: 'create g <id>', description: 'empty group; all creates accept in <containerId>' },
         ], [
-          'read <file.svg>', 'save [file.svg]', 'group <newGid> <id1> <id2>...',
-          'ungroup <gid>', 'addto <gid> <id>', 'front <id>', 'back <id>', 'undo', 'redo',
+          'read <file.svg>', 'save [file.svg]', 'undo', 'redo',
         ]);
       } }],
     ]);
