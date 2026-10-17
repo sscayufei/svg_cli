@@ -1,4 +1,4 @@
-import type { SvgGeometry, SvgStyle } from './SvgAttributes.js';
+import type { SvgGeometry, SvgGeometryDescription, SvgStyle } from './SvgAttributes.js';
 import { SvgNode } from './SvgNode.js';
 
 export class LineShape extends SvgNode {
@@ -19,5 +19,9 @@ export class LineShape extends SvgNode {
 
   public getGeometry(): SvgGeometry {
     return Object.freeze({ x1: this.#x1, y1: this.#y1, x2: this.#x2, y2: this.#y2 });
+  }
+
+  public override describeGeometry(): SvgGeometryDescription {
+    return Object.freeze({ kind: 'segment', x1: this.#x1, y1: this.#y1, x2: this.#x2, y2: this.#y2 });
   }
 }

@@ -1,4 +1,4 @@
-import type { SvgAttributes, SvgGeometry, SvgStyle } from './SvgAttributes.js';
+import type { SvgAttributes, SvgGeometry, SvgGeometryDescription, SvgStyle } from './SvgAttributes.js';
 import type { SvgDocument } from './SvgDocument.js';
 import type { SvgGroup } from './SvgGroup.js';
 import { setNodeLocation } from './internal/TreeAccess.js';
@@ -37,6 +37,10 @@ export abstract class SvgNode implements Iterable<SvgNode> {
   }
 
   public abstract getGeometry(): SvgGeometry;
+
+  public describeGeometry(): SvgGeometryDescription {
+    return Object.freeze({ kind: 'properties', values: this.getGeometry() });
+  }
 
   public getAttributes(): SvgAttributes {
     return Object.freeze({ ...this.getGeometry(), ...this.#style });

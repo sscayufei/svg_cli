@@ -33,12 +33,30 @@
 - 测试过程：先写两份领域测试，在授权的沙箱外运行中因缺失模型模块失败；实现后首轮完整回归 42/42 通过，随后针对样式覆盖和嵌套容器恢复补充测试。
 - 最终证据：`npm.cmd run build` 通过；`npm.cmd test` 为 3 个文件、44 项全部通过（40 项领域测试 + 4 项 M0 CLI 回归）；Node 直接加载 dist/domain 编译产物，执行嵌套创建、遍历、子树摘除和重新插入的 smoke check 通过；`git diff --check` 通过。
 - 依赖复核：domain 只导入本层模块；SvgNode 对 SvgDocument/SvgGroup 的引用为 type-only，避免运行时循环；没有 Node I/O、CLI/XML、switch(tag) 或 any。
+- Git commit SHA：`4c6aea4`（建立领域模型，设置统一 Node 抽象，实现六种内置图形模型）。
+- 验收状态：用户已验收并提交，随后授权 M2。
+
+## M2 — 2026-10-17 — 命令入口与基础查询
+
+- 起点：M1 已由用户验收，提交 `4c6aea4`，工作区干净。
+- 本轮范围：Tokenizer/Dispatcher、基础 Command/Executor/Session、六类型 create（含 in）、init、canvas、tree/show/help；不进入 M3。
+- 用户确认补充：本轮补入 canvas 尺寸修改；canvas 无参数查询，两个参数修改，单参数报语法错误。init 一个参数指定宽度且高度为 600，无参数为 800×600。
+- 分派约束：CommandDispatcher 对命令名、ShapeFactory 对类型名；均标记为未来重构点。格式器只解释结果和通用几何描述，不按图形标签再次分派。
+- 设计细化：领域新增与 CLI 无关的点/线段/属性集合几何描述；独立 CLI 格式器输出 tree/show。CreateCommand 保存原节点、文档、父容器及插入位置并提供 undo/redo 协议，本轮不建立历史栈或启用 undo/redo 命令。
+- 角色对应：Command/EditCommand 为请求协议；六个具体命令为 ConcreteCommand；Dispatcher 与 main 为 Client；CommandExecutor 为 Invoker；EditorSession、SvgDocument 和 SceneQuery 为 Receiver。命令不直接读写节点字段。
+- 解析规则：只把整行起始的 # 作为注释；双引号保留空文本和引号元数据；引号内支持转义引号/反斜杠，其他反斜杠原样保留。只有未加引号的尾部 in 被识别为父容器子句。数值统一使用有限十进制/指数解析。
+- 测试过程：先确认缺失模块与未实现会话导致的失败基线，再实现；首轮 64 项通过，针对小数/指数、文本转义和多根连接线补测后最终 6 个文件、66 项全部通过。
+- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 66/66 通过；`node dist/cli/main.js` 会话验证创建、tree/show、canvas 修改及 box 错误；UTF-8 管道下中文往返通过；`git diff --check` 通过。Vitest 按既有环境要求在授权的沙箱外执行。
+- 初始方案复核：SceneQuery 的父引用联合类型采用结构收窄，避免不安全强转；帮助结果只复制 syntax/description，避免把 Dispatcher 的构造回调带入结果快照。M0 smoke test 保留启动/注释/错误恢复/EOF 检查，随现有支持范围更新断言。
+- 依赖审核：domain 仅依赖本层，application 依赖 domain，CLI 仅依赖 application 和本层；应用/CLI 不导入内部 TreeAccess。没有 switch(tag) 或新增形状类型分派。ResultFormatter 的结果联合类型分支只负责展示结果，不构造或路由命令。
+- 变更范围：新增应用层、Tokenizer/Dispatcher/格式器、ShapeFactory/SvgNumber 和三份测试；扩展模型查询/画布基础能力，更新现有 CLI 与 smoke test、README。未新增依赖、历史栈、文件读写或后续编辑命令。
+- 文档同步：按用户确认更新本地 ARCHITECTURE/DEVELOPMENT_PLAN/CODEX_PROMPT，保留三文件原有 Git 忽略规则；关键决定在本文中受版本控制。
 - Git commit SHA：待用户验收后提交。
-- 验收状态：待用户验收；未授权进入 M2。
+- 验收状态：待用户验收；未授权进入 M3。
 
 ## 后续需确认的事项
 
-- 计划尚未明确安排 canvas 修改尺寸，建议 M2 纳入；未视为已获批。
+- canvas 修改尺寸已由用户明确批准纳入 M2。
 - 树修改入口、历史状态唯一归属，以及 SVG 读写复用唯一类型分派需在相关阶段细化。
 - 跨父 group、transform、save 路径、IO 后历史清空规则尚待确认。
 - 原需求 §6.1 流程图 A 有 7 个元素，但示例 save 输出 8；计数规则待确认。

@@ -1,12 +1,18 @@
 import { createInterface } from 'node:readline';
 import type { Readable, Writable } from 'node:stream';
+import type { CommandExecutor } from '../application/CommandExecutor.js';
+import type { CommandDispatcher } from './CommandDispatcher.js';
+import type { ResultFormatter } from './ResultFormatter.js';
 
-/** M0 REPL shell. Command construction and dispatch arrive in M2. */
+/** REPL adapter; commands own requests and receivers own business rules. */
 export class SvgCli {
   public constructor(
     private readonly input: Readable,
     private readonly output: Writable,
     private readonly errors: Writable,
+    private readonly dispatcher: CommandDispatcher,
+    private readonly executor: CommandExecutor,
+    private readonly formatter: ResultFormatter,
   ) {}
 
   public async run(): Promise<void> {
@@ -24,17 +30,18 @@ export class SvgCli {
 
     try {
       for await (const line of lines) {
-        const input = line.trim();
-
-        if (input.length > 0 && !input.startsWith('#')) {
-          if (input === 'help') {
-            this.output.write(
-              'M0: help — show this message; EOF — exit (Ctrl+Z then Enter on Windows).\n'
-              + 'Document, shape editing, inspection and undo/redo commands are not implemented yet.\n',
-            );
-          } else {
-            this.errors.write('error: command not implemented in M0. use \'help\'\n');
+        try {
+          const command = this.dispatcher.parse(line);
+          if (command !== null) {
+            const outcome = this.executor.execute(command);
+            if (outcome.ok) {
+              this.output.write(this.formatter.format(outcome.result).join('\n') + '\n');
+            } else {
+              this.writeError(outcome.error);
+            }
           }
+        } catch (error) {
+          this.writeError(error instanceof Error ? error.message : 'invalid command');
         }
 
         // EOF can close readline before the final buffered line is consumed.
@@ -46,5 +53,9 @@ export class SvgCli {
       lines.close();
       this.output.write('\n');
     }
+  }
+
+  private writeError(message: string): void {
+    this.errors.write(`error: ${message.replace(/[\r\n]+/g, ' ')}\n`);
   }
 }

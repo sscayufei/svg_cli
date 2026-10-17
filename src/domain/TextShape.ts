@@ -1,4 +1,4 @@
-import type { SvgAttributes, SvgGeometry, SvgStyle } from './SvgAttributes.js';
+import type { SvgAttributes, SvgGeometry, SvgGeometryDescription, SvgStyle } from './SvgAttributes.js';
 import { SvgNode } from './SvgNode.js';
 
 export class TextShape extends SvgNode {
@@ -21,5 +21,9 @@ export class TextShape extends SvgNode {
 
   public override getAttributes(): SvgAttributes {
     return Object.freeze({ ...super.getAttributes(), text: this.#text });
+  }
+
+  public override describeGeometry(): SvgGeometryDescription {
+    return Object.freeze({ kind: 'point', x: this.#x, y: this.#y });
   }
 }

@@ -4,8 +4,8 @@ import { insertGroupChild, removeGroupChild, setNodeLocation } from './internal/
 
 /** Aggregate root: coordinates child order, ownership, parents and the ID index. */
 export class SvgDocument implements Iterable<SvgNode> {
-  readonly #width: number;
-  readonly #height: number;
+  #width: number;
+  #height: number;
   readonly #children: SvgNode[] = [];
   readonly #idIndex = new Map<string, SvgNode>();
 
@@ -21,6 +21,21 @@ export class SvgDocument implements Iterable<SvgNode> {
   public get height(): number { return this.#height; }
   public get size(): number { return this.#idIndex.size; }
   public get children(): readonly SvgNode[] { return Object.freeze([...this.#children]); }
+
+  public resize(width: number, height: number): void {
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+      throw new Error('canvas dimensions must be finite and positive');
+    }
+    this.#width = width;
+    this.#height = height;
+  }
+
+  public requireContainer(id: string): SvgGroup {
+    const node = this.findById(id);
+    if (node === undefined) throw new Error(`no such container: ${id}`);
+    if (!(node instanceof SvgGroup)) throw new Error(`not a container: ${id}`);
+    return node;
+  }
 
   public findById(id: string): SvgNode | undefined {
     return this.#idIndex.get(id);

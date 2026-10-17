@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-describe('M0 CLI process', () => {
+describe('CLI startup and EOF regression', () => {
   const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 
   const runCli = (input: string) => {
@@ -31,24 +31,24 @@ describe('M0 CLI process', () => {
     const result = runCli('\r\n   \r\n# comment\r\n  # 中文注释\r\nhelp\r\n');
 
     expect(result.stderr).toBe('');
-    expect(result.stdout).toContain('M0: help');
-    expect(result.stdout).toContain('not implemented yet');
+    expect(result.stdout).toContain('help — show command syntax');
+    expect(result.stdout).toContain('Not implemented in M2:');
   });
 
   it('reports one error per unsupported input and keeps accepting help', () => {
-    const result = runCli('init\ncreate rect r1 0 0 10 10 #abc\nhelp\n');
+    const result = runCli('wibble\nunknown\nhelp\n');
 
     expect(result.stderr.trim().split('\n')).toEqual([
-      "error: command not implemented in M0. use 'help'",
-      "error: command not implemented in M0. use 'help'",
+      'error: unknown command: wibble',
+      'error: unknown command: unknown',
     ]);
-    expect(result.stdout).toContain('M0: help');
+    expect(result.stdout).toContain('help — show command syntax');
   });
 
   it('processes the final line even when EOF is not preceded by a newline', () => {
     const result = runCli('help');
 
-    expect(result.stdout).toContain('M0: help');
+    expect(result.stdout).toContain('help — show command syntax');
     expect(result.stderr).toBe('');
   });
 });
