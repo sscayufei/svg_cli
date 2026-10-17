@@ -13,6 +13,7 @@ export type CommandResult =
   | { readonly kind: 'tree'; readonly snapshot: TreeSnapshot }
   | { readonly kind: 'show'; readonly node: NodeSnapshot }
   | { readonly kind: 'saved'; readonly path: string; readonly count: number }
+  | { readonly kind: 'read'; readonly path: string; readonly count: number; readonly warnings: readonly string[] }
   | { readonly kind: 'created'; readonly node: NodeReference; readonly parent: NodeReference | null }
   | { readonly kind: 'grouped'; readonly node: NodeReference; readonly count: number }
   | { readonly kind: 'ungrouped'; readonly node: NodeReference }

@@ -34,7 +34,7 @@ describe('M6 real CLI save transcripts', () => {
     expect(output).toContain('saved to 绘图 with spaces.svg (2 elements)');
     expect(output).toContain(`saved to ${absolute} (2 elements)`);
     expect(output).toContain('text#t moved back to (10,20)\ntext#t moved to (11,22)');
-    expect(output).toContain('Not implemented in M6: read <file.svg>');
+    expect(output).toContain('read <file.svg> — load SVG as the current document');
     const initial = readFileSync(join(directory, '绘图 with spaces.svg'), 'utf8');
     expect(initial).toContain('<text id="t" x="10" y="20">开始 &amp; &lt;结束&gt;</text>');
     expect(readFileSync(absolute, 'utf8')).toContain('x="11" y="22"');

@@ -13,13 +13,13 @@ export class SaveCommand implements Command {
 
   public execute(): CommandResult {
     const document = this.session.requireDocument();
-    // M7 will resolve an omitted path from the successful read source.
-    if (this.path === undefined) throw new Error("no source path. use 'save <file.svg>'");
+    const path = this.path ?? this.session.sourcePath;
+    if (path === null) throw new Error("no source path. use 'save <file.svg>'");
     try {
-      this.store.save(document, this.path);
+      this.store.save(document, path);
     } catch {
-      throw new Error(`cannot write file: ${this.path}`);
+      throw new Error(`cannot write file: ${path}`);
     }
-    return Object.freeze({ kind: 'saved', path: this.path, count: document.size });
+    return Object.freeze({ kind: 'saved', path, count: document.size });
   }
 }

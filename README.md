@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前已实现 M0～M6：工程骨架、领域模型、创建/查询 CLI、基础编辑、层级/顺序操作、Undo/Redo 和 SVG 保存。
+当前已实现 M0～M7：工程骨架、领域模型、完整编辑 CLI、Undo/Redo 和 SVG 读写；M8 的综合验收与正式报告待独立授权。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
@@ -12,15 +12,21 @@ M3 支持 `move <id> <dx> <dy>`、`scale <id> <factor>`、`set <id> <attr> <valu
 
 M4 支持 `group <newGid> <id1> <id2>...`、`ungroup <gid>`、`addto <gid> <id>`、`front <id>`、`back <id>`。新组使用首参数节点的原父级/位置，成员按原文档顺序排列；跨父分组允许，同父移除选中节点后校正位置。ungroup 仅允许嵌套组，根级组按实验要求禁止解散；孩子占据原组位置。addto 放在目标容器末尾，front/back 只调整同级顺序。结构操作不改几何和显式样式，继承随父级变化；因此解散带样式的组可能改变外观。
 
-M5 支持 `undo` / `redo`，每条成功编辑占一个历史单元，包括整组和整棵子树操作。新编辑清空 Redo；查询及失败命令保留历史。成功 init、canvas 修改或 save 清空双栈并禁用 Undo/Redo，直到下一条成功编辑开启新历史；禁用时两条命令均报 `error: undo not allowed after io command`。
+M5 支持 `undo` / `redo`，每条成功编辑占一个历史单元，包括整组和整棵子树操作。新编辑清空 Redo；查询及失败命令保留历史。成功 init、read、canvas 修改或 save 清空双栈并禁用 Undo/Redo，直到下一条成功编辑开启新历史；禁用时两条命令均报 `error: undo not allowed after io command`。
 
 M6 支持 `save <file.svg>`，输出 UTF-8 SVG，包含嵌套组、几何、显式样式和转义后的文本。支持绝对路径、相对路径及引号包裹的中文/空格文件名；相对路径以启动 CLI 的工作目录解析，不自动创建目录。先完整序列化并写入同目录临时文件，再替换目标，避免写入失败截断旧文件。保存失败保留文档及历史。保存提示统计所有图形和 g，排除根 svg。
 
-无参数 save 只使用 read 来源路径，显式 save 不更新默认路径。目前 read 留待 M7，因此本阶段需显式给出保存路径；否则报 `error: no source path. use 'save <file.svg>'`。模型中的非法 XML 字符会使保存失败，保留原有文件。
+M7 支持 `read <file.svg>`，可直接建立当前文档。完整解析、补 ID 和验证成功后才替换当前文档及来源路径；失败保留文档、路径和历史。缺失或空 ID 按类型加序号生成，先预留全文显式 ID 避免冲突，成功后逐项输出 warning。重复 ID 直接报错。读写往返保留几何、显式样式、文本、父子归属和绘制顺序。
+
+无参数 save 使用最近成功 read 的绝对来源路径，显式 save 不更新该路径；成功 init 清除来源，编辑和 canvas 修改保留来源。没有 read 来源时报 `error: no source path. use 'save <file.svg>'`。模型中的非法 XML 字符会使保存失败，保留原有文件。
+
+输入范围已明确限定：UTF-8 XML 1.0；根 svg 仅支持 width/height/viewBox 与命名空间声明，width/height 必须为正数（可带 px），viewBox 如存在必须为 `0 0 width height`。形状几何使用无单位数字，缺省值为 0；只支持六种形状的几何、公共 fill/stroke/stroke-width 及 text 子文本。允许 SVG 命名空间前缀、注释和 CDATA。遇到 transform、未知标签/属性（包括 style/font-size/data-*）、叶子中的子元素、DTD 或处理指令会明确失败。
 
 ## 环境与运行
 
 使用 Node.js 24.x 和 npm。Windows PowerShell 如阻止 `npm.ps1`，使用 `npm.cmd`，无需修改执行策略。
+
+运行时 XML 解析依赖固定为 saxes 6.0.0。经用户确认，tsconfig 的 skipLibCheck 用于兼容它与 TypeScript 7 的声明差异；源码的 strict、exactOptionalPropertyTypes 及调用处类型检查保留。
 
 ```powershell
 npm.cmd ci
@@ -59,6 +65,16 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
 ```
 
+读取现有示例并另存：
+
+```text
+read demo.svg
+move node2 0 100
+save copy.svg
+```
+
+原需求中的外部文件示例位于 [test/fixtures/other.svg](test/fixtures/other.svg)，读取时会为背景矩形补充 rect1。
+
 ## 验证
 
 ```powershell
@@ -69,6 +85,8 @@ git diff --check
 ```
 
 `build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状编辑、失败原子性、精确浮点恢复、属性缺席、子树 ID/父引用、跨父分组、同级顺序、双栈分叉和历史边界，以及结构事务中途失败和撤销重试。历史状态机测试逐步比较文档状态；生产实现只保留局部变更记录，不复制整个文档。保存测试覆盖 XML 转义、非法字符、1500 层嵌套、真实文件覆盖、部分写入/替换失败、CLI 路径及历史边界。
+
+读取测试覆盖 ID 预留、六类型及嵌套结构、XML/命名空间/编码边界、来源路径生命周期、失败后继续 Undo/Redo，以及真实文件 read/save/read 往返。
 
 ## 文档与迭代
 

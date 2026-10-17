@@ -121,13 +121,32 @@
 - 依赖复核（ADR-010）：domain 未修改，无反向 I/O 依赖；应用仅依赖保存端口，具体基础设施仅在 main 引用；内部 TreeAccess 未暴露，名称分派仍集中于 Dispatcher/ShapeFactory。Visitor/Observer/Decorator 未引入。
 - 变更范围：新增五份生产文件（一个接口、四个类）、四份测试、demo.svg 及 examples/demo.cli；更新结果协议、命令装配/分发/格式器、现有测试帮助标记、README 与本记录。未安装依赖，未实现 SVG 读取、来源路径替换、transform 导入或 M7 功能。
 - 文档同步：本地架构/计划/提示文档记录已确认路径、计数与 ADR-010，保留原有 Git 忽略规则；关键决策由本文跟踪。
+- Git commit SHA：`c7d4b04`（实现 save <file.svg> 命令）。
+- 验收状态：用户已验收并提交，随后授权 M7。
+
+## M7 — 2026-10-17 — SVG 读取与来源路径
+
+- 起点：M6 提交 `c7d4b04`，工作区干净；只实施 M7。
+- 用户确认输入范围：六类型及嵌套 g；transform、未知元素/属性（含 style/font-size/data-*）、叶子中的子元素整次失败。允许 XML 声明、注释、CDATA、SVG 命名空间；拒绝 DTD。根 width/height 必须为正，可带 px；viewBox 可缺省，存在时必须匹配 0 0 width height。图形几何缺省 0；空 ID 视作缺失，先预留所有显式 ID，再按前序和每类型序号补 ID。
+- 具体适配边界：UTF-8 XML 1.0，可接受 BOM；根只接收 width/height/viewBox 与命名空间声明，接受 SVG 前缀或无命名空间文件。外来命名空间、不支持的处理指令和非 UTF-8 明确失败。读写往返保留模型语义，格式与命名空间前缀会规范化。
+- 用户批准依赖：新增固定运行时 saxes@6.0.0（带入 xmlchars）；沙箱内安装遇到 ENOTCACHED，使用获批网络权限完成安装。XML 库仅出现在基础设施层。
+- 编译兼容修正：首次 build 报错全部来自 saxes 声明，涉及 TS7 泛型约束与 exactOptionalPropertyTypes。提出方案后，用户明确批准 skipLibCheck:true；源码 strict/exactOptionalPropertyTypes/noUncheckedIndexedAccess 及调用处类型检查继续开启。未更改 node_modules 声明或降低源码严格性。
+- 实现职责（ADR-011）：SvgReader 解析为前序输入记录，完成根/命名空间检查、显式 ID 预留和候选树构建。ShapeFactory 在原唯一类型表中补充几何元数据，提供通用 fromAttributes，使 CLI 和读取复用类型创建/校验，不增加标签分派。SvgFileStore 负责读取字节、UTF-8 解码及绝对路径；SvgReadPort 返回候选文档/警告/来源。ReadCommand 完整成功后调用 EditorSession.load；Executor 随后触发历史边界。
+- 原子性：失败候选不触及当前文档、路径、双栈；候选警告只在成功结果中发布。重复 ID 保持原需求的 id already exists 文案，文件读取失败保持 cannot read file，XML 语法错误带 invalid SVG 诊断。
+- 来源生命周期：成功 read 替换为绝对路径，成功 init 清空；失败 read/init 保留。编辑、canvas 修改及显式 save 保留来源；无参数 save 回到来源，新的成功 read 更新默认目标。读入文档继续支持同一组编辑与 Undo/Redo，无单独的导入节点类型。
+- 测试先行：新增 Reader 测试确认模块缺失失败基线；首轮 Reader 36/36 通过。首次完整回归 200/201 通过，唯一失败为新增测试漏算对同一缺 ID 原文件再次读取的警告；修正断言，并验证保存后的副本不再补号。补入编码/命名空间边界后最终 22 个文件、204/204 通过（本轮新增 52 项）。
+- 覆盖：全文后置显式 ID、空 ID、大小写、七元素原需求 fixture、六类型/嵌套/样式/文本往返、CDATA/实体、XML 错误、DTD、未知内容、非法几何、px/viewBox、命名空间、XML 版本、无效 UTF-8、默认来源与复制保存、失败后继续 Undo/Redo、替换成功后的历史清理。
+- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 204/204 通过；编译后 CLI 在 dist/m7-verification 内回放原需求 other.svg，读取→编辑→撤销/重做→无参数保存→重新读取→整组删除恢复→另存→再读取均通过；独立 .NET XML 解析核对 7 元素与几何值，保存后不再告警。`git diff --check` 和新增文件空白检查通过。Vitest 使用授权的沙箱外子进程权限。
+- 依赖复核：domain 不依赖 XML/fs/application；基础设施依赖领域及端口；CLI 仅装配入口引用具体基础设施。ShapeFactory 仍为唯一图形类型注册表，Dispatcher 为唯一命令名称分派；未引入 Visitor/Observer/Decorator 或插件。
+- 变更范围：新增 SvgReadPort、ReadCommand、SvgReader、四份测试及原需求 fixture；扩展 Session/SaveCommand/FileStore/Factory、结果和 CLI 装配契约；更新 package/lock、获准的 tsconfig 兼容选项、既有帮助测试和说明。未修改 demo.svg，未实施 M8 总验收/正式报告。
+- 文档同步：本地架构/计划/提示文档记录输入规则和 ADR-011，保留原有 Git 忽略规则；关键决策在本文跟踪。
 - Git commit SHA：待用户验收后提交。
-- 验收状态：待用户验收；未进入 M7。
+- 验收状态：待用户验收；未进入 M8。
 
 ## 后续需确认的事项
 
 - canvas 修改尺寸已由用户明确批准纳入 M2。
-- 树修改入口已在 M4 实现，历史状态唯一归属已在 M5 明确；SVG 输出已在 M6 采用通用属性/遍历而不新增类型分派，读取适配仍需在 M7 细化。
-- 跨父 group 和结构操作样式语义已在 M4 确认；历史清空规则已在 M5 确认；save 路径与计数已在 M6 确认；transform、未知元素/属性和缺失 ID 的读取策略仍待 M7 确认。
+- M0～M7 的范围与输入/历史/路径规则均已确认；ShapeFactory 的唯一类型分派已复用于导入。
+- M8 需独立授权后完成完整需求矩阵、正式架构图/报告与交付检查；若教师要求支持当前子集以外的 SVG 内容，再按新增需求评估。
 
 M8 应补齐架构方案（含 PlantUML）、过程记录、一致性自查和质量保证手段，并以真实代码及测试为准。

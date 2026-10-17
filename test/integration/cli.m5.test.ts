@@ -42,7 +42,7 @@ describe('M5 undo/redo CLI transcripts', () => {
       'error: nothing to undo', 'error: undo not allowed after io command',
     ]);
     expect(output.match(/g#g moved by \(2,3\)/g)).toHaveLength(2);
-    expect(output).toContain('Not implemented in M6: read <file.svg>');
+    expect(output).toContain('read <file.svg> — load SVG as the current document');
     expect(output).toContain('g#new deleted\ng#new created');
   });
 });

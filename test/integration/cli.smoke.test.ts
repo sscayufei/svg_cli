@@ -32,7 +32,7 @@ describe('CLI startup and EOF regression', () => {
 
     expect(result.stderr).toBe('');
     expect(result.stdout).toContain('help — show command syntax');
-    expect(result.stdout).toContain('Not implemented in M6:');
+    expect(result.stdout).toContain('read <file.svg> — load SVG as the current document');
   });
 
   it('reports one error per unsupported input and keeps accepting help', () => {
