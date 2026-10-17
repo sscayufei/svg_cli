@@ -15,8 +15,26 @@
 - 测试范围：空输入 EOF、CRLF 空行/整行注释、未实现命令报错后继续 help、无末尾换行的最后一行。尚未人工验证实体终端的 Ctrl+Z 按键行为。
 - 架构符合性：仅 cli 模块引用 Node readline/stream；输入输出通过构造函数注入并封装。没有 domain/application/infrastructure 实现，没有 switch(tag)、any 或公共字段数据袋。Command/Composite 按计划留到后续阶段。
 - 设计偏差：正式报告路径提前建立阶段记录草稿；未改动被忽略的设计基线，也未将待确认建议当作已批准决策。
-- Git commit SHA：待用户审阅后提交。
-- 验收状态：待用户验收；未授权进入 M1。
+- Git commit SHA：`020cc5a`（搭建运行环境）。
+- 验收状态：用户已验收并提交，随后授权 M1。
+
+## M1 — 2026-10-17 — 领域模型与 Composite
+
+- 起点：M0 提交 `020cc5a`，工作区干净。
+- 授权范围：六种内置图形模型、SvgDocument、ID 索引、完整父子约束与领域测试；不进入 M2。
+- 用户确认：图形宽高/半径允许 0，画布宽高必须为正；所有几何数值有限。stroke-width 为有限非负数。
+- 实现：SvgNode 为统一抽象；RectShape/CircleShape/EllipseShape/LineShape/TextShape 封装各自几何字段；SvgGroup 持有有序子节点；SvgDocument 管理根、索引和整体归属。
+- Composite/Iterator：叶子和组都提供只读 children、getGeometry/getAttributes 和前序 Iterable；叶子没有孩子。领域对象不生成 CLI 文本或 XML。
+- 树结构规则：append/insert 只接收未归属的子树根，父容器必须属于当前文档；拒绝重复 ID、重复归属、环和非法插入位置；先验证整棵子树，成功后统一写入。remove 注销全部子孙 ID，保留摘除子树内部的父子关系和对象身份，重新插入后完整恢复登记。
+- 封装决策：字段采用 ECMAScript 私有字段；对外属性和 children 为冻结快照。TypeScript 没有包级 friend，internal/TreeAccess.ts 用 Symbol 提供聚合内部结构写入协议，仅 SvgDocument 调用，应用/CLI 禁止导入；该协议属于包内约定，不是防恶意调用的安全边界。
+- 初始方案复核：样式参数采用结构类型，额外 x 字段可能覆盖查询结果中的几何属性，因此构造时拒绝三种公共样式以外的字段，并增加回归测试。
+- 阶段边界说明：架构中的几何接口本轮落实为多态只读查询；move/scale/set 的变更行为按 M3 计划实现，未添加空方法或“尚未实现”异常占位。树结构仅提供聚合基础操作，未实现 group/ungroup/addto/front/back 用例或 Command/History。
+- 目录细化：增加 SvgAttributes.ts 类型文件和 internal/TreeAccess.ts，仍位于 domain 内；未修改 CLI、依赖或工程配置。
+- 测试过程：先写两份领域测试，在授权的沙箱外运行中因缺失模型模块失败；实现后首轮完整回归 42/42 通过，随后针对样式覆盖和嵌套容器恢复补充测试。
+- 最终证据：`npm.cmd run build` 通过；`npm.cmd test` 为 3 个文件、44 项全部通过（40 项领域测试 + 4 项 M0 CLI 回归）；Node 直接加载 dist/domain 编译产物，执行嵌套创建、遍历、子树摘除和重新插入的 smoke check 通过；`git diff --check` 通过。
+- 依赖复核：domain 只导入本层模块；SvgNode 对 SvgDocument/SvgGroup 的引用为 type-only，避免运行时循环；没有 Node I/O、CLI/XML、switch(tag) 或 any。
+- Git commit SHA：待用户验收后提交。
+- 验收状态：待用户验收；未授权进入 M2。
 
 ## 后续需确认的事项
 

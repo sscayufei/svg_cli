@@ -2,7 +2,9 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前仅实现 M0 工程骨架：`svg>` REPL、空行与整行注释、简要 `help`、EOF 退出。图形、编辑命令、文件读写和历史功能尚未实现。
+当前已实现 M0 工程骨架及 M1 领域模型。CLI 仍只支持 `svg>` REPL、空行与整行注释、简要 `help`、EOF 退出；编辑命令、文件读写和历史功能尚未实现。
+
+M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型通过 TypeScript API 使用，尚未接入 CLI。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
 ## 环境与运行
 
@@ -24,7 +26,7 @@ node dist/cli/main.js
 git diff --check
 ```
 
-`build` 严格编译 `src/`；Vitest 运行真实 Node 子进程的 smoke test，验证启动、提示符、注释、错误恢复和 EOF，不使用 watch 模式。测试通过 `tsx` 运行源码；编译后的入口另行检查。
+`build` 严格编译 `src/`；Vitest 单次运行领域测试及真实 Node 子进程的 CLI smoke test，不使用 watch 模式。领域测试验证几何/样式封装、ID、父子关系、遍历顺序、失败不变和子树重新挂接。CLI 测试通过 `tsx` 运行源码，验证启动、提示符、注释、错误恢复和 EOF。
 
 ## 文档与迭代
 
