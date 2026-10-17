@@ -10,7 +10,7 @@ function harness() {
   const session = new EditorSession();
   const history = new CommandHistory();
   const executor = new CommandExecutor(history);
-  const dispatcher = new CommandDispatcher(session, history);
+  const dispatcher = new CommandDispatcher(session, history, { save: () => { throw new Error('unexpected file write'); } });
   const run = (line: string) => {
     const command = dispatcher.parse(line);
     if (command === null) throw new Error('test requires a command');

@@ -12,6 +12,7 @@ export type CommandResult =
   | { readonly kind: 'canvas'; readonly operation: 'created' | 'queried' | 'resized'; readonly width: number; readonly height: number }
   | { readonly kind: 'tree'; readonly snapshot: TreeSnapshot }
   | { readonly kind: 'show'; readonly node: NodeSnapshot }
+  | { readonly kind: 'saved'; readonly path: string; readonly count: number }
   | { readonly kind: 'created'; readonly node: NodeReference; readonly parent: NodeReference | null }
   | { readonly kind: 'grouped'; readonly node: NodeReference; readonly count: number }
   | { readonly kind: 'ungrouped'; readonly node: NodeReference }

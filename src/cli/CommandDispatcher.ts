@@ -1,6 +1,8 @@
 import type { CommandHelp } from '../application/CommandResult.js';
 import type { EditorSession } from '../application/EditorSession.js';
 import type { CommandHistory } from '../application/CommandHistory.js';
+import type { SvgSavePort } from '../application/ports/SvgSavePort.js';
+import { SaveCommand } from '../application/commands/SaveCommand.js';
 import { UndoCommand } from '../application/commands/UndoCommand.js';
 import { RedoCommand } from '../application/commands/RedoCommand.js';
 import { CanvasCommand } from '../application/commands/CanvasCommand.js';
@@ -31,7 +33,7 @@ export class CommandDispatcher {
   readonly #tokenizer = new CommandTokenizer();
   readonly #definitions: ReadonlyMap<string, CommandDefinition>;
 
-  public constructor(private readonly session: EditorSession, history: CommandHistory) {
+  public constructor(private readonly session: EditorSession, history: CommandHistory, store: SvgSavePort) {
     this.#definitions = new Map<string, CommandDefinition>([
       ['init', { syntax: 'init [w] [h]', description: 'create canvas (default 800x600)', build: a => {
         this.count(a, 0, 2, 'init [w] [h]');
@@ -84,6 +86,9 @@ export class CommandDispatcher {
       ['back', { syntax: 'back <id>', description: 'move to the first sibling slot', build: a => {
         this.count(a, 1, 1, 'back <id>'); return new BackCommand(this.session, a[0]?.value ?? '');
       } }],
+      ['save', { syntax: 'save [file.svg]', description: 'save SVG (path required without a read source)', build: a => {
+        this.count(a, 0, 1, 'save [file.svg]'); return new SaveCommand(this.session, store, a[0]?.value);
+      } }],
       ['undo', { syntax: 'undo', description: 'undo the last edit', build: a => {
         this.count(a, 0, 0, 'undo'); return new UndoCommand(this.session, history);
       } }],
@@ -101,7 +106,7 @@ export class CommandDispatcher {
           { syntax: 'create text <id> <x> <y> "content"', description: 'text' },
           { syntax: 'create g <id>', description: 'empty group; all creates accept in <containerId>' },
         ], [
-          'read <file.svg>', 'save [file.svg]',
+          'read <file.svg>',
         ]);
       } }],
     ]);

@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前已实现 M0～M5：工程骨架、领域模型、创建/查询 CLI、基础编辑、层级/顺序操作和 Undo/Redo。
+当前已实现 M0～M6：工程骨架、领域模型、创建/查询 CLI、基础编辑、层级/顺序操作、Undo/Redo 和 SVG 保存。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
@@ -12,7 +12,11 @@ M3 支持 `move <id> <dx> <dy>`、`scale <id> <factor>`、`set <id> <attr> <valu
 
 M4 支持 `group <newGid> <id1> <id2>...`、`ungroup <gid>`、`addto <gid> <id>`、`front <id>`、`back <id>`。新组使用首参数节点的原父级/位置，成员按原文档顺序排列；跨父分组允许，同父移除选中节点后校正位置。ungroup 仅允许嵌套组，根级组按实验要求禁止解散；孩子占据原组位置。addto 放在目标容器末尾，front/back 只调整同级顺序。结构操作不改几何和显式样式，继承随父级变化；因此解散带样式的组可能改变外观。
 
-M5 支持 `undo` / `redo`，每条成功编辑占一个历史单元，包括整组和整棵子树操作。新编辑清空 Redo；查询及失败命令保留历史。成功 init 或 canvas 修改清空双栈并禁用 Undo/Redo，直到下一条成功编辑开启新历史；禁用时两条命令均报 `error: undo not allowed after io command`。当前 SVG 文件读写尚未实现。
+M5 支持 `undo` / `redo`，每条成功编辑占一个历史单元，包括整组和整棵子树操作。新编辑清空 Redo；查询及失败命令保留历史。成功 init、canvas 修改或 save 清空双栈并禁用 Undo/Redo，直到下一条成功编辑开启新历史；禁用时两条命令均报 `error: undo not allowed after io command`。
+
+M6 支持 `save <file.svg>`，输出 UTF-8 SVG，包含嵌套组、几何、显式样式和转义后的文本。支持绝对路径、相对路径及引号包裹的中文/空格文件名；相对路径以启动 CLI 的工作目录解析，不自动创建目录。先完整序列化并写入同目录临时文件，再替换目标，避免写入失败截断旧文件。保存失败保留文档及历史。保存提示统计所有图形和 g，排除根 svg。
+
+无参数 save 只使用 read 来源路径，显式 save 不更新默认路径。目前 read 留待 M7，因此本阶段需显式给出保存路径；否则报 `error: no source path. use 'save <file.svg>'`。模型中的非法 XML 字符会使保存失败，保留原有文件。
 
 ## 环境与运行
 
@@ -40,11 +44,20 @@ delete node1
 undo
 tree
 redo
+save output.svg
 ```
 
 双引号包裹带空格参数；引号内支持 `\"` 和 `\\`，其他反斜杠原样保留。空文本 `""` 合法；只有未加引号的尾部 `in <containerId>` 才作为父容器子句。数值支持十进制小数和指数形式，拒绝 NaN、Infinity、十六进制和带单位的参数。
 
 Windows PowerShell 5 用管道回放含中文的命令时，先设置 `$OutputEncoding = [System.Text.UTF8Encoding]::new($false)`，避免 shell 将中文转换成问号。
+
+[demo.svg](demo.svg) 是讲义 §6.1 的两节点流程图，可直接拖入浏览器查看。用 [examples/demo.cli](examples/demo.cli) 重现生成过程：
+
+```powershell
+npm.cmd run build
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
+```
 
 ## 验证
 
@@ -55,7 +68,7 @@ node dist/cli/main.js
 git diff --check
 ```
 
-`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状编辑、失败原子性、精确浮点恢复、属性缺席、子树 ID/父引用、跨父分组、同级顺序、双栈分叉和历史边界，以及结构事务中途失败和撤销重试。历史状态机测试逐步比较文档状态；生产实现只保留局部变更记录，不复制整个文档。
+`build` 严格编译 `src/`；Vitest 单次运行领域、应用、分词器及真实 Node 子进程的 CLI 测试，不使用 watch 模式。测试覆盖全部形状编辑、失败原子性、精确浮点恢复、属性缺席、子树 ID/父引用、跨父分组、同级顺序、双栈分叉和历史边界，以及结构事务中途失败和撤销重试。历史状态机测试逐步比较文档状态；生产实现只保留局部变更记录，不复制整个文档。保存测试覆盖 XML 转义、非法字符、1500 层嵌套、真实文件覆盖、部分写入/替换失败、CLI 路径及历史边界。
 
 ## 文档与迭代
 

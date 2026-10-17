@@ -6,6 +6,7 @@ export class ResultFormatter {
 
   public format(result: CommandResult): readonly string[] {
     switch (result.kind) {
+      case 'saved': return [`saved to ${result.path} (${result.count} elements)`];
       case 'canvas': {
         const suffix = result.operation === 'queried' ? '' : ` ${result.operation}`;
         return [`canvas ${result.width}x${result.height}${suffix}`];
@@ -33,7 +34,7 @@ export class ResultFormatter {
       case 'help': return [
         ...result.entries.map(entry => `${entry.syntax} — ${entry.description}`),
         'EOF — exit (Ctrl+Z then Enter on Windows; Ctrl+D on Unix).',
-        `Not implemented in M5: ${result.pending.join('; ')}`,
+        `Not implemented in M6: ${result.pending.join('; ')}`,
       ];
     }
   }
