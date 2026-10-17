@@ -1,5 +1,8 @@
 import type { CommandHelp } from '../application/CommandResult.js';
 import type { EditorSession } from '../application/EditorSession.js';
+import type { CommandHistory } from '../application/CommandHistory.js';
+import { UndoCommand } from '../application/commands/UndoCommand.js';
+import { RedoCommand } from '../application/commands/RedoCommand.js';
 import { CanvasCommand } from '../application/commands/CanvasCommand.js';
 import type { Command } from '../application/commands/Command.js';
 import { CreateCommand } from '../application/commands/CreateCommand.js';
@@ -28,7 +31,7 @@ export class CommandDispatcher {
   readonly #tokenizer = new CommandTokenizer();
   readonly #definitions: ReadonlyMap<string, CommandDefinition>;
 
-  public constructor(private readonly session: EditorSession) {
+  public constructor(private readonly session: EditorSession, history: CommandHistory) {
     this.#definitions = new Map<string, CommandDefinition>([
       ['init', { syntax: 'init [w] [h]', description: 'create canvas (default 800x600)', build: a => {
         this.count(a, 0, 2, 'init [w] [h]');
@@ -81,6 +84,12 @@ export class CommandDispatcher {
       ['back', { syntax: 'back <id>', description: 'move to the first sibling slot', build: a => {
         this.count(a, 1, 1, 'back <id>'); return new BackCommand(this.session, a[0]?.value ?? '');
       } }],
+      ['undo', { syntax: 'undo', description: 'undo the last edit', build: a => {
+        this.count(a, 0, 0, 'undo'); return new UndoCommand(this.session, history);
+      } }],
+      ['redo', { syntax: 'redo', description: 'redo the last undone edit', build: a => {
+        this.count(a, 0, 0, 'redo'); return new RedoCommand(this.session, history);
+      } }],
       ['help', { syntax: 'help', description: 'show command syntax', build: a => {
         this.count(a, 0, 0, 'help');
         return new HelpCommand([
@@ -92,7 +101,7 @@ export class CommandDispatcher {
           { syntax: 'create text <id> <x> <y> "content"', description: 'text' },
           { syntax: 'create g <id>', description: 'empty group; all creates accept in <containerId>' },
         ], [
-          'read <file.svg>', 'save [file.svg]', 'undo', 'redo',
+          'read <file.svg>', 'save [file.svg]',
         ]);
       } }],
     ]);

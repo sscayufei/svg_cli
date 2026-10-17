@@ -33,7 +33,7 @@ export class ResultFormatter {
       case 'help': return [
         ...result.entries.map(entry => `${entry.syntax} — ${entry.description}`),
         'EOF — exit (Ctrl+Z then Enter on Windows; Ctrl+D on Unix).',
-        `Not implemented in M4: ${result.pending.join('; ')}`,
+        `Not implemented in M5: ${result.pending.join('; ')}`,
       ];
     }
   }

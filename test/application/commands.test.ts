@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { EditorSession } from '../../src/application/EditorSession.js';
 import { CommandExecutor } from '../../src/application/CommandExecutor.js';
+import { CommandHistory } from '../../src/application/CommandHistory.js';
 import { CanvasCommand } from '../../src/application/commands/CanvasCommand.js';
 import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
 import { InitCommand } from '../../src/application/commands/InitCommand.js';
@@ -8,7 +9,7 @@ import { InitCommand } from '../../src/application/commands/InitCommand.js';
 describe('Command requests and session receivers', () => {
   it('leaves the session untouched on failed initialization and resize', () => {
     const session = new EditorSession();
-    const executor = new CommandExecutor();
+    const executor = new CommandExecutor(new CommandHistory());
     expect(executor.execute(new InitCommand(session)).ok).toBe(true);
     const original = session.requireDocument();
     expect(executor.execute(new InitCommand(session, 'NaN', 300)).ok).toBe(false);
@@ -17,7 +18,7 @@ describe('Command requests and session receivers', () => {
     expect([original.width, original.height]).toEqual([800, 600]);
   });
 
-  it('classifies queries/documents/edits without introducing a history stack', () => {
+  it('classifies queries, documents and edits for the invoker', () => {
     const session = new EditorSession();
     expect(new InitCommand(session).kind).toBe('document');
     expect(new CanvasCommand(session).kind).toBe('query');

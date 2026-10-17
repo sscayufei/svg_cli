@@ -86,14 +86,31 @@
 - 依赖检查：SceneEditor 只依赖 domain；具体命令仅调用领域服务；CLI 无 domain 直接依赖，TreeAccess 未暴露给服务外层。两处名称分派维持 Dispatcher/ShapeFactory；没有新增形状类型分派、Node I/O 反向依赖或公共数据袋。
 - 变更概览：新增 SceneEditor、五个命令和三份测试；更新 SvgDocument、命令结果、Dispatcher/格式器、两份现有测试的帮助阶段标记，以及 README/本记录。未新增依赖，未引入历史栈或后续 I/O。
 - 文档同步：将已确认的跨父分组和原生结构语义写入本地架构/计划/提示文档；保留三份文件的 Git 忽略规则，关键决策在本文受版本控制。
+- Git commit SHA：`ef7673c`（实现 group、ungroup、addto、front、back 命令）。
+- 验收状态：用户已验收并提交，随后授权 M5。
+
+## M5 — 2026-10-17 — Undo/Redo 与历史边界
+
+- 起点：M4 提交 `ef7673c`，工作区干净；只实施 M5。
+- 用户确认：成功 init、canvas 修改（以及后续 read/save）清空双栈并禁用 undo/redo，下一条成功编辑开启新历史。查询及失败命令保留历史和禁用状态。
+- 实现：CommandHistory 封装双栈与禁用标志；UndoCommand/RedoCommand 调用历史并返回原命令的结果；CommandExecutor 成功执行编辑后才入栈，成功执行文档命令后才设边界。main 创建唯一历史实例，显式注入 Executor 和 Dispatcher。
+- 架构细化（ADR-009）：草案曾把历史状态同时分配给 Session 与 History，现由 History 独占，避免状态不同步。Command.kind 增加 history，撤销/重做不会再次入栈。未改变 domain，也未增加图形或命令名分派点。Visitor/Observer/Decorator 仍无本轮必要场景。
+- 原子性与记录：沿用 M2～M4 的节点身份、局部属性旧/新值、原父级/索引和 ChangeSet；没有生产用全量文档快照。历史先完成 undo/redo，再移动栈项；异常保留两栈，允许修复外部冲突后重试。每条成功编辑均为一个单元，包含无效果的合法编辑；新的成功编辑清空 Redo。
+- 错误约定：历史禁用时 undo 和 redo 均使用原需求的 `undo not allowed after io command`；未初始化时沿用 no document；未禁用且空栈时分别为 `nothing to undo` / `nothing to redo`。
+- 测试先行：新增历史测试，确认 CommandHistory 模块缺失导致失败基线。首轮完整运行 127/128 通过，唯一失败为新增测试误写既有 box 错误文案；核对原需求后修正断言，保留生产错误文本。
+- 回归证据：所有十类编辑逐前缀反向撤销、正向重做，检查精确属性、节点身份、父引用、兄弟顺序及 ID 索引；覆盖六种形状、跨父 group、嵌套子树 delete/restore、属性缺席、小数恢复。另有游标时间线状态机、失败与查询保留 Redo、分叉、文档边界、空栈、真实 undo/redo 失败重试、复合撤销中途失败回滚与重试。
+- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 最终 14 个文件、130/130 通过（本轮新增 13 项）；UTF-8 管道回放 `node dist/cli/main.js`，圆形 100→130→100→130、中文文本撤销、整组删除恢复及 group 撤销后的原父级输出均通过；`git diff --check` 通过。Vitest 使用授权的沙箱外子进程权限。
+- 依赖检查：domain 无 application/CLI/Node I/O 反向依赖；CLI 不直接导入 domain；TreeAccess 未泄漏到应用层。CommandHistory 只管理请求历史，业务仍由领域对象/服务完成。
+- 变更范围：新增三个应用类及两份测试；更新执行器、命令分类、入口装配、Dispatcher/help、现有三份测试与 README/本记录。没有依赖变更或 SVG 文件读写。
+- 文档同步：本地架构/计划/提示文档记录 ADR-009 和确认的历史规则，保留原 Git 忽略规则；关键决定在本文受版本控制。
 - Git commit SHA：待用户验收后提交。
-- 验收状态：待用户验收；未授权进入 M5。
+- 验收状态：待用户验收；未进入 M6。
 
 ## 后续需确认的事项
 
 - canvas 修改尺寸已由用户明确批准纳入 M2。
-- 树修改入口、历史状态唯一归属，以及 SVG 读写复用唯一类型分派需在相关阶段细化。
-- 跨父 group 和结构操作样式语义已在 M4 确认；transform、save 路径、IO 后历史清空规则仍待后续确认。
+- 树修改入口已在 M4 实现，历史状态唯一归属已在 M5 明确；SVG 读写复用唯一类型分派仍需在相关阶段细化。
+- 跨父 group 和结构操作样式语义已在 M4 确认；历史清空规则已在 M5 确认；transform、save 路径仍待后续确认。
 - 原需求 §6.1 流程图 A 有 7 个元素，但示例 save 输出 8；计数规则待确认。
 
 M8 应补齐架构方案（含 PlantUML）、过程记录、一致性自查和质量保证手段，并以真实代码及测试为准。

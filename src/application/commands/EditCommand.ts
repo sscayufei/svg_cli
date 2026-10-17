@@ -1,7 +1,7 @@
 import type { CommandResult } from '../CommandResult.js';
 import type { Command } from './Command.js';
 
-/** Edit protocol exists before M5; no history collection is implemented here. */
+/** A reversible request; stack management belongs to CommandHistory. */
 export abstract class EditCommand implements Command {
   public get kind(): 'edit' { return 'edit'; }
   public abstract execute(): CommandResult;
