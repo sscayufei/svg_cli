@@ -1,0 +1,21 @@
+{
+  "name": "svg-cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Software design Lab1 Phase 1 SVG command-line editor",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "cli": "tsx src/cli/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}
