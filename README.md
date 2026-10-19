@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
 
-当前已实现 M0～M7：工程骨架、领域模型、完整编辑 CLI、Undo/Redo 和 SVG 读写；M8 的综合验收与正式报告待独立授权。
+M0～M8 的实现、综合本地验收和正式报告已完成，待用户验收本轮修改并完成最终 Git 提交、推送和 final 标签。支持完整编辑 CLI、Undo/Redo 和 SVG 读写。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
@@ -88,11 +88,15 @@ git diff --check
 
 读取测试覆盖 ID 预留、六类型及嵌套结构、XML/命名空间/编码边界、来源路径生命周期、失败后继续 Undo/Redo，以及真实文件 read/save/read 往返。
 
+M8 验收结果为 24 个测试文件、214 项通过。`test/integration/cli.acceptance.test.ts` 精确核对讲义典型会话、六类型结构编辑往返和流程图；`test/architecture/dependencies.test.ts` 检查层次依赖及类组织。编译后的三份会话与 Chrome 流程图渲染均已验证。
+
 ## 文档与迭代
 
 - 原始需求：`docs/phase_cli_1.md`，优先级最高。
 - 本地设计基线：`docs/ARCHITECTURE.md`、`docs/DEVELOPMENT_PLAN.md`、`docs/CODEX_PROMPT.md`，保留现有 Git 忽略规则。
-- 正式报告与过程记录：`doc/README.md`，当前为阶段记录草稿，M8 补齐正式报告。
+- [正式报告与过程记录](doc/README.md)：含架构方案、PlantUML 包图、过程记录、一致性自查、质量保证和完整需求/测试对应表。
 - 每阶段需验收并由用户完成 Git 提交；下一阶段必须单独授权。
 
 原有初始化说明 `READMEmd` 保留。
+
+当前分支为 master，已配置 origin。M8 验收前未执行提交、推送或创建标签；最终交付需由用户核对截止时间、远端及最终提交 SHA，再完成提交和 final 标签的推送。

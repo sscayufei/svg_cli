@@ -1,8 +1,211 @@
-# Lab1 Phase 1 — 阶段记录（正式报告待 M8 完成）
+# Lab1 Phase 1 — SVG 命令行编辑器实验报告
 
-本文目前仅记录工程基线，不代表全部实验功能或正式报告已完成。原始需求位于 `docs/phase_cli_1.md`。
+本项目使用 TypeScript、Node.js 和面向对象设计，实现六种内置 SVG 图形、19 条命令、嵌套分组、精确 Undo/Redo 及 SVG 读写。原始需求为 [phase_cli_1.md](../docs/phase_cli_1.md)，优先于设计建议。本文记录真实实现和分阶段协作过程，不依赖被忽略的本地设计文件才能理解方案。
 
-## M0 — 2026-10-17 — 工程骨架
+2026-10-17，M8 本地自动验收完成：构建通过，24 个测试文件、214 项测试通过；编译后完整会话与浏览器预览通过。M8 用户验收、最终 Git 提交、推送及 final 标签仍待用户完成。
+
+## 架构方案
+
+### 模块划分
+
+| 模块 | 主要类/接口 | 职责 |
+|---|---|---|
+| `src/domain` | SvgNode、五种叶子、SvgGroup、SvgDocument、SceneEditor、GeometryState、ChangeSet、ShapeFactory | 封装几何/样式、树和 ID 不变量、统一操作、跨节点事务及局部可逆变更；不依赖 XML/文件系统 |
+| `src/application` | EditorSession、CommandExecutor、CommandHistory、SceneQuery | 文档和来源生命周期、用例执行边界、历史状态和查询投影 |
+| `src/application/commands` | Command、EditCommand、NodeEditCommand、具体命令 | 封装请求及执行记录，委托 Receiver，不承担 CLI 解析或 XML 操作 |
+| `src/application/ports` | SvgReadPort、SvgSavePort | 应用拥有的窄文件接口；返回完整候选及警告 |
+| `src/infrastructure/svg` | SvgReader、SvgWriter、SvgFileStore、AtomicFileWriter | XML 解析/序列化、UTF-8、来源路径解析及文件替换，实现应用端口 |
+| `src/cli` | SvgCli、CommandTokenizer、CommandDispatcher、NodeFormatter、ResultFormatter、main | REPL、参数解析、命令构造、结果显示；main 装配具体依赖 |
+| `test`、`examples` | 分层测试、精确会话基线、demo.cli | 独立回归证据和可复现示例，不参与生产依赖 |
+
+```drawio
+<mxfile>
+  <diagram id="GBQr5sh85MB8I5eZ5CNh" name="第 1 页">
+    <mxGraphModel dx="1287" dy="1693" grid="1" gridSize="10" guides="1" tooltips="0" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <UserObject label="" plantUmlData="{&#xa;  &quot;data&quot;: &quot;@startuml\nskinparam packageStyle rectangle\npackage \&quot;cli\&quot; as CLI {\n  component \&quot;main (composition root)\&quot; as MAIN\n}\npackage \&quot;application\&quot; as APP {\n  package \&quot;ports\&quot; as PORTS\n}\npackage \&quot;domain\&quot; as DOMAIN\npackage \&quot;infrastructure/svg\&quot; as INFRA\nCLI ..&gt; APP : requests / results\nMAIN ..&gt; INFRA : construction / injection\nAPP ..&gt; DOMAIN : receivers / model\nPORTS ..&gt; DOMAIN : document contract\nINFRA ..&gt; PORTS : implements\nINFRA ..&gt; DOMAIN : parse / serialize\n@enduml&quot;,&#xa;  &quot;config&quot;: null&#xa;}" id="plantuml-1">
+          <mxCell connectable="0" parent="1" style="group;transparentBounds=1;editIcon=1;lockedGroup=0;groupPadding=10;" vertex="1">
+            <mxGeometry as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="cli" plantUmlId="c_0" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" plantUmlBaseValue="cli" id="c_0">
+          <mxCell parent="plantuml-1" style="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" vertex="1">
+            <mxGeometry height="95" width="225" x="16" y="6" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="main (composition root)" plantUmlId="n_1" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=6;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;whiteSpace=wrap;" plantUmlBaseValue="main (composition root)" id="n_1">
+          <mxCell parent="c_0" style="rounded=1;absoluteArcSize=1;arcSize=6;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;whiteSpace=wrap;" vertex="1">
+            <mxGeometry height="49" width="195" x="15" y="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="ci_2" plantUmlBaseStyle="rounded=0;fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_2">
+          <mxCell parent="c_0" style="rounded=0;fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
+            <mxGeometry height="10" width="15" x="190" y="39" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="ci_3" plantUmlBaseStyle="fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_3">
+          <mxCell parent="c_0" style="fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
+            <mxGeometry height="2" width="4" x="188" y="41" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" plantUmlId="ci_4" plantUmlBaseStyle="fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_4">
+          <mxCell parent="c_0" style="fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
+            <mxGeometry height="2" width="4" x="188" y="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="application" plantUmlId="c_5" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" plantUmlBaseValue="application" id="c_5">
+          <mxCell parent="plantuml-1" style="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" vertex="1">
+            <mxGeometry height="104.97" width="107" x="22.35" y="266.5" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="ports" plantUmlId="n_6" plantUmlBaseStyle="shape=folder;tabWidth=60;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="ports" id="n_6">
+          <mxCell parent="c_5" style="shape=folder;tabWidth=60;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
+            <mxGeometry height="40" width="77" x="15" y="34" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="domain" plantUmlId="n_7" plantUmlBaseStyle="shape=folder;tabWidth=72;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="domain" id="n_7">
+          <mxCell parent="plantuml-1" style="shape=folder;tabWidth=72;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
+            <mxGeometry height="40" width="89" x="82.81" y="416.22" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="infrastructure/svg" plantUmlId="n_8" plantUmlBaseStyle="shape=folder;tabWidth=151;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="infrastructure/svg" id="n_8">
+          <mxCell parent="plantuml-1" style="shape=folder;tabWidth=151;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
+            <mxGeometry height="40" width="168" x="143.39" y="164.75" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="requests / results" plantUmlId="e_9" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="requests / results" id="e_9">
+          <mxCell edge="1" parent="plantuml-1" source="c_0" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="c_5">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="60" y="11" as="offset" />
+              <Array as="points">
+                <mxPoint x="68.84" y="135" />
+                <mxPoint x="-20.61" y="176.75" />
+                <mxPoint x="54.45" y="235.39" />
+              </Array>
+              <mxPoint x="68.84" y="98.4" as="sourcePoint" />
+              <mxPoint x="54.45" y="273.09" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="construction / injection" plantUmlId="e_10" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="construction / injection" id="e_10">
+          <mxCell edge="1" parent="plantuml-1" source="n_1" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_8">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="89" y="8" as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="receivers / model" plantUmlId="e_11" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="receivers / model" id="e_11">
+          <mxCell edge="1" parent="plantuml-1" source="c_5" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="39" y="-4" as="offset" />
+              <Array as="points">
+                <mxPoint x="-19.19" y="386.12" />
+              </Array>
+              <mxPoint x="54.45" y="360.76" as="sourcePoint" />
+              <mxPoint x="105.06" y="416.22" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="document contract" plantUmlId="e_12" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="document contract" id="e_12">
+          <mxCell edge="1" parent="plantuml-1" source="n_6" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="90" y="14" as="offset" />
+              <Array as="points">
+                <mxPoint x="75.85" y="366.49" />
+                <mxPoint x="127.31" y="386.12" />
+              </Array>
+              <mxPoint x="75.85" y="340.5" as="sourcePoint" />
+              <mxPoint x="127.31" y="416.22" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="implements" plantUmlId="e_13" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="implements" id="e_13">
+          <mxCell edge="1" parent="plantuml-1" source="n_8" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_6">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="63" y="-17" as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="parse / serialize" plantUmlId="e_14" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="parse / serialize" id="e_14">
+          <mxCell edge="1" parent="plantuml-1" source="n_8" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
+            <mxGeometry relative="1" as="geometry">
+              <mxPoint x="53" y="-30" as="offset" />
+              <Array as="points">
+                <mxPoint x="254.1" y="235.39" />
+                <mxPoint x="254.1" y="310.99" />
+                <mxPoint x="273.81" y="391.36" />
+              </Array>
+              <mxPoint x="255.39" y="204.75" as="sourcePoint" />
+              <mxPoint x="149.56" y="416.22" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+
+```
+
+### 设计模式及具体角色
+
+| 设计思想 | 采用方式与理由 |
+|---|---|
+| Command（必选） | Command 定义请求，EditCommand 定义可逆协议。ConcreteCommand 为 Create/Move/Scale/SetAttribute/Delete/Group/Ungroup/AddTo/Front/Back 及文档、查询、历史命令。CommandDispatcher/main 为 Client；CommandExecutor 为 Invoker；SvgNode、SvgDocument、SceneEditor、EditorSession、SceneQuery 等为业务 Receiver；Undo/Redo 命令以 CommandHistory 为 Receiver。请求与业务规则分离，编辑记录可进入历史。 |
+| Composite | SvgNode 是共同 Component，五种图形为叶子，SvgGroup 为 Composite。容器把 move/scale 准备工作委托给孩子，叶子通过自身几何声明完成操作；set 保持统一接口及属性白名单，普通组样式按 SVG 继承。SvgDocument 是画布聚合根。 |
+| Iterator 思想 | SvgNode/SvgDocument 实现前序 Iterable，查询、序列化和分组顺序复用受控遍历；外部只获得冻结的 children 快照，不依赖内部数组。 |
+| Visitor | 本期不引入封闭的逐形状访问接口。统一几何/属性描述已满足显示与序列化；未来插件增加形状时，封闭 Visitor 会增加修改面。 |
+| Observer | 本期只有顺序执行的 CLI，无多个实时视图，不建立事件总线。未来 GUI 可在 Session/Executor 的成功提交边界发布事件。 |
+| Decorator | 没有动态叠加行为的当前需求，不引入装饰层。后续输出诊断、日志等若有实际需要再评估。 |
+
+ShapeFactory 和 CommandDispatcher 是仅有的两处按名称选择实现的位置，均已标注待重构：未来可分别演进为 ShapeProvider 注册与命令注册。Reader 通过 ShapeFactory.fromAttributes 复用同一类型表；格式器按结果 DTO 和通用几何描述展示，不再次按图形 tag 分派。
+
+### 树、事务与历史
+
+- SvgNode 封装 ID、父级、归属、几何及样式；只读查询返回冻结快照。SvgDocument 统一检查 ID 唯一、父容器归属、重复挂接、环和有序位置。内部 Symbol 写入协议仅由 SvgDocument/SvgGroup/SvgNode 引用，属于包内约定。
+- SceneEditor 处理跨父 group、ungroup、addto 和同级顺序；通过文档行为准备变更。group 先验证全部输入，再插入空组并转移成员；ungroup 提升孩子后删除空组，逆序恢复位置。
+- ChangeSet 组合原子的 apply/revert 步骤；中途失败回滚已完成步骤，撤销失败也恢复已撤销步骤。单个步骤自身必须原子；本项目采用受控赋值与文档校验后的结构操作，不向插件开放任意回调。
+- move/scale 保存受影响字段的旧/新值，避免反向浮点运算误差；set 保存单属性及缺席状态；结构操作保存相关节点身份、父级、索引。生产撤销不复制整个文档。
+- CommandHistory 独占双栈及禁用标志。Executor 只在编辑成功后记账；Undo/Redo 先执行成功再移栈。每条成功编辑为一个单元，新编辑清空 Redo。查询与失败命令不改历史；成功 init/read/save/canvas 修改清空双栈并禁用，下一条成功编辑开启新历史。
+- read 在候选文档中完成解析、ID 预留/补号和全部校验，再提交 Session；警告只在成功结果中发布。save 先完整序列化，再写同目录临时文件、fsync、关闭后 rename，失败保留会话和已有目标文件。
+
+### 依赖方向规则
+
+| 来源 | 允许依赖 | 理由 |
+|---|---|---|
+| domain | 本层模块及 TS 基础类型 | 图形/树规则可脱离 CLI、XML 和文件系统测试 |
+| application | domain、本层命令/端口 | 用例依赖抽象保存/读取能力，不知道具体存储实现 |
+| infrastructure/svg | domain、application/ports、Node I/O、saxes | 适配外部格式，不能反向调用 CLI 或具体命令 |
+| cli | application、本层、Node readline/stream；main 可依赖 infrastructure | 保持输入输出与业务分离，把具体实现集中在装配根 |
+| production | 不依赖 test | 测试只能依赖生产模块 |
+
+`test/architecture/dependencies.test.ts` 守卫现有静态导入边界、内部结构符号和一类一文件规则；人工抽查再核对运行时控制流和名称分派。
+
+### 已确认语义与变化点
+
+图形尺寸/半径为有限非负数，画布宽高为正数；init 单参数只指定宽度，高度默认 600；canvas 修改必须同时给出宽高。scale 改变全部几何位置和尺寸，不改变 stroke-width 或文本。普通 g 的样式只写在组上，继承随父级改变；结构编辑保留几何和显式样式。
+
+group 的新组使用首参数节点的原父级/位置，成员按修改前文档前序排列；同父摘除后校正位置。ungroup 禁止根级组，嵌套组的孩子占据原组位置。front/back 分别移到同级列表末尾/开头，末尾后绘制。
+
+输入采用经用户确认的有限子集：UTF-8 XML 1.0、六类型及嵌套 g；根正数 width/height 可带 px，viewBox 可省略或必须匹配 `0 0 width height`；图形几何缺省 0。允许 SVG 命名空间/前缀、注释及 CDATA；transform、未知属性/元素、叶子子元素、DTD/处理指令明确失败。补 ID 前预留全部显式 ID；空 ID 视作缺失，按类型序号跳过冲突。
+
+成功 read 记录绝对来源路径；无参数 save 使用该来源，显式 save 不更新来源；成功 init 清除来源，canvas 和编辑保留来源。没有来源时要求显式保存路径。计数含全部图形和 g，不含根 svg。
+
+| 未来变化点 | 当前预留/不预留的决定 |
+|---|---|
+| 新图形及 box 插件 | 统一节点协议、唯一工厂表与结构化属性；不实现 ShapeProvider 加载器或 box，避免提前确定插件协议 |
+| 新命令或其他入口 | Command/Executor 与 CLI 分离；唯一 Dispatcher 可演进为注册，不创建 GUI/网络服务 |
+| XML 范围扩展或其他存储 | Read/Save 端口与 Reader/Writer 独立；完整 SVG/transform 支持须另行设计，当前明确失败 |
+| 更多视图或日志 | 成功提交边界可作为事件接入点；无当前需求，不增加 Observer/Decorator |
+| 历史策略 | 局部可逆记录和集中历史服务可扩展；不实现持久化历史或复杂分支时间线 |
+
+## 过程记录
+
+开发由用户与 Codex 结对进行，每阶段先检查、补测试、实现、验证，再由用户验收提交；以下保留各阶段发生的取舍与修正。
+
+### M0 — 2026-10-17 — 工程骨架
 
 - 授权范围：用户授权实施 M0，仅工程配置、最小 CLI 与 smoke test。
 - 模块：`src/cli/SvgCli.ts` 封装输入输出生命周期；`main.ts` 只装配并启动。
@@ -18,7 +221,7 @@
 - Git commit SHA：`020cc5a`（搭建运行环境）。
 - 验收状态：用户已验收并提交，随后授权 M1。
 
-## M1 — 2026-10-17 — 领域模型与 Composite
+### M1 — 2026-10-17 — 领域模型与 Composite
 
 - 起点：M0 提交 `020cc5a`，工作区干净。
 - 授权范围：六种内置图形模型、SvgDocument、ID 索引、完整父子约束与领域测试；不进入 M2。
@@ -36,7 +239,7 @@
 - Git commit SHA：`4c6aea4`（建立领域模型，设置统一 Node 抽象，实现六种内置图形模型）。
 - 验收状态：用户已验收并提交，随后授权 M2。
 
-## M2 — 2026-10-17 — 命令入口与基础查询
+### M2 — 2026-10-17 — 命令入口与基础查询
 
 - 起点：M1 已由用户验收，提交 `4c6aea4`，工作区干净。
 - 本轮范围：Tokenizer/Dispatcher、基础 Command/Executor/Session、六类型 create（含 in）、init、canvas、tree/show/help；不进入 M3。
@@ -54,7 +257,7 @@
 - Git commit SHA：`7bf0221`（M2 命令入口）。
 - 验收状态：用户已验收并提交，随后授权 M3。
 
-## M3 — 2026-10-17 — 基础编辑与失败原子性
+### M3 — 2026-10-17 — 基础编辑与失败原子性
 
 - 起点：M2 提交 `7bf0221`，工作区干净；只实施 M3。
 - 用户确认：普通 g 的 fill/stroke/stroke-width 仅写在组上，按 SVG 继承，不覆盖孩子的显式样式；scale 只改变几何位置与尺寸，不改变 stroke-width 或文本内容。
@@ -71,7 +274,7 @@
 - Git commit SHA：`687818c`（新增 move、scale、set、delete 命令）。
 - 验收状态：用户已验收并提交，随后授权 M4。
 
-## M4 — 2026-10-17 — 层级与顺序
+### M4 — 2026-10-17 — 层级与顺序
 
 - 起点：M3 已验收并提交为 `687818c`，工作区干净。
 - 用户确认：group 新组置于首参数节点的原父级/原位置，成员按修改前文档前序排列。同父选中节点被摘除后自然校正插入位置。例如 A=[a,b]、B=[c,d]，group g c a 得到 A=[b]、B=[g,d]、g=[a,c]。
@@ -89,7 +292,7 @@
 - Git commit SHA：`ef7673c`（实现 group、ungroup、addto、front、back 命令）。
 - 验收状态：用户已验收并提交，随后授权 M5。
 
-## M5 — 2026-10-17 — Undo/Redo 与历史边界
+### M5 — 2026-10-17 — Undo/Redo 与历史边界
 
 - 起点：M4 提交 `ef7673c`，工作区干净；只实施 M5。
 - 用户确认：成功 init、canvas 修改（以及后续 read/save）清空双栈并禁用 undo/redo，下一条成功编辑开启新历史。查询及失败命令保留历史和禁用状态。
@@ -106,7 +309,7 @@
 - Git commit SHA：`4774476`（接入 undo/redo 双栈）。
 - 验收状态：用户已验收并提交，随后授权 M6。
 
-## M6 — 2026-10-17 — SVG 保存
+### M6 — 2026-10-17 — SVG 保存
 
 - 起点：M5 提交 `4774476`，工作区干净；只实施 M6，不实现 read。
 - 用户确认：无参数 save 只回到成功 read 的来源路径，显式 save 不更新默认路径；相对路径按进程工作目录解析。本阶段没有 read，需显式指定目标，默认来源状态留到 M7。
@@ -124,7 +327,7 @@
 - Git commit SHA：`c7d4b04`（实现 save <file.svg> 命令）。
 - 验收状态：用户已验收并提交，随后授权 M7。
 
-## M7 — 2026-10-17 — SVG 读取与来源路径
+### M7 — 2026-10-17 — SVG 读取与来源路径
 
 - 起点：M6 提交 `c7d4b04`，工作区干净；只实施 M7。
 - 用户确认输入范围：六类型及嵌套 g；transform、未知元素/属性（含 style/font-size/data-*）、叶子中的子元素整次失败。允许 XML 声明、注释、CDATA、SVG 命名空间；拒绝 DTD。根 width/height 必须为正，可带 px；viewBox 可缺省，存在时必须匹配 0 0 width height。图形几何缺省 0；空 ID 视作缺失，先预留所有显式 ID，再按前序和每类型序号补 ID。
@@ -140,13 +343,110 @@
 - 依赖复核：domain 不依赖 XML/fs/application；基础设施依赖领域及端口；CLI 仅装配入口引用具体基础设施。ShapeFactory 仍为唯一图形类型注册表，Dispatcher 为唯一命令名称分派；未引入 Visitor/Observer/Decorator 或插件。
 - 变更范围：新增 SvgReadPort、ReadCommand、SvgReader、四份测试及原需求 fixture；扩展 Session/SaveCommand/FileStore/Factory、结果和 CLI 装配契约；更新 package/lock、获准的 tsconfig 兼容选项、既有帮助测试和说明。未修改 demo.svg，未实施 M8 总验收/正式报告。
 - 文档同步：本地架构/计划/提示文档记录输入规则和 ADR-011，保留原有 Git 忽略规则；关键决策在本文跟踪。
+- Git commit SHA：`5e70d51`（实现 read <file.svg> 接口）。
+- 验收状态：用户已验收并提交，随后授权 M8。
+
+### M8 — 2026-10-17 — 综合验收与正式报告
+
+- 起点：M7 提交 `5e70d51`，工作区干净；范围为精确完整会话、架构守卫和本正式报告，无新产品功能。
+- 新增三份完整会话输出基线：原需求 §6 典型会话、覆盖六类型和结构/顺序操作的往返会话、§6.1 流程图。基线独立编写，测试只规范换行、移除提示符和首尾空白，保留树连接线、属性与错误全文。
+- 初轮会话 3/4 通过；帮助测试把 EOF 说明误当命令，修正为识别小写命令名称并单独断言 EOF 说明，生产代码未修改。
+- 新增六项架构检查：domain、application、CLI 装配边界、基础设施端口依赖、内部 TreeAccess、类名/文件名。结合人工审查未发现本轮需修改的生产实现。
+- 最终验证：`npm.cmd run build` 通过；`npm.cmd test` 为 24 个文件、214/214 通过（新增 10 项）。三份会话用编译后的 `node dist/cli/main.js` 在隔离目录重新精确比对 stdout/stderr，全部通过。独立 .NET XML 解析确认流程图 8 元素及中文；无头 Chrome 实际渲染截图，人工检查两彩色节点、连线和中文布局正常。
+- 文档完成：本文补齐四个规定部分与 PlantUML 包图、设计模式角色、变化点、完整命令证据矩阵、限制及交付状态；保留 M0～M7 的过程证据。
+- Git 检查：起点分支 master，本地 origin/master 引用显示领先 9 次提交，final 标签不存在；未联网核验远端。没有执行提交、推送或创建标签。
+- 变更范围：两份测试文件、六份会话/输出 fixture，以及根 README/本文；三份本地设计文件同步但继续保持 Git 忽略。无源码、依赖或编译配置变更。
 - Git commit SHA：待用户验收后提交。
-- 验收状态：待用户验收；未进入 M8。
+- 验收状态：本地验证通过，待用户验收及完成最终 Git 手续。
 
-## 后续需确认的事项
+## 一致性自查
 
-- canvas 修改尺寸已由用户明确批准纳入 M2。
-- M0～M7 的范围与输入/历史/路径规则均已确认；ShapeFactory 的唯一类型分派已复用于导入。
-- M8 需独立授权后完成完整需求矩阵、正式架构图/报告与交付检查；若教师要求支持当前子集以外的 SVG 内容，再按新增需求评估。
+### 模块划分是否一致
 
-M8 应补齐架构方案（含 PlantUML）、过程记录、一致性自查和质量保证手段，并以真实代码及测试为准。
+实际保留了 cli/application/domain/infrastructure 四层。随迭代新增 GeometryState、ChangeSet、NodeEditCommand、application/ports、SvgFileStore、AtomicFileWriter 及 domain/internal，均已在 M1/M3/M6/M7 记录原因；这些是对职责的细化。Session 曾被草案分配历史标志，M5 调整为 History 独占，已记 ADR-009。M7 新增语义属性恢复入口复用唯一工厂，已记 ADR-011。
+
+所有导出的生产类各占一个同名文件，接口和结果类型可独立成文件；main 是装配脚本。图形拥有行为及私有状态，公开结构化 DTO/冻结快照用于边界传值。未实现 box、GUI、HTTP、完整 SVG 或强行引入额外模式。
+
+### 依赖方向是否一致
+
+静态守卫与人工抽查均未发现反向依赖：domain 只引用本层；application 引用领域及本层端口；SvgFileStore 实现端口；只有 main 装配具体基础设施。TreeAccess 仅由三个聚合内部类引用。项目唯一 switch 位于 ResultFormatter，分支依据结果联合类型，未按图形 tag 或命令名称分派。
+
+名称分派仍集中在 Dispatcher 与 ShapeFactory 两张表。Reader 的类型恢复使用 Factory；XML 标签字符串只用于解析根/命名空间与输出，不建立另一份形状构造表。CommandHistory 管理双栈，ChangeSet 管理局部事务，SvgDocument 管理树/索引，各自承担独立责任。
+
+### 限制和已知取舍
+
+- 输入仅支持已确认的 SVG 子集；背景知识中的 transform 示例会明确拒绝。样式继承随结构改变，解组不保证外观不变。
+- 读写保留模型语义，XML 声明、注释、前缀和格式会规范化；没有实现完整 SVG 保真编辑。
+- 文件 I/O 同步执行，适合本期顺序 CLI。临时文件替换在当前 Windows 环境实测；未承诺断电/进程崩溃后的清理或其他平台文件替换行为。
+- skipLibCheck 经用户确认用于 saxes 与 TS7 声明兼容，跳过声明文件内部检查；源码严格检查继续开启。内部结构符号按模块约定隔离，不是防恶意调用机制。
+- 未测量行/分支覆盖率，测试通过数不等同于穷尽证明。未人工操作实体终端 Ctrl+Z；真实 Node 子进程 EOF/无末尾换行退出已覆盖。
+
+## 质量保证手段
+
+### 需求到实现及测试的对应
+
+下表测试列省略 `test/` 前缀和 `.test.ts` 后缀；原有分层测试补充精确会话无法观察的对象身份、索引、缺席属性和失败重试。
+
+| 需求 | 实现位置 | 主要测试证据 |
+|---|---|---|
+| init 默认/单参数/失败原子性 | InitCommand、EditorSession | application/commands、ReadCommand；integration/cli.m2、cli.acceptance |
+| canvas 查询/修改/历史边界 | CanvasCommand、SvgDocument | application/commands、CommandHistory；integration/cli.m2、cli.acceptance |
+| 六类型 create、in、ID 唯一 | ShapeFactory、CreateCommand、SvgDocument | domain/shapes、SvgDocument；integration/cli.m2、cli.acceptance |
+| move | MoveCommand、SvgNode/GeometryState/SvgGroup | domain/edits；application/edits、CommandHistory；典型会话精确输出 |
+| scale | ScaleCommand、几何值对象/Composite | domain/edits；application/edits；六类型结构会话 |
+| set 白名单/继承/文本 | SetAttributeCommand、节点多态 | domain/edits；application/edits；integration/cli.m3、cli.acceptance |
+| delete 整棵子树 | DeleteCommand、SvgDocument | domain/SvgDocument；application/CommandHistory；integration/cli.m5、cli.acceptance |
+| group 跨父/顺序/原子性 | GroupCommand、SceneEditor | domain/SceneEditor；application/structure、CommandHistory；典型会话 |
+| ungroup 根级限制/提升 | UngroupCommand、SceneEditor | domain/SceneEditor；application/structure；integration/cli.m4、cli.acceptance |
+| addto 防循环/末尾挂接 | AddToCommand、SvgDocument.planRelocate | domain/SceneEditor；application/structure；结构会话 |
+| front/back 同级顺序 | FrontCommand/BackCommand、SceneEditor | domain/SceneEditor；application/structure；结构会话 |
+| tree 全文/子树内联属性 | SceneQuery、NodeFormatter | integration/cli.m2、cli.m4、cli.acceptance |
+| show parent/属性 | SceneQuery、NodeFormatter | integration/cli.m2、cli.m7、cli.acceptance |
+| help 全命令及 EOF | HelpCommand、Dispatcher、格式器 | integration/cli.smoke、cli.acceptance（19 个名称） |
+| undo/redo 粒度/分叉/失败 | CommandExecutor、CommandHistory、ChangeSet | application/CommandHistory（全部编辑逐前缀、时间线、失败重试）；integration/cli.m5 |
+| save 转义/旧文件保护 | SaveCommand、SvgWriter、AtomicFileWriter | infrastructure/SvgWriter、AtomicFileWriter；application/SaveCommand；integration/cli.m6 |
+| read 补 ID/失败候选/来源 | ReadCommand、SvgReader、SvgFileStore、Session | infrastructure/SvgReader、SvgFileStore；application/ReadCommand；integration/cli.m7 |
+| read/save/read 等价 | Reader/Writer、文件适配器 | infrastructure/SvgReader、SvgFileStore；integration/cli.m7、cli.acceptance |
+| 引号/空文本/注释/错误恢复 | Tokenizer、SvgCli | cli/CommandTokenizer；integration/cli.smoke、cli.m2 |
+| 精确标准错误及阶段范围 | 接收者/Executor/格式器 | integration/cli.m2～m7、cli.acceptance；box 明确 unknown shape type |
+| 结构、依赖与类组织 | 聚合、端口与装配根 | domain/SvgDocument、SceneEditor；architecture/dependencies |
+
+### 验证方法与实际结果
+
+环境：Windows PowerShell，Node v24.14.0、npm 11.9.0。依赖由 package-lock.json 固定。实际执行：
+
+```powershell
+npm.cmd run build
+npm.cmd test
+git diff --check
+```
+
+构建通过；24 个测试文件、214 项测试全部通过。测试包括领域单元、命令/历史状态机、真实文件失败注入、XML 往返、真实 CLI 子进程、三份精确完整会话及架构守卫。Vitest 因环境子进程限制使用用户授权的沙箱外执行权限。
+
+编译产物另外用三份脚本回放并比较输出，隔离产物位于被忽略的 dist/m8-verification，不污染示例或测试 fixture。采用独立 .NET XML 解析器检查流程图，并用独立 Chrome 配置无头渲染后查看截图。交付的 [demo.svg](../demo.svg) 与 examples/demo.cli 生成结果一致，浏览器可直接打开。
+
+复现单项验收：
+
+```powershell
+npm.cmd test -- test/integration/cli.acceptance.test.ts test/architecture/dependencies.test.ts
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
+```
+
+### Git 演化与最终交付状态
+
+| 阶段 | 已存在提交 | 当时通过测试数 |
+|---|---|---|
+| M0 | 020cc5a | 4 |
+| M1 | 4c6aea4 | 44 |
+| M2 | 7bf0221 | 66 |
+| M3 | 687818c | 95 |
+| M4 | ef7673c | 117 |
+| M5 | 4774476 | 130 |
+| M6 | c7d4b04 | 152 |
+| M7 | 5e70d51 | 204 |
+| M8 | 待用户验收提交 | 214 |
+
+本地已有分阶段提交，M8 没有自动提交。检查时分支为 master，已配置 origin，本地 origin/master 引用显示领先 9 次提交；没有联网核验远端最新状态，final 标签尚不存在。
+
+用户需审阅本轮 diff 并验收，提交 M8 后确认提交 SHA、实际截止时间、远端和分支，推送提交并在最终提交创建/推送 final 标签；已有同名标签时先核查，不能强制覆盖。完成这些手续后再核对远端 final 是否指向已验证的最终提交。本轮未执行任何提交、推送或标签创建，不将本地测试通过写成远端交付完成。

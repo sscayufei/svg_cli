@@ -1,0 +1,24 @@
+init
+canvas
+canvas 400 300
+create g outer
+create rect a 1 2 3 4 in outer
+create circle b 5 6 7 in outer
+create ellipse e 1 2 3 4
+create line l 1 2 3 4 black
+create text t 5 6 "text & <中文>"
+group g b a
+scale g 2
+ungroup g
+addto outer t
+front a
+back a
+show a
+tree outer
+delete outer
+undo
+redo
+undo
+save scene.svg
+read scene.svg
+show t

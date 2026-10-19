@@ -1,0 +1,31 @@
+svg-editor 0.1 — type 'help' for commands
+canvas 800x600 created
+canvas 800x600
+canvas 400x300 resized
+g#outer created
+rect#a created in g#outer
+circle#b created in g#outer
+ellipse#e created
+line#l created
+text#t created
+g#g created with 2 children
+g#g scaled by 2
+g#g ungrouped
+text#t moved into g#outer
+rect#a moved to front
+rect#a moved to back
+rect#a  parent=g#outer
+  x=2 y=4 width=6 height=8
+g#outer
+├── rect#a  x=2 y=4 w=6 h=8
+├── circle#b  cx=10 cy=12 r=14
+└── text#t  (5,6) "text & <中文>"
+g#outer deleted
+g#outer restored into svg
+g#outer deleted
+g#outer restored into svg
+saved to scene.svg (6 elements)
+read scene.svg (6 elements)
+text#t  parent=g#outer
+  x=5 y=6
+  text="text & <中文>"

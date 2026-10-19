@@ -1,0 +1,14 @@
+svg-editor 0.1 — type 'help' for commands
+canvas 800x600 created
+g#flowchart created
+g#node1 created in g#flowchart
+rect#start created in g#node1
+text#start-label created in g#node1
+g#node2 created in g#flowchart
+rect#process created in g#node2
+text#process-label created in g#node2
+line#arrow1 created in g#flowchart
+g#node2 moved by (0,100)
+g#node2 moved back by (0,-100)
+text#process-label updated: text="处理数据 v2"
+saved to demo.svg (8 elements)
