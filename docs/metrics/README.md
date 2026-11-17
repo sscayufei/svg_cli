@@ -17,4 +17,4 @@
 
 首轮 [p2-2c-initial.md](p2-2c-initial.md) / [JSON](p2-2c-initial.json) 对比 final `2054ec5…` 与 P2-2b 已提交的 `4a4ed73…`。这不是尚未提交的 P2-2c 全量指标，也不是最终 p2 指标。内置命令/图形迁入插件会重新分配分类数字，必须一起看 cliTotal，不能把迁移当功能净删除。
 
-本轮框架提交后，以该实际 SHA 再运行同一命令并提交生成报告；最终先确定运行源码终态 SHA，再产出报告提交，并在 final/p2 上重算验证运行源码一致。不得手改生成 JSON/Markdown 数字。
+P2-3a 开始时已确认框架冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，生成 [framework-freeze.md](framework-freeze.md) / [JSON](framework-freeze.json)。该报告只包含冻结框架，不包含本轮未提交 stats；工具仍直接读取历史 Git blob。最终先确定运行源码终态 SHA，再产出报告提交，并在 final/p2 上重算验证运行源码一致。不得手改生成 JSON/Markdown 数字。

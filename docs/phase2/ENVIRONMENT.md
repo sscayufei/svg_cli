@@ -12,6 +12,8 @@
 
 ## 1. Git 基线：已核对正确
 
+P2-3a 更新：框架冻结提交为 1ff4352de83ac64943f36c9d51684101249fa1f6，补齐 final→该 SHA 的历史指标。本轮离线安装仅增加 @svgframe/command-stats 本地 workspace 链接，无新增第三方依赖/工具版本。build 自动发现新包，未改编排。默认 A 启用 stats；无扩展基线通过 SVG_CLI_ENTRY 指向 test/fixtures/entries/no-optional.mjs，以显式空配置运行冻结 bootstrap。300项主测试、单包11项、A/B 和三份 raw 基线通过。见 [P2-3a 记录](P2-3a_REPORT.md)。
+
 P2-2c 更新：前置提交 4a4ed73，无新增依赖/锁文件变更；新增 metrics、verify:assemblies、verify:plugin-diff 脚本。Node 24.14.0 原生 ESM 解析/清单发现已实测，Windows 清单扩展路径需 native realpath。未知 workspace 的隔离构建/编译后加载、286项主测试和字节回放通过。PlantUML 1.2024.3 已实际渲染前后图；独立扩展8项单测通过，GUI/VSIX 本轮未重跑。首次指标只取 final→已提交4a4ed73，本轮冻结 SHA 随审阅提交确定。见 [P2-2c 记录](P2-2c_REPORT.md)。
 
 | 项目 | 实测结果 |

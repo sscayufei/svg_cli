@@ -500,3 +500,13 @@ P2-2b 已提交 4a4ed73。默认内置及代码/配置两种装配现统一进�
 34文件/286项主测试、扩展8项单测、构建/类型检查通过；三份 final 原始字节一致。工具 fixture 验证 A/B 同实现/options/cwd 的两输出流/生成 SVG、未知 workspace 拓扑及编译后加载、Git 允许/拒绝路径和 peer 比较。见 [验证摘要](evidence/phase2/p2-2c-checks.json)、[字节摘要](evidence/phase2/p2-2c-baseline.json)、[A/B 摘要](evidence/phase2/p2-2c-assemblies.json) 及 [阶段报告](../docs/phase2/P2-2c_REPORT.md)。
 
 首轮 [历史指标](../docs/metrics/README.md) 由脚本真实读取 final→已提交4a4ed73，不包含本轮未提交源码。框架本地验收完成，冻结 SHA 须在用户审阅本轮普通提交后登记并重算指标；尚未实现真实业务插件、接入提交证明和最终 p2 指标，不以 fixture 或前置提交代替。未对项目执行 git add/commit/push/tag；合成 Git 提交仅用于隔离测试仓库。
+
+### P2-3a：stats 独立接入
+
+P2-2c 已提交，冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，已补齐该 SHA 的 [指标](../docs/metrics/framework-freeze.md)。新增 command-stats workspace 仅依赖 core public，三个类分别负责 query 执行、参数/help 定义和注册。遍历使用现有文档 Iterator，以 isContainer 判定容器、Map 保留叶子类型首次出现顺序，根不计；无需修改核心或添加具体形状分支。
+
+默认 A 只在 composition 加入 StatsPlugin；B 用配置加载同一包/清单/类，都经过冻结 installer。root package/lock 只补本地工作区依赖，loader、formatter、构建编排和既有插件均无差异。原十九命令 help 精确验收显式使用空配置，原断言/预期保持不变。
+
+36文件/300项主测试、stats 单包11项、编译/类型检查通过。单包使用公开叶子/复合容器替身，不 import 其他插件或 host；集成验证真实形状和 A/B。新会话对手工语义预期检查，并以 raw 两输出流/生成 SVG 比较 A/B；无扩展三份旧会话仍与 final 逐字节一致。
+
+见 [P2-3a 报告](../docs/phase2/P2-3a_REPORT.md)、[验证摘要](evidence/phase2/p2-3a-checks.json)、[A/B 摘要](evidence/phase2/p2-3a-assemblies.json)、[边界摘要](evidence/phase2/p2-3a-boundary.json)。本轮未创建项目提交，stats 接入 SHA/正式提交差异证明待审阅提交后补齐；下一阶段为 dir，真实 box/星号及最终 p2 指标仍按计划推进。

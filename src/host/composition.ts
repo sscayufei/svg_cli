@@ -3,6 +3,7 @@ import { AttributeService, CommandHistory, EditorSession, ExtensionRegistry, Sha
 import { fileURLToPath } from 'node:url';
 import { BuiltinShapesPlugin } from '@svgframe/builtin-shapes';
 import { BuiltinCommandsPlugin } from '@svgframe/builtin-commands';
+import { StatsPlugin } from '@svgframe/command-stats';
 import { SvgFileStore } from './svg/SvgFileStore.js';
 import { SvgReader } from './svg/SvgReader.js';
 import { CommandDispatcher } from './cli/CommandDispatcher.js';
@@ -17,7 +18,9 @@ export interface CodePluginRegistration { readonly module: string; readonly plug
 export interface ApplicationOptions { readonly args?: readonly string[]; readonly cwd?: string; readonly codePlugins?: readonly CodePluginRegistration[]; readonly directory?: DirectoryPort }
 const compositionDirectory = fileURLToPath(new URL('.', import.meta.url));
 /** The only list edited to add optional plugins through code composition (A). */
-export function optionalPlugins(): readonly CodePluginRegistration[] { return []; }
+export function optionalPlugins(): readonly CodePluginRegistration[] {
+  return [{ module: '@svgframe/command-stats', plugin: new StatsPlugin() }];
+}
 
 /** Composition owns defaults; constructing an empty core never installs built-ins. */
 export function createPluginContext(directory: DirectoryPort = new NodeDirectoryAdapter()): PluginContext {

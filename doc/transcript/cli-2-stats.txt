@@ -1,0 +1,35 @@
+stats
+stats extra
+init 400 300
+stats
+create g empty
+stats
+create g scene
+create rect r1 1 2 3 4 in scene
+create circle c1 10 10 5 in scene
+create g nested in scene
+create text t1 0 0 "label" in nested
+create rect r2 4 5 6 7 in nested
+create ellipse e1 20 20 4 3
+stats
+back e1
+stats
+undo
+stats
+delete scene
+stats
+undo
+stats
+redo
+stats
+undo
+save stats.svg
+stats
+undo
+create line l1 0 0 5 5
+stats
+set l1 x2 10
+undo
+stats
+redo
+stats

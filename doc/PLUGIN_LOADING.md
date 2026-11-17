@@ -1,6 +1,6 @@
 # 插件装配、配置与验证
 
-P2-2c 已实现通用框架；仓库当前仅默认安装六种形状和十九条内置命令，没有默认可选业务插件。新机器先 npm ci 和 npm run build；运行入口为 dist/host/main.js。
+框架已冻结于 1ff4352，保留六种形状和十九条内置命令；P2-3a 默认代码装配另启用独立 stats。新机器先 npm ci 和 npm run build；运行入口为 dist/host/main.js。
 
 ## A：代码装配
 
@@ -31,6 +31,8 @@ node dist/host/main.js --config plugins.config.json
 
 package.json 的 contributes 支持 shapes、commands、decorators、attributes 四类名称数组，缺省均为空；名称集合须与实际注册一致。接口实现使用类/实例，四类在各自名称空间中重名即拒绝。默认导出类由宿主无参构造，实例需提供同步 activate(ctx, options):void。
 
+当前真实 stats 配置示例为 doc/transcript/inputs/stats.plugins.json（模块 @svgframe/command-stats），运行 `node dist/host/main.js --config doc/transcript/inputs/stats.plugins.json` 与默认 A 都提供 stats。`node dist/host/main.js --config plugins.config.json` 使用根空列表，禁用全部可选贡献；根配置将在后续 stats/dir 一致演示基线准备时再调整。
+
 ## 错误和资源边界
 
 | 情况 | stderr（后续仍接受 CLI 输入） |
@@ -60,6 +62,8 @@ npm.cmd run metrics -- final HEAD --output docs/metrics/current
 ```
 
 metrics 使用真实 Git blob，提供完整 SHA、文件职责、物理/代码行数、函数明细和复杂度增量。运行前先提交待统计源码；脚本不会暗中创建提交或把未提交文件算入历史。口径与首轮结果见 [metrics 说明](../docs/metrics/README.md)。
+
+stats 的真实 A/B 回放可直接运行 `npm.cmd run verify:assemblies -- doc/transcript/plans/stats.json`。无扩展 final 基线应把 SVG_CLI_ENTRY 设为 test/fixtures/entries/no-optional.mjs，再运行 verify:baseline；此测试 wrapper 只调用冻结 bootstrap 和相邻的独立空配置，不修改 loader 或基线脚本，也不依赖未来根演示配置的内容。它确保比较条件是禁用可选插件，而不是带新增 help 的默认 A。
 
 `npm.cmd run verify:assemblies -- plan.json` 的 plan 包含 codeEntry、configEntry、configPath、transcript 和可选 fixtureDirectory，路径均相对 plan 文件。两入口都直接 node 运行并使用同一 bootstrap；B 追加 --config。工具在 .tmp/phase2 生成同一 cwd，A/B 顺序执行，日志位于 cwd 外，逐字节比较两个输出流与生成文件。复制后的 fixture 在每轮前重置；链接按链接内容记录，不跟随。fixture A/B 已验证 options、错误流与 SVG 字节，后续业务会话继续复用。
 

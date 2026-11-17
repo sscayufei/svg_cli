@@ -1,13 +1,13 @@
-# 扩展点清单（P2-2c）
+# 扩展点清单（P2-3a）
 
-更新日期：2026-11-17。本清单覆盖当前事务/复合模型/生命周期及安装/加载框架；本地验收通过，冻结 SHA 待本轮审阅提交确定。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
+更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及新接入 stats。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
 
 ## 接口、调用位置与缺省行为
 
 | 扩展点 | 核心接口及职责 | 当前实际调用点 | 当前实现 | 缺省/禁用 | 契约错误 |
 |---|---|---|---|---|---|
 | ShapeProvider | core/extensions/Contracts.ts；创建离线节点、恢复完整子树、提供 help 与可选创建反馈 | core/application/ShapeFactory.ts：create、fromAttributes、restore、creationFeedback、help；CreateCommand 与 SvgReader 调用服务 | builtin-shapes 中六类 provider；复合使用 FixtureProvider 测试替身 | 空表创建未知类型报错；未知 g 的 data-kind 降级普通 g；默认六种 provider | 重复/缺必需方法拒绝；无效节点/身份/归属拒绝；已注册复合标记缺 restore 或结构损坏拒绝，不降级 |
-| Command | core/application/commands/Command.ts：执行协议；Contracts.ts 的 CommandDefinition 提供命令名、语法、help 和 build | host/cli/CommandDispatcher.ts：parse；core/application/CommandExecutor.ts：execute | builtin-commands 中十九个具体 Command，由 BuiltinCommandDefinition 类注册 | 空表输出 unknown command；默认装配保留原十九条命令与顺序 | 重复/缺 build 拒绝；无有效 execute/kind 报 invalid command definition result；edit 缺 undo/redo 在执行前拒绝 |
+| Command | core/application/commands/Command.ts：执行协议；Contracts.ts 的 CommandDefinition 提供命令名、语法、help 和 build | host/cli/CommandDispatcher.ts：parse；core/application/CommandExecutor.ts：execute；command-stats/StatsCommandDefinition.build、StatsCommand.execute | builtin-commands 十九个命令；独立 command-stats 的 StatsPlugin/Definition/Command | 内置十九条不变，默认 A 另启 stats；空配置/disabled 不含 stats，执行报 unknown command: stats | 重复/缺 build 拒绝；无有效 execute/kind 拒绝；stats 多参数报 usage、无文档沿用 no document；query 不建历史 |
 | AttributeHandler | Contracts.ts：纯 handles；apply 接收只读目标及 AttributeEdits，可返回 applied/undone 反馈 | core/application/AttributeService.ts：resolve/plan；EditTransaction；SetAttributeCommand.plan 调用 | test/extensions 的 ProbeHandler、PairHandler；正式业务处理器在 P2-4 | 无匹配调用 SvgNode.planSetAttribute，保留原白名单 | 多匹配报 attribute handler conflict；操作/反馈/不变量失败逆序恢复，不转默认；门面关闭后报 transaction is closed |
 | TreeDecorator | Contracts.ts：读取只读 TreeRow，返回可选后缀 | core/application/SceneQuery.ts：tree/suffixes；NodeFormatter.tree 拼接通用 suffixes | 本阶段使用 ProbeDecorator 测试类；正式标签在 P2-4/P2-5 | 空表后缀为空，tree 与 final 字节不变 | 重复/缺 decorate 拒绝；非字符串或换行后缀报 invalid tree decorator result；异常使本次查询失败 |
 
@@ -62,7 +62,7 @@ P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描
 | 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
 | 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory | 未 init 可用；startup path、冻结直接条目、不跟随链接；失败 cannot read directory: path；排序/展示待 DirCommand |
 
-配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。没有实现真实 stats/dir/box/star，fixture 回放和差异测试不冒充业务接入提交。
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats 已真实接入，使用通用 lines 和文档 Iterator；dir/box/star 仍待后续。工作区边界/fixture 测试不冒充尚未产生的业务接入提交 SHA。
 
 可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。两个插件包各有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
 
