@@ -471,6 +471,16 @@ P2-1a 已提交为 5a5bcbf；P2-1b 已完成本地验收，待提交。扩展 0.
 
 第一部分已提交 c093c7f。本轮迁移为 src/core、src/host、plugins/builtin-shapes、plugins/builtin-commands；四扩展点位于 core，内置十九条命令/六种图形经类实例注册。帮助由注册元数据生成，命令分发器与形状服务不再枚举具体实现。domain 只依赖自身，插件只依赖 core public，host 仅在组合根导入具体插件。
 
-当前接口、调用位置、实现、缺省与契约错误见 [扩展点清单](EXTENSION_POINTS.md)。AttributeHandler 暂为纯 ChangeSet 计划契约，完整受控事务与复合结构保护在 P2-2b；配置安装回滚和首次指标在 P2-2c，尚未冻结框架。
+本节点当时的 AttributeHandler 为纯 ChangeSet 计划契约，后续已在 P2-2b 升级。当前接口、调用位置、实现、缺省与契约错误见 [扩展点清单](EXTENSION_POINTS.md)；配置安装回滚和首次指标在 P2-2c，尚未冻结框架。
 
 全工作区干净构建、测试源码类型检查通过；27文件/232项主测试、两个内置包各2项独立测试、扩展8项单测与真实宿主回归通过。三份 final 会话逐字节一致，见 [字节兼容摘要](evidence/phase2/p2-2a-baseline.json) 与 [P2-2a 记录](../docs/phase2/P2-2a_REPORT.md)。当前编译入口为 dist/host/main.js，首次安装后先构建本地包。本节点待审阅提交。
+
+### P2-2b：事务、复合容器与生命周期
+
+P2-2a 已提交 dc27435。此阶段新增只读属性目标与 AttributeEdits 门面，多部件修改、反馈和不变量验证在同一边界内完成；异常恢复已完成步骤，redo 重放局部记录。NodeEdit/Create/Group 的结果与验证失败均恢复原状态，再决定是否推进命令和历史状态。
+
+复合 provider 通过 ShapeConstructionPort 请求基本形状，以 SubtreeBuilder 构建完整离线子树。通用容器钩子集中保护挂接、删除、跨父迁移和分组；语义/显示/XML 三身份分离。读取在检查全文 ID 后后序恢复完整子树，已注册标记损坏即拒绝，未注册 data-kind 静默降级普通 g。核心没有真实业务插件名或派生 ID 规则。
+
+SessionSnapshot 提供复制冻结的场景，SessionEvents 在历史提交后通知七类成功操作；查询与失败无通知，订阅可释放，观察者异常单独记录诊断，不改变已成功保存的结果。正式 dirty 与祖先传播算法仍待 P2-5，此阶段仅以测试观察者和假标签验收协议。
+
+正式决策：[ADR 001 属性事务](adr/001-attribute-transactions.md)、[ADR 002 复合与恢复](adr/002-composite-restore.md)、[ADR 003 生命周期与标签](adr/003-lifecycle-and-labels.md)。构建、测试源码检查、30文件/257项主测试、扩展8项单测通过；三份 final 回放逐字节一致，见 [验证摘要](evidence/phase2/p2-2b-checks.json)、[基线摘要](evidence/phase2/p2-2b-baseline.json) 及 [阶段报告](../docs/phase2/P2-2b_REPORT.md)。扩展源码未改，本阶段未重跑真实宿主、VSIX 或截图。未新增依赖、未执行 Git 写操作；待审阅提交后进入 P2-2c。

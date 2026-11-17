@@ -5,6 +5,7 @@ import { SvgNumber } from './SvgNumber.js';
 import type { SvgDocument } from './SvgDocument.js';
 import type { SvgGroup } from './SvgGroup.js';
 import { setNodeLocation } from './internal/TreeAccess.js';
+import type { SvgElementDescription } from './SvgElementDescription.js';
 
 /** Common Component contract for leaves and groups. No I/O or CLI formatting. */
 export abstract class SvgNode implements Iterable<SvgNode> {
@@ -99,6 +100,11 @@ export abstract class SvgNode implements Iterable<SvgNode> {
 
   public getAttributes(): SvgAttributes {
     return Object.freeze({ ...this.getGeometry(), ...this.#style });
+  }
+
+  public describeSvg(): SvgElementDescription {
+    const { text, ...attributes } = this.getAttributes();
+    return Object.freeze({ tag: this.type, attributes: Object.freeze(attributes), text: text === undefined ? undefined : String(text) });
   }
 
   /** Preorder traversal, independent of the concrete child storage. */

@@ -3,9 +3,13 @@ import { ShapeFactory } from './ShapeFactory.js';
 import { AttributeService } from './AttributeService.js';
 import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
 import type { TreeDecorator } from '../extensions/Contracts.js';
+import { SceneQuery } from './SceneQuery.js';
+import { SessionEvents } from './SessionEvents.js';
+import type { SessionSnapshot } from './SceneSnapshot.js';
 
 /** Receiver for document lifecycle; contains no UI, file I/O or history stack. */
 export class EditorSession {
+  public readonly events = new SessionEvents(() => this.snapshot());
   public constructor(
     private readonly shapeFactory = new ShapeFactory(),
     private readonly attributeService = new AttributeService(),
@@ -18,6 +22,11 @@ export class EditorSession {
   #sourcePath: string | null = null;
 
   public get sourcePath(): string | null { return this.#sourcePath; }
+
+  public snapshot(): SessionSnapshot {
+    return Object.freeze({ sourcePath: this.#sourcePath,
+      document: this.#document === null ? null : new SceneQuery().scene(this.#document) });
+  }
 
   public initialize(width = 800, height = 600): SvgDocument {
     const candidate = new SvgDocument(width, height);

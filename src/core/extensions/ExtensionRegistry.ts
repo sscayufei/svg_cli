@@ -5,7 +5,7 @@ export class ExtensionRegistry<T extends { readonly name: string }> {
   public register(extension: T): void {
     if (!extension || typeof extension.name !== 'string' || !/^[a-z][a-z0-9-]*$/.test(extension.name)) throw new Error(`invalid registration: ${this.category}`);
     if (this.#entries.has(extension.name)) throw new Error(`duplicate registration: ${this.category}/${extension.name}`);
-    const methods: Readonly<Record<string, readonly string[]>> = { shapes: ['create', 'fromAttributes'], commands: ['build'], attributes: ['handles', 'plan'], decorators: ['decorate'] };
+    const methods: Readonly<Record<string, readonly string[]>> = { shapes: ['create', 'fromAttributes'], commands: ['build'], attributes: ['handles', 'apply'], decorators: ['decorate'] };
     for (const name of methods[this.category] ?? []) {
       if (typeof Reflect.get(extension, name) !== 'function') throw new Error(`invalid registration contract: ${this.category}/${extension.name}`);
     }

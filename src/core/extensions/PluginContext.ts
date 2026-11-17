@@ -1,4 +1,5 @@
 import type { EditorSession } from '../application/EditorSession.js';
+import type { SessionEvents } from '../application/SessionEvents.js';
 import type { CommandHistory } from '../application/CommandHistory.js';
 import type { SvgReadPort } from '../application/ports/SvgReadPort.js';
 import type { SvgSavePort } from '../application/ports/SvgSavePort.js';
@@ -8,6 +9,7 @@ import type { AttributeHandler, CommandDefinition, ShapeProvider, TreeDecorator 
 
 export interface PluginContext {
   readonly session: EditorSession;
+  readonly events: SessionEvents;
   readonly history: CommandHistory;
   readonly store: SvgReadPort & SvgSavePort;
   readonly shapes: ShapeFactory;

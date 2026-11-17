@@ -80,7 +80,7 @@ describe('SvgReader validated candidates', () => {
     [svg('<rect id="same"/><g id="same"/>'), 'id already exists: same'],
     [svg('<path/>'), 'unknown shape type: path'], [svg('<g transform="translate(1,2)"/>'), 'unknown attribute: transform'],
     [svg('<rect style="fill:red"/>'), 'unknown attribute: style'], [svg('<text font-size="16"/>'), 'unknown attribute: font-size'],
-    [svg('<g data-kind="box"/>'), 'unknown attribute: data-kind'], [svg('<rect text="bad"/>'), 'unknown attribute: text'],
+    [svg('<g data-other="box"/>'), 'unknown attribute: data-other'], [svg('<rect text="bad"/>'), 'unknown attribute: text'],
     [svg('<text><tspan>nested</tspan></text>'), 'not a container'], [svg('<rect><g/></rect>'), 'not a container'],
     [svg('unexpected text'), 'unexpected text'], [svg('<g>unexpected</g>'), 'unexpected text'],
     [svg('<rect width="-1"/>'), 'non-negative'], [svg('<circle r="NaN"/>'), 'finite'],

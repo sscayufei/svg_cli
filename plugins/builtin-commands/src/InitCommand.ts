@@ -4,6 +4,7 @@ import type { EditorSession } from '@svgframe/core';
 import type { Command } from '@svgframe/core';
 
 export class InitCommand implements Command {
+  public readonly lifecycleEvent = 'init';
   public constructor(
     private readonly session: EditorSession,
     private readonly width: string | number = 800,

@@ -4,6 +4,7 @@ import type { SvgReadPort } from '@svgframe/core';
 import type { Command } from '@svgframe/core';
 
 export class ReadCommand implements Command {
+  public readonly lifecycleEvent = 'read';
   public readonly kind = 'document';
   public constructor(private readonly session: EditorSession, private readonly store: SvgReadPort, private readonly path: string) {}
 

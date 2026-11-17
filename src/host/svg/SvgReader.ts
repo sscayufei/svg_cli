@@ -6,6 +6,7 @@ import type { SvgNode } from '@svgframe/core';
 import { SvgNumber } from '@svgframe/core';
 
 interface ElementInput {
+  readonly children: ElementInput[];
   readonly type: string;
   readonly uri: string;
   readonly attributes: Readonly<Record<string, string>>;
@@ -36,13 +37,14 @@ export class SvgReader {
       const parent = stack.at(-1) ?? null;
       if (tag.uri !== '' && tag.uri !== 'http://www.w3.org/2000/svg') throw new Error(`unsupported namespace: ${tag.uri}`);
       if (parent !== null && root?.uri !== '' && tag.uri === '') throw new Error('unsupported empty element namespace');
+      if (parent !== null && parent.type !== 'svg' && parent.type !== 'g') throw new Error(`not a container: ${parent.attributes.id ?? parent.type}`);
       const element: ElementInput = {
-        type: tag.local, uri: tag.uri, attributes: this.attributes(tag), parent, content: '',
+        type: tag.local, uri: tag.uri, attributes: this.attributes(tag), parent, content: '', children: [],
       };
       if (parent === null) {
         if (root !== undefined || tag.local !== 'svg') throw new Error('expected one svg root');
         root = element;
-      } else elements.push(element);
+      } else { elements.push(element); parent.children.push(element); }
       stack.push(element);
     });
     parser.on('closetag', () => { stack.pop(); });
@@ -76,12 +78,10 @@ export class SvgReader {
     }
     const counters = new Map<string, number>();
     const nodes = new Map<ElementInput, SvgNode>();
+    const ids = new Map<ElementInput, string>();
     const warnings: string[] = [];
     for (const element of elements) {
-      const parent = element.parent === root ? null : element.parent === null ? undefined : nodes.get(element.parent);
-      if (parent === undefined) throw new Error('missing parent in candidate');
-      if (parent !== null) document.requireContainer(parent.id);
-      const { id: explicitId, ...attributes } = element.attributes;
+      const { id: explicitId } = element.attributes;
       let id = explicitId;
       if (id === undefined || id === '') {
         let sequence = counters.get(element.type) ?? 0;
@@ -89,9 +89,20 @@ export class SvgReader {
         counters.set(element.type, sequence); reserved.add(id);
         warnings.push(`assigned id ${id} to unnamed <${element.type}>`);
       }
-      const node = this.factory.fromAttributes(element.type, id, attributes, element.content);
-      document.append(node, parent); nodes.set(element, node);
+      ids.set(element, id);
     }
+    // Children are restored first; providers never receive incomplete composites.
+    for (const element of elements.toReversed()) {
+      const { id: _explicitId, ...attributes } = element.attributes;
+      const children = element.children.map(child => {
+        const node = nodes.get(child);
+        if (!node) throw new Error('missing child in candidate');
+        return node;
+      });
+      const node = this.factory.restore(Object.freeze({ tag: element.type, id: ids.get(element)!, attributes: Object.freeze(attributes), content: element.content, children: Object.freeze(children) }));
+      nodes.set(element, node);
+    }
+    for (const child of root.children) document.append(nodes.get(child)!);
     document.verifyInvariants();
     return Object.freeze({ document, warnings: Object.freeze(warnings) });
   }

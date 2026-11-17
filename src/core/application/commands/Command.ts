@@ -1,7 +1,9 @@
 import type { CommandResult } from '../CommandResult.js';
+import type { DocumentEventKind } from '../SessionEvents.js';
 
 export interface Command {
   readonly kind: 'document' | 'query' | 'edit' | 'history';
+  readonly lifecycleEvent?: DocumentEventKind;
   execute(): CommandResult;
 }
 

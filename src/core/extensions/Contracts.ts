@@ -1,5 +1,4 @@
 import type { SvgNode } from '../domain/SvgNode.js';
-import type { ChangeSet } from '../domain/ChangeSet.js';
 import type { CommandHelp } from '../application/CommandResult.js';
 import type { Command } from '../application/commands/Command.js';
 import type { CommandToken } from './CommandToken.js';
@@ -11,6 +10,7 @@ export interface ShapeProvider {
   readonly help: CommandHelp;
   create(id: string, args: readonly string[]): SvgNode;
   fromAttributes(id: string, attributes: Readonly<Record<string, string>>, content: string): SvgNode;
+  restore?(input: ShapeRestoreInput): SvgNode;
   creationFeedback?(node: SvgNode, parent: SvgNode | null): readonly string[];
 }
 export interface CommandDefinition extends CommandHelp {
@@ -22,15 +22,26 @@ export interface AttributeTarget {
   readonly semanticType: string;
   readonly isContainer: boolean;
   readonly attributes: SvgAttributes;
+  readonly children: readonly { readonly id: string; readonly semanticType: string }[];
 }
-/** Initial planning contract; controlled multi-operation transactions arrive in P2-2b. */
+export interface ShapeRestoreInput {
+  readonly tag: string;
+  readonly id: string;
+  readonly attributes: Readonly<Record<string, string>>;
+  readonly content: string;
+  readonly children: readonly SvgNode[];
+}
+/** Matching is pure; edits are only exposed through the scoped transaction. */
 export interface AttributeHandler {
   readonly name: string;
   handles(target: AttributeTarget, attribute: string): boolean;
-  plan(target: SvgNode, attribute: string, value: string | number): ChangeSet;
-  feedback?(target: SvgNode, attribute: string, value: string | number): OperationFeedback;
+  apply(target: AttributeTarget, attribute: string, value: string | number, transaction: AttributeEdits): OperationFeedback | void;
 }
-/** Both forms are prepared before mutation; redo reuses applied feedback. */
+export interface AttributeEdits {
+  read(id: string): AttributeTarget;
+  setAttribute(id: string, attribute: string, value: string | number): void;
+}
+/** Both forms are validated inside the transaction; redo reuses applied feedback. */
 export interface OperationFeedback { readonly applied: readonly string[]; readonly undone: readonly string[] }
 export interface TreeRow {
   readonly node: NodeSnapshot | null;

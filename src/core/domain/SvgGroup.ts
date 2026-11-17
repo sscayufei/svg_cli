@@ -1,7 +1,7 @@
 import type { SvgGeometry, SvgStyle } from './SvgAttributes.js';
 import { ChangeSet } from './ChangeSet.js';
 import { SvgNode } from './SvgNode.js';
-import { insertGroupChild, removeGroupChild } from './internal/TreeAccess.js';
+import { insertGroupChild, removeGroupChild, setNodeLocation } from './internal/TreeAccess.js';
 
 /** Composite: callers inspect groups through the same SvgNode contract as leaves. */
 export class SvgGroup extends SvgNode {
@@ -20,6 +20,35 @@ export class SvgGroup extends SvgNode {
 
   public getGeometry(): SvgGeometry {
     return Object.freeze({});
+  }
+
+  /** Policy hooks are pure checks; implementations cannot mutate aggregate storage. */
+  public assertCanAccept(_child: SvgNode): void {}
+  public assertCanRelease(_child: SvgNode): void {}
+  public assertCanUngroup(): void {}
+  public verifyStructure(): void {}
+
+  /** Initialize a detached, empty container atomically, without exposing tree symbols. */
+  public initializeChildren(children: readonly SvgNode[]): void {
+    if (this.document !== null || this.parent !== null || this.#children.length) throw new Error(`container is not empty and detached: ${this.id}`);
+    const ids = new Set<string>([this.id]);
+    for (const child of children) {
+      this.assertCanAccept(child);
+      if (child.parent !== null || child.document !== null) throw new Error(`child is not detached: ${child.id}`);
+      for (const node of child) {
+        if (node.document !== null) throw new Error(`node already belongs to a document: ${node.id}`);
+        if (ids.has(node.id)) throw new Error(`id already exists: ${node.id}`);
+        ids.add(node.id);
+        if (node instanceof SvgGroup) node.verifyStructure();
+        for (const descendant of node.children) if (descendant.parent !== node) throw new Error(`invalid subtree parent: ${descendant.id}`);
+      }
+    }
+    for (const child of children) { this.#children.push(child); child[setNodeLocation](null, this); }
+    try { this.verifyStructure(); } catch (error) {
+      this.#children.length = 0;
+      for (const child of children) child[setNodeLocation](null, null);
+      throw error;
+    }
   }
 
   protected override buildMove(dx: number, dy: number): ChangeSet {

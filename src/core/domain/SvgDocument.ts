@@ -92,6 +92,7 @@ export class SvgDocument implements Iterable<SvgNode> {
         throw new Error(`id already exists: ${descendant.id}`);
       }
       ids.add(descendant.id);
+      if (descendant instanceof SvgGroup) descendant.verifyStructure();
       for (const child of descendant.children) {
         if (child.parent !== descendant) {
           throw new Error(`invalid subtree parent: ${child.id}`);
@@ -99,6 +100,7 @@ export class SvgDocument implements Iterable<SvgNode> {
       }
     }
 
+    if (parent !== null) parent.assertCanAccept(node);
     if (parent === null) {
       this.#children.splice(index, 0, node);
     } else {
@@ -140,6 +142,10 @@ export class SvgDocument implements Iterable<SvgNode> {
     }
     if (node.parent !== this && !(node.parent instanceof SvgGroup)) throw new Error(`invalid scene graph parent: ${node.id}`);
     const source = node.parent instanceof SvgGroup ? node.parent : null;
+    if (source !== parent) {
+      source?.assertCanRelease(node);
+      parent?.assertCanAccept(node);
+    }
     const sourceIndex = (source === null ? this.children : source.children).indexOf(node);
     const maximum = (parent === null ? this.children : parent.children).length - (source === parent ? 1 : 0);
     if (!Number.isInteger(index) || index < 0 || index > maximum) throw new Error('invalid child index');
@@ -192,6 +198,7 @@ export class SvgDocument implements Iterable<SvgNode> {
     if (index < 0) {
       throw new Error(`invalid scene graph position: ${id}`);
     }
+    if (parent instanceof SvgGroup) parent.assertCanRelease(node);
     if (parent instanceof SvgGroup) {
       parent[removeGroupChild](index);
     } else {
@@ -226,6 +233,7 @@ export class SvgDocument implements Iterable<SvgNode> {
         throw new Error(`inconsistent scene graph: ${node.id}`);
       }
       visited.add(node);
+      if (node instanceof SvgGroup) node.verifyStructure();
       for (const child of node.children) {
         if (!(node instanceof SvgGroup)) {
           throw new Error(`not a container: ${node.id}`);

@@ -15,8 +15,9 @@ function context(): PluginContext {
   const shapes = new ShapeFactory(shapeProviders);
   const attributes = new ExtensionRegistry<AttributeHandler>('attributes');
   const decorators = new ExtensionRegistry<TreeDecorator>('decorators');
+  const session = new EditorSession(shapes, new AttributeService(attributes), decorators);
   return { shapes, shapeProviders, attributes, decorators,
-    session: new EditorSession(shapes, new AttributeService(attributes), decorators), history: new CommandHistory(), commands: new ExtensionRegistry<CommandDefinition>('commands'),
+    session, events: session.events, history: new CommandHistory(session.events), commands: new ExtensionRegistry<CommandDefinition>('commands'),
     store: { read() { throw new Error('unexpected read'); }, save() { throw new Error('unexpected save'); } } };
 }
 describe('built-in commands with a shape-service test double', () => {

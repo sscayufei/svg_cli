@@ -8,6 +8,8 @@
 
 > P2-2a 更新：core 与两个内置插件已成为本地工作区包，使用包 exports 的编译产物。新增机器准备不需要第三方依赖；首次 npm ci 后先 npm run build。build:all 包含扩展，check:tests 检查测试源码，test:all 汇总主测试/扩展单测/宿主。TypeScript 7 AST 扫描使用其原生快照 API，不能照搬 TS 5 的 createSourceFile。详见 [P2-2a 记录](P2-2a_REPORT.md)。
 
+> P2-2b 更新：前置提交 dc27435，未增加依赖/脚本或更改锁文件。全量构建、测试源码检查、257项主测试、扩展8项单测及三份 final 字节回放通过。Windows 沙箱拦截子进程时按授权重跑；本阶段未重跑真实 GUI/VSIX 安装。事件订阅由会话实例提供，独立装配应把 session.events 注入 CommandHistory。详见 [P2-2b 记录](P2-2b_REPORT.md)。
+
 ## 1. Git 基线：已核对正确
 
 | 项目 | 实测结果 |

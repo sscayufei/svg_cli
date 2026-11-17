@@ -9,21 +9,23 @@ export class SvgWriter {
       '<?xml version="1.0" encoding="UTF-8"?>',
       `<svg xmlns="http://www.w3.org/2000/svg" width="${document.width}" height="${document.height}" viewBox="0 0 ${document.width} ${document.height}">`,
     ];
-    const ancestors: SvgNode[] = [];
+    const ancestors: { node: SvgNode; tag: string }[] = [];
     for (const node of document) {
-      while (ancestors.length > 0 && ancestors.at(-1) !== node.parent) this.close(ancestors, lines);
-      const tag = this.name(node.type);
-      const attributes = node.getAttributes();
+      while (ancestors.length > 0 && ancestors.at(-1)?.node !== node.parent) this.close(ancestors, lines);
+      const description = node.describeSvg();
+      const tag = this.name(description.tag);
+      const attributes = description.attributes;
+      if (Object.hasOwn(attributes, 'id')) throw new Error('serialized attributes must not redefine id');
+      if (description.text !== undefined && node.children.length) throw new Error('cannot serialize text and children together');
       const values = [`id="${this.escape(node.id, true)}"`];
       for (const [name, value] of Object.entries(attributes)) {
-        // The model exposes text as a semantic value; SVG stores it as child content.
-        if (name !== 'text') values.push(`${this.name(name)}="${this.escape(String(value), true)}"`);
+        values.push(`${this.name(name)}="${this.escape(String(value), true)}"`);
       }
       const start = `${'  '.repeat(ancestors.length + 1)}<${tag} ${values.join(' ')}`;
-      if (attributes.text !== undefined) {
-        lines.push(`${start}>${this.escape(String(attributes.text))}</${tag}>`);
+      if (description.text !== undefined) {
+        lines.push(`${start}>${this.escape(description.text)}</${tag}>`);
       } else if (node.children.length > 0) {
-        lines.push(`${start}>`); ancestors.push(node);
+        lines.push(`${start}>`); ancestors.push({ node, tag });
       } else {
         lines.push(`${start}/>`);
       }
@@ -33,9 +35,9 @@ export class SvgWriter {
     return lines.join('\n');
   }
 
-  private close(ancestors: SvgNode[], lines: string[]): void {
+  private close(ancestors: { node: SvgNode; tag: string }[], lines: string[]): void {
     const node = ancestors.pop();
-    if (node !== undefined) lines.push(`${'  '.repeat(ancestors.length + 1)}</${this.name(node.type)}>`);
+    if (node !== undefined) lines.push(`${'  '.repeat(ancestors.length + 1)}</${node.tag}>`);
   }
 
   private name(value: string): string {

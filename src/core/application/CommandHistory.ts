@@ -1,8 +1,10 @@
 import type { CommandResult } from './CommandResult.js';
 import type { ReversibleCommand } from './commands/Command.js';
+import type { DocumentEventKind, SessionEvents } from './SessionEvents.js';
 
 /** Owns history state; each command retains its own minimal reversible record. */
 export class CommandHistory {
+  public constructor(private readonly events?: SessionEvents) {}
   readonly #undo: ReversibleCommand[] = [];
   readonly #redo: ReversibleCommand[] = [];
   #blocked = false;
@@ -16,13 +18,15 @@ export class CommandHistory {
     this.#undo.push(command);
     this.#redo.length = 0;
     this.#blocked = false;
+    this.events?.publish('edit');
   }
 
   /** Successful document commands discard references into the old history. */
-  public barrier(): void {
+  public barrier(kind?: DocumentEventKind): void {
     this.#undo.length = 0;
     this.#redo.length = 0;
     this.#blocked = true;
+    if (kind !== undefined) this.events?.publish(kind);
   }
 
   public undo(): CommandResult {
@@ -32,6 +36,7 @@ export class CommandHistory {
     const result = command.undo();
     this.#undo.pop();
     this.#redo.push(command);
+    this.events?.publish('undo');
     return result;
   }
 
@@ -42,6 +47,7 @@ export class CommandHistory {
     const result = command.redo();
     this.#redo.pop();
     this.#undo.push(command);
+    this.events?.publish('redo');
     return result;
   }
 

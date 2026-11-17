@@ -4,6 +4,7 @@ import type { EditorSession } from '@svgframe/core';
 import type { Command } from '@svgframe/core';
 
 export class CanvasCommand implements Command {
+  public readonly lifecycleEvent = 'canvas';
   readonly #size: readonly [string | number, string | number] | undefined;
 
   public constructor(private readonly session: EditorSession, size?: readonly [string | number, string | number]) {

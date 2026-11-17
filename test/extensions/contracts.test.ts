@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { AttributeService, ChangeSet, CommandExecutor, CommandHistory, EditorSession, ExtensionRegistry, SceneQuery, ShapeFactory, SvgGroup,
-  type AttributeHandler, type AttributeTarget, type Command, type CommandDefinition, type CommandResult, type CommandToken, type ShapeProvider, type SvgNode, type TreeDecorator, type TreeRow } from '@svgframe/core';
+  type AttributeEdits, type AttributeHandler, type AttributeTarget, type Command, type CommandDefinition, type CommandResult, type CommandToken, type ShapeProvider, type SvgNode, type TreeDecorator, type TreeRow } from '@svgframe/core';
 import { createDefaultContext, createPluginContext } from '../../src/host/composition.js';
 import { CommandDispatcher } from '../../src/host/cli/CommandDispatcher.js';
 import { ResultFormatter } from '../../src/host/cli/ResultFormatter.js';
@@ -26,7 +26,7 @@ class ProbeDefinition implements CommandDefinition {
 class ProbeHandler implements AttributeHandler {
   public constructor(public readonly name = 'probe-attribute') {}
   public handles(target: AttributeTarget, attribute: string) { return target.semanticType === 'probe' && attribute === 'color'; }
-  public plan(node: SvgNode, _attribute: string, value: string | number): ChangeSet { return node.planSetAttribute('fill', value); }
+  public apply(target: AttributeTarget, _attribute: string, value: string | number, edits: AttributeEdits): void { edits.setAttribute(target.id, 'fill', value); }
 }
 class ProbeDecorator implements TreeDecorator {
   public constructor(public readonly name: string, private readonly text: string) {}
@@ -129,8 +129,10 @@ describe('Four extension contracts and default assembly', () => {
   it('supports generic creation and attribute feedback through apply/undo/redo', () => {
     class FeedbackProvider extends ProbeProvider { public creationFeedback(node: SvgNode) { return [`made ${node.id}`]; } }
     class FeedbackHandler extends ProbeHandler {
-      public feedback(node: SvgNode, _attribute: string, value: string | number) {
-        return { applied: [`color ${value}`], undone: [`restore ${node.getAttributes().fill ?? 'absent'}`] };
+      public override apply(target: AttributeTarget, attribute: string, value: string | number, edits: AttributeEdits) {
+        const before = edits.read(target.id).attributes.fill;
+        super.apply(target, attribute, value, edits);
+        return { applied: [`color ${value}`], undone: [`restore ${before ?? 'absent'}`] };
       }
     }
     const context = createPluginContext(); context.session.initialize();

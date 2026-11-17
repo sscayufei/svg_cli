@@ -14,7 +14,7 @@ export function createPluginContext(): PluginContext {
   const decorators = new ExtensionRegistry<TreeDecorator>('decorators');
   const shapes = new ShapeFactory(shapeProviders);
   const session = new EditorSession(shapes, new AttributeService(attributes), decorators);
-  return Object.freeze({ shapeProviders, commands, attributes, decorators, shapes, session, history: new CommandHistory(), store: new SvgFileStore(undefined, undefined, new SvgReader(shapes)) });
+  return Object.freeze({ shapeProviders, commands, attributes, decorators, shapes, session, events: session.events, history: new CommandHistory(session.events), store: new SvgFileStore(undefined, undefined, new SvgReader(shapes)) });
 }
 export function createDefaultContext(): PluginContext {
   const context = createPluginContext();
@@ -25,6 +25,6 @@ export function createDefaultContext(): PluginContext {
 /** Explicit test/client assembly over an existing session and I/O port. */
 export function createCommandDispatcher(session: EditorSession, history: CommandHistory, store: SvgReadPort & SvgSavePort): CommandDispatcher {
   const base = createPluginContext();
-  new BuiltinCommandsPlugin().activate({ ...base, session, history, store, shapes: session.shapes });
+  new BuiltinCommandsPlugin().activate({ ...base, session, events: session.events, history, store, shapes: session.shapes });
   return new CommandDispatcher(base.commands);
 }

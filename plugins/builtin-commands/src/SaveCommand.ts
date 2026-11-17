@@ -4,6 +4,7 @@ import type { SvgSavePort } from '@svgframe/core';
 import type { Command } from '@svgframe/core';
 
 export class SaveCommand implements Command {
+  public readonly lifecycleEvent = 'save';
   public readonly kind = 'document';
   public constructor(
     private readonly session: EditorSession,

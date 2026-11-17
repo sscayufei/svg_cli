@@ -14,7 +14,7 @@ export class CommandExecutor {
       }
       const result = command.execute();
       if (command.kind === 'edit' && isReversibleCommand(command)) this.history.recordExecuted(command);
-      else if (command.kind === 'document') this.history.barrier();
+      else if (command.kind === 'document') this.history.barrier(command.lifecycleEvent);
       return Object.freeze({ ok: true, result });
     } catch (error) {
       return Object.freeze({ ok: false, error: error instanceof Error ? error.message : 'command failed' });

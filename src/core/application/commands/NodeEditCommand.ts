@@ -4,6 +4,7 @@ import type { SvgNode } from '../../domain/SvgNode.js';
 import type { CommandResult } from '../CommandResult.js';
 import type { EditorSession } from '../EditorSession.js';
 import type { NodeReference } from '../SceneSnapshot.js';
+import { CommandResults } from '../CommandResults.js';
 import { EditCommand } from './EditCommand.js';
 
 interface EditRecord {
@@ -25,24 +26,24 @@ export abstract class NodeEditCommand extends EditCommand {
     const document = this.session.requireDocument();
     const node = document.requireById(this.id);
     const change = this.plan(node, document);
-    change.apply();
+    const result = change.applyChecked(() => { document.verifyInvariants(); return CommandResults.validate(this.result(node, false)); });
     this.#record = Object.freeze({ document, node, change, appliedOwner: node.document });
     this.#state = 'applied';
-    return this.result(node, false);
+    return result;
   }
 
   public undo(): CommandResult {
     const record = this.activeRecord('applied');
-    record.change.revert();
+    const result = record.change.revertChecked(() => { record.document.verifyInvariants(); return CommandResults.validate(this.result(record.node, true)); });
     this.#state = 'undone';
-    return this.result(record.node, true);
+    return result;
   }
 
   public redo(): CommandResult {
     const record = this.activeRecord('undone');
-    record.change.apply();
+    const result = record.change.applyChecked(() => { record.document.verifyInvariants(); return CommandResults.validate(this.result(record.node, false)); });
     this.#state = 'applied';
-    return this.result(record.node, false);
+    return result;
   }
 
   protected abstract plan(node: SvgNode, document: SvgDocument): ChangeSet;

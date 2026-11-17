@@ -23,6 +23,7 @@ export class SceneEditor {
       return this.document.requireById(memberId);
     });
     const selection = new Set(selected);
+    for (const node of selected) if (node.parent instanceof SvgGroup) node.parent.assertCanRelease(node);
     for (const node of selected) {
       let ancestor = node.parent;
       while (ancestor instanceof SvgGroup) {
@@ -63,6 +64,7 @@ export class SceneEditor {
   public planUngroup(id: string): ChangeSet {
     const node = this.document.requireById(id);
     if (!(node instanceof SvgGroup)) throw new Error(`not a container: ${id}`);
+    node.assertCanUngroup();
     if (node.parent === this.document) throw new Error(`cannot ungroup top-level container: ${id}`);
     const parent = node.parent;
     if (!(parent instanceof SvgGroup)) throw new Error(`invalid scene graph parent: ${id}`);

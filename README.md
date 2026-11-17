@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器。Phase 1 已完成并由 final 标签固定；Phase 2 按 [开发计划](docs/phase2/DEVELOPMENT_PLAN.md) 推进。
 
-当前已交付 VSCode 文件标记/大纲；P2-2a 已完成 core/host/内置插件包迁移与注册式装配，本地验收通过，待审阅提交。四扩展点、通用输出/反馈和公开撤销协议已就位；完整属性事务、复合结构保护、配置加载器与业务插件仍按后续阶段实现。详见 [P2-2a 记录](docs/phase2/P2-2a_REPORT.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
+当前已交付 VSCode 文件标记/大纲，P2-2a 注册式内核已提交。P2-2b 已补齐受控属性事务、复合结构保护、完整 SVG 恢复和成功生命周期通知，257项主测试及三份 final 字节回放通过，待审阅提交。配置加载器与业务插件按后续阶段实现。详见 [P2-2b 记录](docs/phase2/P2-2b_REPORT.md)、[扩展点清单](doc/EXTENSION_POINTS.md) 和 [ADR](doc/adr/001-attribute-transactions.md)。
 
 首次安装后需构建本地工作区包，再启动 CLI；core 与插件通过 package exports 使用编译产物，tsx 不替代包构建。
 
@@ -35,6 +35,8 @@ M7 支持 `read <file.svg>`，可直接建立当前文档。完整解析、补 I
 无参数 save 使用最近成功 read 的绝对来源路径，显式 save 不更新该路径；成功 init 清除来源，编辑和 canvas 修改保留来源。没有 read 来源时报 `error: no source path. use 'save <file.svg>'`。模型中的非法 XML 字符会使保存失败，保留原有文件。
 
 输入范围已明确限定：UTF-8 XML 1.0；根 svg 仅支持 width/height/viewBox 与命名空间声明，width/height 必须为正数（可带 px），viewBox 如存在必须为 `0 0 width height`。形状几何使用无单位数字，缺省值为 0；只支持六种形状的几何、公共 fill/stroke/stroke-width 及 text 子文本。允许 SVG 命名空间前缀、注释和 CDATA。遇到 transform、未知标签/属性（包括 style/font-size/data-*）、叶子中的子元素、DTD 或处理指令会明确失败。
+
+Phase 2 新增通用复合标记：仅 g 的 data-kind 可路由到已注册复合 provider；未知标记静默降级为普通 g 并保留孩子/合法样式，移除标记。已注册但结构损坏时整次读取失败；其他 data-* 仍严格拒绝。当前没有默认可选复合业务插件。
 
 ## 环境与运行
 

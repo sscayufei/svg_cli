@@ -3,6 +3,7 @@ import { ChangeSet } from '../domain/ChangeSet.js';
 import type { AttributeHandler, OperationFeedback } from '../extensions/Contracts.js';
 import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
 import { OutputLines } from './OutputLines.js';
+import { EditTransaction } from './EditTransaction.js';
 
 export interface AttributeOperation { readonly change: ChangeSet; readonly feedback: OperationFeedback | undefined }
 
@@ -12,13 +13,29 @@ export class AttributeService {
     return this.resolve(node, attribute, value).change;
   }
   public resolve(node: SvgNode, attribute: string, value: string | number): AttributeOperation {
-    const view = Object.freeze({ id: node.id, semanticType: node.type, isContainer: node.isContainer, attributes: node.getAttributes() });
+    const view = EditTransaction.view(node);
     const matches = this.handlers.values().filter(handler => handler.handles(view, attribute));
     if (matches.length > 1) throw new Error(`attribute handler conflict: ${matches.map(handler => handler.name).join(', ')}`);
     const handler = matches[0];
-    const change = handler ? handler.plan(node, attribute, value) : node.planSetAttribute(attribute, value);
-    if (!(change instanceof ChangeSet)) throw new Error(`invalid attribute handler result: ${handler?.name}`);
-    const feedback = handler?.feedback?.(node, attribute, value);
-    return Object.freeze({ change, feedback: feedback === undefined ? undefined : Object.freeze({ applied: OutputLines.copy(feedback.applied), undone: OutputLines.copy(feedback.undone) }) });
+    if (!handler) return Object.freeze({ change: node.planSetAttribute(attribute, value), feedback: undefined });
+    const document = node.document;
+    if (!document) throw new Error('attribute handler target must belong to a document');
+    let record: ChangeSet | undefined;
+    let feedback: OperationFeedback | undefined;
+    const change = new ChangeSet([{
+      apply: () => {
+        if (record) { record.apply(); return; }
+        const transaction = new EditTransaction(document);
+        try {
+          const response = handler.apply(view, attribute, value, transaction.edits);
+          const prepared = response === undefined ? undefined : Object.freeze({ applied: OutputLines.copy(response.applied), undone: OutputLines.copy(response.undone) });
+          document.verifyInvariants();
+          record = transaction.commit();
+          feedback = prepared;
+        } catch (error) { transaction.rollback(); throw error; }
+      },
+      revert: () => { if (!record) throw new Error('attribute operation is not applied'); record.revert(); },
+    }]);
+    return Object.freeze({ change, get feedback() { return feedback; } });
   }
 }

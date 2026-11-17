@@ -1,6 +1,6 @@
 import type { SvgDocument } from '../domain/SvgDocument.js';
 import type { SvgNode } from '../domain/SvgNode.js';
-import type { NodeSnapshot, TreeEntry, TreeSnapshot } from './SceneSnapshot.js';
+import type { NodeSnapshot, SceneState, TreeEntry, TreeSnapshot } from './SceneSnapshot.js';
 import type { TreeDecorator, TreeRow } from '../extensions/Contracts.js';
 import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
 
@@ -17,6 +17,13 @@ export class SceneQuery {
   }
   public show(document: SvgDocument, id: string): NodeSnapshot {
     return this.snapshot(document.requireById(id));
+  }
+
+  public scene(document: SvgDocument): SceneState {
+    return Object.freeze({ width: document.width, height: document.height,
+      rootIds: Object.freeze(document.children.map(node => node.id)),
+      nodes: Object.freeze([...document].map(node => this.snapshot(node))),
+    });
   }
 
   public tree(document: SvgDocument, id?: string): TreeSnapshot {
@@ -46,12 +53,16 @@ export class SceneQuery {
 
   private snapshot(node: SvgNode): NodeSnapshot {
     const parent = node.parent;
+    const description = node.describeGeometry();
     return Object.freeze({
       id: node.id, type: node.type,
       semanticType: node.type, displayType: node.displayType, isContainer: node.isContainer,
+      childIds: Object.freeze(node.children.map(child => child.id)),
       parent: parent !== null && 'id' in parent
         ? Object.freeze({ id: parent.id, type: parent.type }) : null,
-      geometry: node.getGeometry(), description: node.describeGeometry(), attributes: node.getAttributes(),
+      geometry: Object.freeze({ ...node.getGeometry() }), description: Object.freeze(description.kind === 'properties'
+        ? { ...description, values: Object.freeze({ ...description.values }) } : { ...description }),
+      attributes: Object.freeze({ ...node.getAttributes() }),
     });
   }
 }
