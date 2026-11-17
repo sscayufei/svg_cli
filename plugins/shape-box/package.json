@@ -1,0 +1,19 @@
+{
+  "name": "@svgframe/shape-box",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/public.d.ts", "import": "./dist/public.js" }
+  },
+  "contributes": {
+    "shapes": ["box"],
+    "attributes": ["box-fill", "box-label"],
+    "decorators": ["box-type-label"]
+  },
+  "dependencies": { "@svgframe/core": "0.2.0" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node ../../scripts/test-workspace.mjs"
+  }
+}
