@@ -4,9 +4,14 @@ export type DocumentEventKind = 'init' | 'read' | 'save' | 'canvas';
 export type SessionEventKind = DocumentEventKind | 'edit' | 'undo' | 'redo';
 export interface SessionEvent { readonly kind: SessionEventKind; readonly snapshot: SessionSnapshot }
 export interface Subscription { dispose(): void }
+export interface SessionEventSource {
+  readonly diagnostics: readonly string[];
+  subscribe(listener: (event: SessionEvent) => void): Subscription;
+}
+export interface ResourceOwner { add(resource: Subscription): void }
 
 /** Post-commit observers cannot change the outcome of an operation. */
-export class SessionEvents {
+export class SessionEvents implements SessionEventSource {
   readonly #listeners = new Set<(event: SessionEvent) => void>();
   readonly #errors: string[] = [];
   public constructor(private readonly snapshot: () => SessionSnapshot) {}

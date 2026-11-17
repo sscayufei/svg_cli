@@ -23,7 +23,10 @@
     "verify:baseline": "node scripts/verify-baseline.mjs",
     "package:extension": "npm run build:extension && node scripts/package-extension.mjs",
     "build:all": "node scripts/build-workspaces.mjs --all",
-    "test:all": "npm test && npm run test:extension:unit && npm run test:extension"
+    "test:all": "npm test && npm run test:extension:unit && npm run test:extension",
+    "metrics": "node scripts/metrics.mjs",
+    "verify:assemblies": "node scripts/verify-assemblies.mjs",
+    "verify:plugin-diff": "node scripts/verify-plugin-diff.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",

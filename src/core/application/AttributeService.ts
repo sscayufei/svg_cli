@@ -1,14 +1,14 @@
 import type { SvgNode } from '../domain/SvgNode.js';
 import { ChangeSet } from '../domain/ChangeSet.js';
 import type { AttributeHandler, OperationFeedback } from '../extensions/Contracts.js';
-import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
+import { ExtensionRegistry, type ExtensionRegistrations } from '../extensions/ExtensionRegistry.js';
 import { OutputLines } from './OutputLines.js';
 import { EditTransaction } from './EditTransaction.js';
 
 export interface AttributeOperation { readonly change: ChangeSet; readonly feedback: OperationFeedback | undefined }
 
 export class AttributeService {
-  public constructor(private readonly handlers = new ExtensionRegistry<AttributeHandler>('attributes')) {}
+  public constructor(private readonly handlers: ExtensionRegistrations<AttributeHandler> = new ExtensionRegistry<AttributeHandler>('attributes')) {}
   public plan(node: SvgNode, attribute: string, value: string | number): ChangeSet {
     return this.resolve(node, attribute, value).change;
   }

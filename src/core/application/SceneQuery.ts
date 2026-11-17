@@ -2,11 +2,11 @@ import type { SvgDocument } from '../domain/SvgDocument.js';
 import type { SvgNode } from '../domain/SvgNode.js';
 import type { NodeSnapshot, SceneState, TreeEntry, TreeSnapshot } from './SceneSnapshot.js';
 import type { TreeDecorator, TreeRow } from '../extensions/Contracts.js';
-import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
+import { ExtensionRegistry, type ExtensionRegistrations } from '../extensions/ExtensionRegistry.js';
 
 /** Read-only projection receiver. Traverses the model through its Iterable API. */
 export class SceneQuery {
-  public constructor(private readonly decorators = new ExtensionRegistry<TreeDecorator>('decorators')) {}
+  public constructor(private readonly decorators: ExtensionRegistrations<TreeDecorator> = new ExtensionRegistry<TreeDecorator>('decorators')) {}
   private suffixes(row: TreeRow): readonly string[] {
     return Object.freeze(this.decorators.values().flatMap(decorator => {
       const value = decorator.decorate(row);

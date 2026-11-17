@@ -56,6 +56,10 @@ describe('Core, host and plugin boundaries', () => {
       if (edge.target) expect(edge.target).toMatch(/^src\/host\/svg\//);
       else expect(edge.specifier).toMatch(/^(?:@svgframe\/core|node:.*|saxes)$/);
     }
+    for (const edge of edges.filter(e => /^src\/host\/(?:loading|filesystem)\//.test(e.path))) {
+      if (edge.target) expect(edge.target, edge.path).toMatch(/^src\/host\/(?:loading|filesystem)\//);
+      else expect(edge.specifier, edge.path).toMatch(/^(?:@svgframe\/core|node:.*)$/);
+    }
     for (const edge of edges.filter(e => e.path.startsWith('extensions/'))) {
       if (edge.target) expect(edge.target).toMatch(/^extensions\/vscode-svg\/src\//);
       else expect(edge.specifier).toMatch(/^(?:vscode|saxes)$/);

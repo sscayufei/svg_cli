@@ -1,0 +1,30 @@
+@startuml
+title Phase 1 final (2054ec5) - actual static dependencies
+skinparam componentStyle rectangle
+package "src/cli" as CLI {
+  component "main (composition)" as MAIN
+  component "REPL / Dispatcher / Formatter" as UI
+}
+package "src/application" as APP {
+  component "Session / History / Query" as USECASE
+  component "concrete commands" as COMMANDS
+  component "I/O ports" as PORTS
+}
+package "src/domain" as DOMAIN {
+  component "nodes / groups / document" as MODEL
+  component "ShapeFactory (fixed types)" as FACTORY
+}
+package "src/infrastructure/svg" as SVG
+MAIN --> USECASE
+MAIN --> SVG
+UI --> COMMANDS
+UI --> USECASE
+COMMANDS --> PORTS
+COMMANDS --> MODEL
+COMMANDS --> FACTORY
+USECASE --> MODEL
+PORTS --> MODEL
+SVG --> PORTS
+SVG --> FACTORY
+SVG --> MODEL
+@enduml

@@ -104,7 +104,7 @@ export class BuiltinCommandCatalog {
         this.count(a, 0, 0, 'help');
         return new HelpCommand([
           ...this.context.commands.values(),
-          ...this.context.shapes.help(),
+          ...this.session.shapes.help(),
         ], []);
       } }],
     ]);

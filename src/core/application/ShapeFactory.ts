@@ -2,12 +2,12 @@ import { SvgNode } from '../domain/SvgNode.js';
 import type { ShapeProvider, ShapeRestoreInput } from '../extensions/Contracts.js';
 import { SvgGroup } from '../domain/SvgGroup.js';
 import { SubtreeBuilder } from '../domain/SubtreeBuilder.js';
-import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
+import { ExtensionRegistry, type ExtensionRegistrations } from '../extensions/ExtensionRegistry.js';
 import { OutputLines } from './OutputLines.js';
 import type { ShapeConstructionPort } from './ports/ShapeConstructionPort.js';
 
 export class ShapeFactory implements ShapeConstructionPort {
-  public constructor(private readonly providers = new ExtensionRegistry<ShapeProvider>('shapes')) {}
+  public constructor(private readonly providers: ExtensionRegistrations<ShapeProvider> = new ExtensionRegistry<ShapeProvider>('shapes')) {}
   public create(type: string, id: string, args: readonly string[]): SvgNode {
     return this.validate(this.provider(type).create(id, args), type, id);
   }

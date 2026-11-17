@@ -484,3 +484,19 @@ P2-2a 已提交 dc27435。此阶段新增只读属性目标与 AttributeEdits �
 SessionSnapshot 提供复制冻结的场景，SessionEvents 在历史提交后通知七类成功操作；查询与失败无通知，订阅可释放，观察者异常单独记录诊断，不改变已成功保存的结果。正式 dirty 与祖先传播算法仍待 P2-5，此阶段仅以测试观察者和假标签验收协议。
 
 正式决策：[ADR 001 属性事务](adr/001-attribute-transactions.md)、[ADR 002 复合与恢复](adr/002-composite-restore.md)、[ADR 003 生命周期与标签](adr/003-lifecycle-and-labels.md)。构建、测试源码检查、30文件/257项主测试、扩展8项单测通过；三份 final 回放逐字节一致，见 [验证摘要](evidence/phase2/p2-2b-checks.json)、[基线摘要](evidence/phase2/p2-2b-baseline.json) 及 [阶段报告](../docs/phase2/P2-2b_REPORT.md)。扩展源码未改，本阶段未重跑真实宿主、VSIX 或截图。未新增依赖、未执行 Git 写操作；待审阅提交后进入 P2-2c。
+
+### P2-2c：共同安装、配置加载与冻结准备
+
+P2-2b 已提交 4a4ed73。默认内置及代码/配置两种装配现统一进入宿主 installer：四类注册与订阅先暂存、清单集合核对后提交；重名锁存、激活/清单/提交失败均恢复当前插件，已成功及后续插件仍可用。注册批量候选与恢复收据覆盖提交阶段失败；资源作用域覆盖订阅及其他 dispose，退出逆序释放。
+
+配置整体校验后按序加载，disabled 不解析，错误时继续内置交互。包目录、包名、显式编译 JS 使用原生 ESM 条件解析与所属清单，内部依赖/求值失败不误报顶层模块找不到。DirectoryPort 由 NodeDirectoryAdapter 适配启动目录与冻结条目，链接不跟随，未来 DirCommand 单测可注入同接口替身；排序/显示属于命令，不混入 Adapter。
+
+完整入口/配置/错误/端口说明见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计依据见 [ADR 004](adr/004-plugin-installation.md)、[ADR 005](adr/005-public-api-and-host.md) 和 [扩展点清单](EXTENSION_POINTS.md)。实际前后模块依赖图（相邻 .puml 可编辑）：
+
+![final 实际架构](architecture/final.svg)
+
+![P2-2c 实际框架](architecture/phase2-framework.svg)
+
+34文件/286项主测试、扩展8项单测、构建/类型检查通过；三份 final 原始字节一致。工具 fixture 验证 A/B 同实现/options/cwd 的两输出流/生成 SVG、未知 workspace 拓扑及编译后加载、Git 允许/拒绝路径和 peer 比较。见 [验证摘要](evidence/phase2/p2-2c-checks.json)、[字节摘要](evidence/phase2/p2-2c-baseline.json)、[A/B 摘要](evidence/phase2/p2-2c-assemblies.json) 及 [阶段报告](../docs/phase2/P2-2c_REPORT.md)。
+
+首轮 [历史指标](../docs/metrics/README.md) 由脚本真实读取 final→已提交4a4ed73，不包含本轮未提交源码。框架本地验收完成，冻结 SHA 须在用户审阅本轮普通提交后登记并重算指标；尚未实现真实业务插件、接入提交证明和最终 p2 指标，不以 fixture 或前置提交代替。未对项目执行 git add/commit/push/tag；合成 Git 提交仅用于隔离测试仓库。

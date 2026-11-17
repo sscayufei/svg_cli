@@ -1,0 +1,18 @@
+{
+  "node": "v24.14.0",
+  "cwd": "D:\\software_design\\svg_cli\\.tmp\\phase2\\assemblies-Actkw8\\cwd",
+  "inputSha256": "23224a849fd4473652fd44a4242f15c0ea61b9854315e20444bc63fc8d87d16a",
+  "codeCommand": [
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\assembly-fixture-0HhQd1\\code.mjs"
+  ],
+  "configCommand": [
+    "D:\\software_design\\svg_cli\\dist\\host\\main.js",
+    "--config",
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\assembly-fixture-0HhQd1\\config.json"
+  ],
+  "stdoutSha256": "e60ba83bc41611f468b49b05fd6ce0eea804d8b2edfecd06b957de8d5afab871",
+  "stderrSha256": "981b7c46b9e4f27a8ada8867104d44253582a20bbd07641752da55e7658e6cbb",
+  "files": {
+    "output.svg": "162c18176326a70e6c9ee7c98747b9a3e167ab1d1f28f9d22ef385aa37cb37f2"
+  }
+}

@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器。Phase 1 已完成并由 final 标签固定；Phase 2 按 [开发计划](docs/phase2/DEVELOPMENT_PLAN.md) 推进。
 
-当前已交付 VSCode 文件标记/大纲，P2-2a 注册式内核已提交。P2-2b 已补齐受控属性事务、复合结构保护、完整 SVG 恢复和成功生命周期通知，257项主测试及三份 final 字节回放通过，待审阅提交。配置加载器与业务插件按后续阶段实现。详见 [P2-2b 记录](docs/phase2/P2-2b_REPORT.md)、[扩展点清单](doc/EXTENSION_POINTS.md) 和 [ADR](doc/adr/001-attribute-transactions.md)。
+当前已交付 VSCode 文件标记/大纲，P2-2b 事务/复合模型已提交。P2-2c 已实现共同安装事务、配置 ESM 加载、目录端口及 A/B/差异/历史指标工具，286项主测试与三份 final 字节回放通过，待审阅提交确定框架冻结 SHA。真实业务插件按后续阶段实现。详见 [P2-2c 记录](docs/phase2/P2-2c_REPORT.md)、[装配说明](doc/PLUGIN_LOADING.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
 
 首次安装后需构建本地工作区包，再启动 CLI；core 与插件通过 package exports 使用编译产物，tsx 不替代包构建。
 
@@ -15,6 +15,8 @@ node dist/host/main.js
 ```
 
 `build:all` 同时构建扩展；`check:tests` 检查测试源码类型；`test` 运行 CLI/插件测试；`test:all` 再运行扩展单测与真实宿主测试。两个内置包可用 `npm.cmd test --workspace @svgframe/builtin-shapes` 与 `npm.cmd test --workspace @svgframe/builtin-commands` 独立测试。
+
+`node dist/host/main.js --config plugins.config.json` 使用配置装配；当前根配置为空，保留所有内置能力。无 --config 使用 composition 的可选代码列表；配置错误或单个插件失败会报告错误并继续启动。格式、资源/错误契约及工具用法见 [插件说明](doc/PLUGIN_LOADING.md)。
 
 以下 M0～M8 功能说明为保持兼容的 Phase 1 行为。
 

@@ -1,9 +1,9 @@
-import type { Command, CommandDefinition, ExtensionRegistry } from '@svgframe/core';
+import type { Command, CommandDefinition, ExtensionRegistrations } from '@svgframe/core';
 import { CommandTokenizer } from './CommandTokenizer.js';
 
 export class CommandDispatcher {
   readonly #tokenizer = new CommandTokenizer();
-  public constructor(private readonly commands: ExtensionRegistry<CommandDefinition>) {}
+  public constructor(private readonly commands: ExtensionRegistrations<CommandDefinition>) {}
   public parse(line: string): Command | null {
     const [name, ...args] = this.#tokenizer.tokenize(line);
     if (name === undefined) return null;

@@ -1,0 +1,5328 @@
+{
+  "schemaVersion": 1,
+  "tools": {
+    "node": "v24.14.0",
+    "typescript": "7.0.2"
+  },
+  "rules": {
+    "schemaVersion": 1,
+    "categories": [
+      {
+        "category": "core",
+        "prefixes": [
+          "src/core/",
+          "src/domain/",
+          "src/application/"
+        ],
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "category": "host",
+        "prefixes": [
+          "src/host/",
+          "src/cli/",
+          "src/infrastructure/"
+        ],
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "category": "plugins",
+        "prefixes": [
+          "plugins/"
+        ],
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "category": "vscode",
+        "prefixes": [
+          "extensions/vscode-svg/src/"
+        ],
+        "responsibility": "independent VSCode extension"
+      }
+    ],
+    "exclusions": [
+      "test",
+      "tests",
+      "fixtures",
+      "dist",
+      "node_modules"
+    ],
+    "complexity": "Each function with body starts at 1; if, for/for-in/for-of, while, do, non-default case, catch, ternary, &&, ||, ?? and logical assignments add 1. Nested functions are separate. Top-level decisions start at 0. else, default, try and optional chaining add 0.",
+    "lines": "Normalize CRLF/CR to LF; final newline adds no physical line; code lines have non-whitespace tokens, excluding comments/trivia. AST literal ranges protect string, regex and template content during scanning."
+  },
+  "baseline": {
+    "revision": "final",
+    "sha": "2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d",
+    "totals": {
+      "core": {
+        "fileCount": 45,
+        "physicalLines": 1549,
+        "codeLines": 1340,
+        "functionCount": 214,
+        "functionComplexity": 445,
+        "topLevelDecisions": 0
+      },
+      "host": {
+        "fileCount": 11,
+        "physicalLines": 647,
+        "codeLines": 596,
+        "functionCount": 70,
+        "functionComplexity": 238,
+        "topLevelDecisions": 0
+      },
+      "plugins": {
+        "fileCount": 0,
+        "physicalLines": 0,
+        "codeLines": 0,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0
+      },
+      "vscode": {
+        "fileCount": 0,
+        "physicalLines": 0,
+        "codeLines": 0,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0
+      },
+      "cliTotal": {
+        "fileCount": 56,
+        "physicalLines": 2196,
+        "codeLines": 1936,
+        "functionCount": 284,
+        "functionComplexity": 683,
+        "topLevelDecisions": 0
+      }
+    },
+    "files": [
+      {
+        "file": "src/application/CommandExecutor.ts",
+        "physicalLines": 23,
+        "codeLines": 20,
+        "functionCount": 2,
+        "functionComplexity": 8,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 7
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/CommandHistory.ts",
+        "physicalLines": 51,
+        "codeLines": 41,
+        "functionCount": 6,
+        "functionComplexity": 9,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "status",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "recordExecuted",
+            "line": 15,
+            "complexity": 1
+          },
+          {
+            "name": "barrier",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "undo",
+            "line": 28,
+            "complexity": 2
+          },
+          {
+            "name": "redo",
+            "line": 38,
+            "complexity": 2
+          },
+          {
+            "name": "checkAllowed",
+            "line": 48,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/CommandResult.ts",
+        "physicalLines": 30,
+        "codeLines": 26,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/EditorSession.ts",
+        "physicalLines": 30,
+        "codeLines": 24,
+        "functionCount": 4,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "sourcePath",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "initialize",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "load",
+            "line": 17,
+            "complexity": 2
+          },
+          {
+            "name": "requireDocument",
+            "line": 24,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/SceneQuery.ts",
+        "physicalLines": 42,
+        "codeLines": 38,
+        "functionCount": 3,
+        "functionComplexity": 14,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "show",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "tree",
+            "line": 11,
+            "complexity": 10
+          },
+          {
+            "name": "snapshot",
+            "line": 33,
+            "complexity": 3
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/SceneSnapshot.ts",
+        "physicalLines": 24,
+        "codeLines": 20,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/AddToCommand.ts",
+        "physicalLines": 17,
+        "codeLines": 16,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 3
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/BackCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/CanvasCommand.ts",
+        "physicalLines": 25,
+        "codeLines": 21,
+        "functionCount": 3,
+        "functionComplexity": 7,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 2
+          },
+          {
+            "name": "kind",
+            "line": 13,
+            "complexity": 2
+          },
+          {
+            "name": "execute",
+            "line": 15,
+            "complexity": 3
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/Command.ts",
+        "physicalLines": 6,
+        "codeLines": 5,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/CreateCommand.ts",
+        "physicalLines": 75,
+        "codeLines": 67,
+        "functionCount": 6,
+        "functionComplexity": 14,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 32,
+            "complexity": 4
+          },
+          {
+            "name": "undo",
+            "line": 44,
+            "complexity": 2
+          },
+          {
+            "name": "redo",
+            "line": 54,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 61,
+            "complexity": 4
+          },
+          {
+            "name": "createdResult",
+            "line": 69,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/DeleteCommand.ts",
+        "physicalLines": 17,
+        "codeLines": 16,
+        "functionCount": 3,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 11,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/EditCommand.ts",
+        "physicalLines": 10,
+        "codeLines": 8,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "kind",
+            "line": 6,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/FrontCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/GroupCommand.ts",
+        "physicalLines": 46,
+        "codeLines": 44,
+        "functionCount": 6,
+        "functionComplexity": 12,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 15,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 18,
+            "complexity": 2
+          },
+          {
+            "name": "undo",
+            "line": 26,
+            "complexity": 1
+          },
+          {
+            "name": "redo",
+            "line": 30,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 34,
+            "complexity": 6
+          },
+          {
+            "name": "grouped",
+            "line": 43,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/HelpCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 4,
+        "functionComplexity": 4,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/InitCommand.ts",
+        "physicalLines": 21,
+        "codeLines": 18,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 15,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/MoveCommand.ts",
+        "physicalLines": 19,
+        "codeLines": 18,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 15,
+            "complexity": 3
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/NodeEditCommand.ts",
+        "physicalLines": 62,
+        "codeLines": 53,
+        "functionCount": 6,
+        "functionComplexity": 14,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 23,
+            "complexity": 2
+          },
+          {
+            "name": "undo",
+            "line": 34,
+            "complexity": 1
+          },
+          {
+            "name": "redo",
+            "line": 41,
+            "complexity": 1
+          },
+          {
+            "name": "reference",
+            "line": 50,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 52,
+            "complexity": 8
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/ReadCommand.ts",
+        "physicalLines": 18,
+        "codeLines": 16,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/RedoCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 12,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/SaveCommand.ts",
+        "physicalLines": 25,
+        "codeLines": 23,
+        "functionCount": 2,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 14,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/ScaleCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 13,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 11,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/SetAttributeCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/ShowCommand.ts",
+        "physicalLines": 12,
+        "codeLines": 11,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 9,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/TreeCommand.ts",
+        "physicalLines": 12,
+        "codeLines": 11,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 9,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/UndoCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 12,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/commands/UngroupCommand.ts",
+        "physicalLines": 18,
+        "codeLines": 17,
+        "functionCount": 3,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/ports/SvgReadPort.ts",
+        "physicalLines": 15,
+        "codeLines": 11,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/application/ports/SvgSavePort.ts",
+        "physicalLines": 6,
+        "codeLines": 4,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/cli/CommandDispatcher.ts",
+        "physicalLines": 145,
+        "codeLines": 138,
+        "functionCount": 25,
+        "functionComplexity": 56,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 38,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 50,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 79,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 85,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 91,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 94,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 97,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 100,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 103,
+            "complexity": 1
+          },
+          {
+            "name": "parse",
+            "line": 118,
+            "complexity": 3
+          },
+          {
+            "name": "create",
+            "line": 126,
+            "complexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 139,
+            "complexity": 1
+          },
+          {
+            "name": "count",
+            "line": 142,
+            "complexity": 3
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/CommandToken.ts",
+        "physicalLines": 5,
+        "codeLines": 4,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/CommandTokenizer.ts",
+        "physicalLines": 46,
+        "codeLines": 45,
+        "functionCount": 2,
+        "functionComplexity": 16,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "tokenize",
+            "line": 4,
+            "complexity": 14
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 2
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/NodeFormatter.ts",
+        "physicalLines": 60,
+        "codeLines": 54,
+        "functionCount": 10,
+        "functionComplexity": 25,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "reference",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "tree",
+            "line": 9,
+            "complexity": 6
+          },
+          {
+            "name": "show",
+            "line": 28,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 30,
+            "complexity": 1
+          },
+          {
+            "name": "summary",
+            "line": 37,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1
+          },
+          {
+            "name": "otherAttributes",
+            "line": 52,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 4
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/ResultFormatter.ts",
+        "physicalLines": 42,
+        "codeLines": 40,
+        "functionCount": 3,
+        "functionComplexity": 30,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "format",
+            "line": 7,
+            "complexity": 28
+          },
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 36,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/SvgCli.ts",
+        "physicalLines": 61,
+        "codeLines": 53,
+        "functionCount": 4,
+        "functionComplexity": 10,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "run",
+            "line": 18,
+            "complexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1
+          },
+          {
+            "name": "writeError",
+            "line": 58,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/cli/main.ts",
+        "physicalLines": 19,
+        "codeLines": 17,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/domain/ChangeSet.ts",
+        "physicalLines": 47,
+        "codeLines": 40,
+        "functionCount": 8,
+        "functionComplexity": 16,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "combine",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "apply",
+            "line": 20,
+            "complexity": 5
+          },
+          {
+            "name": "revert",
+            "line": 34,
+            "complexity": 5
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/CircleShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/EllipseShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/GeometryState.ts",
+        "physicalLines": 67,
+        "codeLines": 57,
+        "functionCount": 16,
+        "functionComplexity": 31,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 2
+          },
+          {
+            "name": "snapshot",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "has",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "value",
+            "line": 23,
+            "complexity": 3
+          },
+          {
+            "name": "position",
+            "line": 29,
+            "complexity": 3
+          },
+          {
+            "name": "planMove",
+            "line": 34,
+            "complexity": 5
+          },
+          {
+            "name": "planScale",
+            "line": 42,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1
+          },
+          {
+            "name": "planSet",
+            "line": 47,
+            "complexity": 1
+          },
+          {
+            "name": "validate",
+            "line": 52,
+            "complexity": 5
+          },
+          {
+            "name": "change",
+            "line": 59,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/LineShape.ts",
+        "physicalLines": 15,
+        "codeLines": 12,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "describeGeometry",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/RectShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SceneEditor.ts",
+        "physicalLines": 120,
+        "codeLines": 109,
+        "functionCount": 20,
+        "functionComplexity": 48,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "planGroup",
+            "line": 16,
+            "complexity": 8
+          },
+          {
+            "name": "(anonymous)",
+            "line": 20,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 38,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 1
+          },
+          {
+            "name": "planUngroup",
+            "line": 63,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 79,
+            "complexity": 2
+          },
+          {
+            "name": "planAddTo",
+            "line": 87,
+            "complexity": 2
+          },
+          {
+            "name": "planFront",
+            "line": 94,
+            "complexity": 1
+          },
+          {
+            "name": "planBack",
+            "line": 95,
+            "complexity": 1
+          },
+          {
+            "name": "planOrder",
+            "line": 97,
+            "complexity": 3
+          },
+          {
+            "name": "children",
+            "line": 103,
+            "complexity": 2
+          },
+          {
+            "name": "transfer",
+            "line": 106,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 109,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 114,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/ShapeFactory.ts",
+        "physicalLines": 75,
+        "codeLines": 67,
+        "functionCount": 11,
+        "functionComplexity": 30,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 21,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 24,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 30,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 33,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 1
+          },
+          {
+            "name": "create",
+            "line": 38,
+            "complexity": 4
+          },
+          {
+            "name": "fromAttributes",
+            "line": 48,
+            "complexity": 9
+          },
+          {
+            "name": "(anonymous)",
+            "line": 56,
+            "complexity": 2
+          },
+          {
+            "name": "definition",
+            "line": 66,
+            "complexity": 2
+          },
+          {
+            "name": "number",
+            "line": 72,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SvgAttributes.ts",
+        "physicalLines": 17,
+        "codeLines": 12,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SvgDocument.ts",
+        "physicalLines": 240,
+        "codeLines": 215,
+        "functionCount": 24,
+        "functionComplexity": 105,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 13,
+            "complexity": 5
+          },
+          {
+            "name": "width",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "height",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "size",
+            "line": 23,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 24,
+            "complexity": 1
+          },
+          {
+            "name": "resize",
+            "line": 26,
+            "complexity": 5
+          },
+          {
+            "name": "requireContainer",
+            "line": 34,
+            "complexity": 3
+          },
+          {
+            "name": "findById",
+            "line": 41,
+            "complexity": 1
+          },
+          {
+            "name": "requireById",
+            "line": 45,
+            "complexity": 2
+          },
+          {
+            "name": "append",
+            "line": 53,
+            "complexity": 2
+          },
+          {
+            "name": "insert",
+            "line": 58,
+            "complexity": 23
+          },
+          {
+            "name": "planRelocate",
+            "line": 114,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 118,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 122,
+            "complexity": 1
+          },
+          {
+            "name": "validateRelocation",
+            "line": 129,
+            "complexity": 20
+          },
+          {
+            "name": "assertLocation",
+            "line": 150,
+            "complexity": 5
+          },
+          {
+            "name": "relocate",
+            "line": 156,
+            "complexity": 4
+          },
+          {
+            "name": "planDelete",
+            "line": 166,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 171,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 178,
+            "complexity": 1
+          },
+          {
+            "name": "remove",
+            "line": 183,
+            "complexity": 7
+          },
+          {
+            "name": "[Symbol.iterator]",
+            "line": 207,
+            "complexity": 2
+          },
+          {
+            "name": "verifyInvariants",
+            "line": 214,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 217,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SvgGroup.ts",
+        "physicalLines": 41,
+        "codeLines": 29,
+        "functionCount": 10,
+        "functionComplexity": 10,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "getGeometry",
+            "line": 20,
+            "complexity": 1
+          },
+          {
+            "name": "buildMove",
+            "line": 24,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1
+          },
+          {
+            "name": "buildScale",
+            "line": 28,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1
+          },
+          {
+            "name": "[insertGroupChild]",
+            "line": 33,
+            "complexity": 1
+          },
+          {
+            "name": "[removeGroupChild]",
+            "line": 38,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SvgNode.ts",
+        "physicalLines": 138,
+        "codeLines": 116,
+        "functionCount": 26,
+        "functionComplexity": 41,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 17,
+            "complexity": 5
+          },
+          {
+            "name": "id",
+            "line": 35,
+            "complexity": 1
+          },
+          {
+            "name": "parent",
+            "line": 36,
+            "complexity": 1
+          },
+          {
+            "name": "document",
+            "line": 37,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 40,
+            "complexity": 1
+          },
+          {
+            "name": "getGeometry",
+            "line": 44,
+            "complexity": 1
+          },
+          {
+            "name": "getPosition",
+            "line": 45,
+            "complexity": 1
+          },
+          {
+            "name": "planMove",
+            "line": 47,
+            "complexity": 1
+          },
+          {
+            "name": "move",
+            "line": 52,
+            "complexity": 1
+          },
+          {
+            "name": "planScale",
+            "line": 56,
+            "complexity": 2
+          },
+          {
+            "name": "scale",
+            "line": 62,
+            "complexity": 1
+          },
+          {
+            "name": "planSetAttribute",
+            "line": 66,
+            "complexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 70,
+            "complexity": 1
+          },
+          {
+            "name": "setAttribute",
+            "line": 75,
+            "complexity": 1
+          },
+          {
+            "name": "buildMove",
+            "line": 79,
+            "complexity": 1
+          },
+          {
+            "name": "buildScale",
+            "line": 80,
+            "complexity": 1
+          },
+          {
+            "name": "buildAttributeChange",
+            "line": 81,
+            "complexity": 1
+          },
+          {
+            "name": "geometryValue",
+            "line": 82,
+            "complexity": 1
+          },
+          {
+            "name": "writeStyle",
+            "line": 84,
+            "complexity": 2
+          },
+          {
+            "name": "describeGeometry",
+            "line": 94,
+            "complexity": 1
+          },
+          {
+            "name": "getAttributes",
+            "line": 98,
+            "complexity": 1
+          },
+          {
+            "name": "[Symbol.iterator]",
+            "line": 103,
+            "complexity": 4
+          },
+          {
+            "name": "finite",
+            "line": 118,
+            "complexity": 2
+          },
+          {
+            "name": "nonNegative",
+            "line": 125,
+            "complexity": 2
+          },
+          {
+            "name": "[setNodeLocation]",
+            "line": 134,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/SvgNumber.ts",
+        "physicalLines": 10,
+        "codeLines": 9,
+        "functionCount": 1,
+        "functionComplexity": 4,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "parse",
+            "line": 3,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/TextShape.ts",
+        "physicalLines": 29,
+        "codeLines": 23,
+        "functionCount": 7,
+        "functionComplexity": 8,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "getAttributes",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "describeGeometry",
+            "line": 20,
+            "complexity": 1
+          },
+          {
+            "name": "buildAttributeChange",
+            "line": 24,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/domain/internal/TreeAccess.ts",
+        "physicalLines": 8,
+        "codeLines": 3,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/infrastructure/svg/AtomicFileWriter.ts",
+        "physicalLines": 38,
+        "codeLines": 33,
+        "functionCount": 2,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "write",
+            "line": 14,
+            "complexity": 5
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/infrastructure/svg/SvgFileStore.ts",
+        "physicalLines": 37,
+        "codeLines": 33,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "read",
+            "line": 16,
+            "complexity": 3
+          },
+          {
+            "name": "save",
+            "line": 33,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/infrastructure/svg/SvgReader.ts",
+        "physicalLines": 131,
+        "codeLines": 122,
+        "functionCount": 15,
+        "functionComplexity": 58,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 18,
+            "complexity": 1
+          },
+          {
+            "name": "parse",
+            "line": 20,
+            "complexity": 3
+          },
+          {
+            "name": "parseInput",
+            "line": 30,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 35,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 49,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 56,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 57,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1
+          },
+          {
+            "name": "buildCandidate",
+            "line": 67,
+            "complexity": 14
+          },
+          {
+            "name": "attributes",
+            "line": 99,
+            "complexity": 4
+          },
+          {
+            "name": "canvas",
+            "line": 109,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 119,
+            "complexity": 1
+          },
+          {
+            "name": "dimension",
+            "line": 127,
+            "complexity": 2
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/infrastructure/svg/SvgWriter.ts",
+        "physicalLines": 63,
+        "codeLines": 57,
+        "functionCount": 5,
+        "functionComplexity": 31,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "serialize",
+            "line": 6,
+            "complexity": 9
+          },
+          {
+            "name": "close",
+            "line": 36,
+            "complexity": 2
+          },
+          {
+            "name": "name",
+            "line": 41,
+            "complexity": 2
+          },
+          {
+            "name": "escape",
+            "line": 46,
+            "complexity": 12
+          },
+          {
+            "name": "(anonymous)",
+            "line": 57,
+            "complexity": 6
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      }
+    ]
+  },
+  "current": {
+    "revision": "HEAD",
+    "sha": "4a4ed731bc162ac5afceae942e7d423088ad41d2",
+    "totals": {
+      "core": {
+        "fileCount": 34,
+        "physicalLines": 1466,
+        "codeLines": 1283,
+        "functionCount": 201,
+        "functionComplexity": 462,
+        "topLevelDecisions": 0
+      },
+      "host": {
+        "fileCount": 11,
+        "physicalLines": 555,
+        "codeLines": 509,
+        "functionCount": 52,
+        "functionComplexity": 200,
+        "topLevelDecisions": 0
+      },
+      "plugins": {
+        "fileCount": 37,
+        "physicalLines": 797,
+        "codeLines": 725,
+        "functionCount": 130,
+        "functionComplexity": 214,
+        "topLevelDecisions": 0
+      },
+      "vscode": {
+        "fileCount": 6,
+        "physicalLines": 165,
+        "codeLines": 143,
+        "functionCount": 19,
+        "functionComplexity": 49,
+        "topLevelDecisions": 0
+      },
+      "cliTotal": {
+        "fileCount": 82,
+        "physicalLines": 2818,
+        "codeLines": 2517,
+        "functionCount": 383,
+        "functionComplexity": 876,
+        "topLevelDecisions": 0
+      }
+    },
+    "files": [
+      {
+        "file": "extensions/vscode-svg/src/ExtensionLifecycle.ts",
+        "physicalLines": 17,
+        "codeLines": 13,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "disposed",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "dispose",
+            "line": 12,
+            "complexity": 3
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "extensions/vscode-svg/src/SvgBadgePolicy.ts",
+        "physicalLines": 16,
+        "codeLines": 13,
+        "functionCount": 1,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "provide",
+            "line": 6,
+            "complexity": 6
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "extensions/vscode-svg/src/SvgDocumentSymbolProvider.ts",
+        "physicalLines": 29,
+        "codeLines": 26,
+        "functionCount": 2,
+        "functionComplexity": 11,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "provideDocumentSymbols",
+            "line": 8,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "extensions/vscode-svg/src/SvgFileDecorationProvider.ts",
+        "physicalLines": 36,
+        "codeLines": 31,
+        "functionCount": 5,
+        "functionComplexity": 12,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 3
+          },
+          {
+            "name": "provideFileDecoration",
+            "line": 20,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 2
+          },
+          {
+            "name": "dispose",
+            "line": 29,
+            "complexity": 3
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "extensions/vscode-svg/src/SvgOutlineParser.ts",
+        "physicalLines": 52,
+        "codeLines": 47,
+        "functionCount": 7,
+        "functionComplexity": 14,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "parse",
+            "line": 21,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 31,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 34,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 42,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 43,
+            "complexity": 1
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "extensions/vscode-svg/src/extension.ts",
+        "physicalLines": 15,
+        "codeLines": 13,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "activate",
+            "line": 7,
+            "complexity": 1
+          }
+        ],
+        "category": "vscode",
+        "responsibility": "independent VSCode extension"
+      },
+      {
+        "file": "plugins/builtin-commands/src/AddToCommand.ts",
+        "physicalLines": 17,
+        "codeLines": 16,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/BackCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/BuiltinCommandCatalog.ts",
+        "physicalLines": 138,
+        "codeLines": 131,
+        "functionCount": 25,
+        "functionComplexity": 55,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 38,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 50,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 67,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 71,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 79,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 82,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 85,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 88,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 91,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 94,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 97,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 100,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 103,
+            "complexity": 1
+          },
+          {
+            "name": "register",
+            "line": 113,
+            "complexity": 2
+          },
+          {
+            "name": "create",
+            "line": 119,
+            "complexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 132,
+            "complexity": 1
+          },
+          {
+            "name": "count",
+            "line": 135,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/BuiltinCommandDefinition.ts",
+        "physicalLines": 11,
+        "codeLines": 10,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 4,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/BuiltinCommandsPlugin.ts",
+        "physicalLines": 8,
+        "codeLines": 7,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "activate",
+            "line": 5,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/CanvasCommand.ts",
+        "physicalLines": 26,
+        "codeLines": 22,
+        "functionCount": 3,
+        "functionComplexity": 7,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 2
+          },
+          {
+            "name": "kind",
+            "line": 14,
+            "complexity": 2
+          },
+          {
+            "name": "execute",
+            "line": 16,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/CreateCommand.ts",
+        "physicalLines": 83,
+        "codeLines": 75,
+        "functionCount": 11,
+        "functionComplexity": 20,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 33,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 42,
+            "complexity": 1
+          },
+          {
+            "name": "undo",
+            "line": 48,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 53,
+            "complexity": 1
+          },
+          {
+            "name": "redo",
+            "line": 61,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 68,
+            "complexity": 4
+          },
+          {
+            "name": "createdResult",
+            "line": 76,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/DeleteCommand.ts",
+        "physicalLines": 17,
+        "codeLines": 16,
+        "functionCount": 3,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 11,
+            "complexity": 4
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/FrontCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/GroupCommand.ts",
+        "physicalLines": 52,
+        "codeLines": 50,
+        "functionCount": 9,
+        "functionComplexity": 15,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 19,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 23,
+            "complexity": 1
+          },
+          {
+            "name": "undo",
+            "line": 27,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1
+          },
+          {
+            "name": "redo",
+            "line": 35,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 40,
+            "complexity": 6
+          },
+          {
+            "name": "grouped",
+            "line": 49,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/HelpCommand.ts",
+        "physicalLines": 15,
+        "codeLines": 14,
+        "functionCount": 4,
+        "functionComplexity": 4,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/InitCommand.ts",
+        "physicalLines": 22,
+        "codeLines": 19,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 16,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/MoveCommand.ts",
+        "physicalLines": 19,
+        "codeLines": 18,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 15,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/ReadCommand.ts",
+        "physicalLines": 19,
+        "codeLines": 17,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 11,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/RedoCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 12,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/SaveCommand.ts",
+        "physicalLines": 26,
+        "codeLines": 24,
+        "functionCount": 2,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 15,
+            "complexity": 4
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/ScaleCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 13,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 11,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/SetAttributeCommand.ts",
+        "physicalLines": 25,
+        "codeLines": 24,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 15,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 20,
+            "complexity": 3
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/ShowCommand.ts",
+        "physicalLines": 12,
+        "codeLines": 11,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 9,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/TreeCommand.ts",
+        "physicalLines": 12,
+        "codeLines": 11,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "kind",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 9,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/UndoCommand.ts",
+        "physicalLines": 14,
+        "codeLines": 12,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/UngroupCommand.ts",
+        "physicalLines": 18,
+        "codeLines": 17,
+        "functionCount": 3,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "result",
+            "line": 12,
+            "complexity": 4
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-commands/src/public.ts",
+        "physicalLines": 23,
+        "codeLines": 23,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/BaseShapeProvider.ts",
+        "physicalLines": 33,
+        "codeLines": 31,
+        "functionCount": 5,
+        "functionComplexity": 18,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "create",
+            "line": 13,
+            "complexity": 4
+          },
+          {
+            "name": "fromAttributes",
+            "line": 17,
+            "complexity": 9
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 2
+          },
+          {
+            "name": "number",
+            "line": 31,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/BuiltinShapesPlugin.ts",
+        "physicalLines": 13,
+        "codeLines": 12,
+        "functionCount": 1,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "activate",
+            "line": 10,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/CircleProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/CircleShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/EllipseProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/EllipseShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/GroupProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/LineProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/LineShape.ts",
+        "physicalLines": 15,
+        "codeLines": 12,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "describeGeometry",
+            "line": 12,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/RectProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/RectShape.ts",
+        "physicalLines": 12,
+        "codeLines": 9,
+        "functionCount": 2,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/TextProvider.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "build",
+            "line": 6,
+            "complexity": 2
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/TextShape.ts",
+        "physicalLines": 29,
+        "codeLines": 23,
+        "functionCount": 7,
+        "functionComplexity": 8,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "getAttributes",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "describeGeometry",
+            "line": 20,
+            "complexity": 1
+          },
+          {
+            "name": "buildAttributeChange",
+            "line": 24,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 27,
+            "complexity": 1
+          }
+        ],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "plugins/builtin-shapes/src/public.ts",
+        "physicalLines": 14,
+        "codeLines": 14,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "plugins",
+        "responsibility": "registered feature implementations"
+      },
+      {
+        "file": "src/core/application/AttributeService.ts",
+        "physicalLines": 41,
+        "codeLines": 39,
+        "functionCount": 8,
+        "functionComplexity": 15,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "plan",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "resolve",
+            "line": 15,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 18,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 2
+          },
+          {
+            "name": "feedback",
+            "line": 39,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/CommandExecutor.ts",
+        "physicalLines": 23,
+        "codeLines": 20,
+        "functionCount": 2,
+        "functionComplexity": 9,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 8,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 10,
+            "complexity": 8
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/CommandHistory.ts",
+        "physicalLines": 57,
+        "codeLines": 47,
+        "functionCount": 7,
+        "functionComplexity": 11,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 7,
+            "complexity": 1
+          },
+          {
+            "name": "status",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "recordExecuted",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "barrier",
+            "line": 25,
+            "complexity": 2
+          },
+          {
+            "name": "undo",
+            "line": 32,
+            "complexity": 2
+          },
+          {
+            "name": "redo",
+            "line": 43,
+            "complexity": 2
+          },
+          {
+            "name": "checkAllowed",
+            "line": 54,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/CommandResult.ts",
+        "physicalLines": 31,
+        "codeLines": 27,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/CommandResults.ts",
+        "physicalLines": 8,
+        "codeLines": 7,
+        "functionCount": 1,
+        "functionComplexity": 2,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "validate",
+            "line": 5,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/EditTransaction.ts",
+        "physicalLines": 37,
+        "codeLines": 35,
+        "functionCount": 11,
+        "functionComplexity": 14,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "edits",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "view",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "read",
+            "line": 18,
+            "complexity": 1
+          },
+          {
+            "name": "setAttribute",
+            "line": 19,
+            "complexity": 1
+          },
+          {
+            "name": "commit",
+            "line": 25,
+            "complexity": 1
+          },
+          {
+            "name": "rollback",
+            "line": 31,
+            "complexity": 3
+          },
+          {
+            "name": "check",
+            "line": 36,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/EditorSession.ts",
+        "physicalLines": 51,
+        "codeLines": 44,
+        "functionCount": 10,
+        "functionComplexity": 13,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "constructor",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "shapes",
+            "line": 18,
+            "complexity": 1
+          },
+          {
+            "name": "attributes",
+            "line": 19,
+            "complexity": 1
+          },
+          {
+            "name": "decorators",
+            "line": 20,
+            "complexity": 1
+          },
+          {
+            "name": "sourcePath",
+            "line": 24,
+            "complexity": 1
+          },
+          {
+            "name": "snapshot",
+            "line": 26,
+            "complexity": 2
+          },
+          {
+            "name": "initialize",
+            "line": 31,
+            "complexity": 1
+          },
+          {
+            "name": "load",
+            "line": 38,
+            "complexity": 2
+          },
+          {
+            "name": "requireDocument",
+            "line": 45,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/OutputLines.ts",
+        "physicalLines": 7,
+        "codeLines": 6,
+        "functionCount": 2,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "copy",
+            "line": 3,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 4,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/SceneQuery.ts",
+        "physicalLines": 68,
+        "codeLines": 63,
+        "functionCount": 10,
+        "functionComplexity": 27,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "suffixes",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 11,
+            "complexity": 5
+          },
+          {
+            "name": "show",
+            "line": 18,
+            "complexity": 1
+          },
+          {
+            "name": "scene",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 24,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 25,
+            "complexity": 1
+          },
+          {
+            "name": "tree",
+            "line": 29,
+            "complexity": 11
+          },
+          {
+            "name": "snapshot",
+            "line": 54,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/SceneSnapshot.ts",
+        "physicalLines": 42,
+        "codeLines": 36,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/SessionEvents.ts",
+        "physicalLines": 31,
+        "codeLines": 27,
+        "functionCount": 7,
+        "functionComplexity": 11,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "diagnostics",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "subscribe",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 15,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "publish",
+            "line": 19,
+            "complexity": 4
+          },
+          {
+            "name": "report",
+            "line": 28,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/ShapeFactory.ts",
+        "physicalLines": 54,
+        "codeLines": 52,
+        "functionCount": 9,
+        "functionComplexity": 27,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "create",
+            "line": 11,
+            "complexity": 1
+          },
+          {
+            "name": "fromAttributes",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "help",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "restore",
+            "line": 19,
+            "complexity": 12
+          },
+          {
+            "name": "creationFeedback",
+            "line": 41,
+            "complexity": 2
+          },
+          {
+            "name": "provider",
+            "line": 45,
+            "complexity": 2
+          },
+          {
+            "name": "validate",
+            "line": 50,
+            "complexity": 6
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/commands/Command.ts",
+        "physicalLines": 16,
+        "codeLines": 14,
+        "functionCount": 1,
+        "functionComplexity": 4,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "isReversibleCommand",
+            "line": 14,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/commands/EditCommand.ts",
+        "physicalLines": 10,
+        "codeLines": 8,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "kind",
+            "line": 6,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/commands/NodeEditCommand.ts",
+        "physicalLines": 63,
+        "codeLines": 54,
+        "functionCount": 9,
+        "functionComplexity": 17,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "execute",
+            "line": 24,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 29,
+            "complexity": 1
+          },
+          {
+            "name": "undo",
+            "line": 35,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 37,
+            "complexity": 1
+          },
+          {
+            "name": "redo",
+            "line": 42,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1
+          },
+          {
+            "name": "reference",
+            "line": 51,
+            "complexity": 1
+          },
+          {
+            "name": "activeRecord",
+            "line": 53,
+            "complexity": 8
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/ports/ShapeConstructionPort.ts",
+        "physicalLines": 6,
+        "codeLines": 4,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/ports/SvgReadPort.ts",
+        "physicalLines": 15,
+        "codeLines": 11,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/application/ports/SvgSavePort.ts",
+        "physicalLines": 6,
+        "codeLines": 4,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/ChangeSet.ts",
+        "physicalLines": 65,
+        "codeLines": 54,
+        "functionCount": 12,
+        "functionComplexity": 23,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 13,
+            "complexity": 1
+          },
+          {
+            "name": "combine",
+            "line": 16,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "fromApplied",
+            "line": 21,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "applyChecked",
+            "line": 28,
+            "complexity": 2
+          },
+          {
+            "name": "revertChecked",
+            "line": 33,
+            "complexity": 2
+          },
+          {
+            "name": "apply",
+            "line": 38,
+            "complexity": 5
+          },
+          {
+            "name": "revert",
+            "line": 52,
+            "complexity": 5
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/GeometryState.ts",
+        "physicalLines": 67,
+        "codeLines": 57,
+        "functionCount": 16,
+        "functionComplexity": 31,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 2
+          },
+          {
+            "name": "snapshot",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "has",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "value",
+            "line": 23,
+            "complexity": 3
+          },
+          {
+            "name": "position",
+            "line": 29,
+            "complexity": 3
+          },
+          {
+            "name": "planMove",
+            "line": 34,
+            "complexity": 5
+          },
+          {
+            "name": "planScale",
+            "line": 42,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 44,
+            "complexity": 1
+          },
+          {
+            "name": "planSet",
+            "line": 47,
+            "complexity": 1
+          },
+          {
+            "name": "validate",
+            "line": 52,
+            "complexity": 5
+          },
+          {
+            "name": "change",
+            "line": 59,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 61,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 64,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SceneEditor.ts",
+        "physicalLines": 122,
+        "codeLines": 111,
+        "functionCount": 20,
+        "functionComplexity": 50,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "planGroup",
+            "line": 16,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 20,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 38,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 39,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 45,
+            "complexity": 6
+          },
+          {
+            "name": "(anonymous)",
+            "line": 54,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 60,
+            "complexity": 1
+          },
+          {
+            "name": "planUngroup",
+            "line": 64,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 75,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 77,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 81,
+            "complexity": 2
+          },
+          {
+            "name": "planAddTo",
+            "line": 89,
+            "complexity": 2
+          },
+          {
+            "name": "planFront",
+            "line": 96,
+            "complexity": 1
+          },
+          {
+            "name": "planBack",
+            "line": 97,
+            "complexity": 1
+          },
+          {
+            "name": "planOrder",
+            "line": 99,
+            "complexity": 3
+          },
+          {
+            "name": "children",
+            "line": 105,
+            "complexity": 2
+          },
+          {
+            "name": "transfer",
+            "line": 108,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 111,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 116,
+            "complexity": 2
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SubtreeBuilder.ts",
+        "physicalLines": 9,
+        "codeLines": 8,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "assemble",
+            "line": 5,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgAttributes.ts",
+        "physicalLines": 17,
+        "codeLines": 12,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgDocument.ts",
+        "physicalLines": 248,
+        "codeLines": 223,
+        "functionCount": 24,
+        "functionComplexity": 110,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 13,
+            "complexity": 5
+          },
+          {
+            "name": "width",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "height",
+            "line": 22,
+            "complexity": 1
+          },
+          {
+            "name": "size",
+            "line": 23,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 24,
+            "complexity": 1
+          },
+          {
+            "name": "resize",
+            "line": 26,
+            "complexity": 5
+          },
+          {
+            "name": "requireContainer",
+            "line": 34,
+            "complexity": 3
+          },
+          {
+            "name": "findById",
+            "line": 41,
+            "complexity": 1
+          },
+          {
+            "name": "requireById",
+            "line": 45,
+            "complexity": 2
+          },
+          {
+            "name": "append",
+            "line": 53,
+            "complexity": 2
+          },
+          {
+            "name": "insert",
+            "line": 58,
+            "complexity": 25
+          },
+          {
+            "name": "planRelocate",
+            "line": 116,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 120,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 124,
+            "complexity": 1
+          },
+          {
+            "name": "validateRelocation",
+            "line": 131,
+            "complexity": 21
+          },
+          {
+            "name": "assertLocation",
+            "line": 156,
+            "complexity": 5
+          },
+          {
+            "name": "relocate",
+            "line": 162,
+            "complexity": 4
+          },
+          {
+            "name": "planDelete",
+            "line": 172,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 177,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 184,
+            "complexity": 1
+          },
+          {
+            "name": "remove",
+            "line": 189,
+            "complexity": 8
+          },
+          {
+            "name": "[Symbol.iterator]",
+            "line": 214,
+            "complexity": 2
+          },
+          {
+            "name": "verifyInvariants",
+            "line": 221,
+            "complexity": 11
+          },
+          {
+            "name": "(anonymous)",
+            "line": 224,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgElementDescription.ts",
+        "physicalLines": 6,
+        "codeLines": 5,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgGroup.ts",
+        "physicalLines": 71,
+        "codeLines": 55,
+        "functionCount": 16,
+        "functionComplexity": 31,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "type",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "isContainer",
+            "line": 15,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 17,
+            "complexity": 1
+          },
+          {
+            "name": "getGeometry",
+            "line": 21,
+            "complexity": 1
+          },
+          {
+            "name": "assertCanAccept",
+            "line": 26,
+            "complexity": 1
+          },
+          {
+            "name": "assertCanRelease",
+            "line": 27,
+            "complexity": 1
+          },
+          {
+            "name": "assertCanUngroup",
+            "line": 28,
+            "complexity": 1
+          },
+          {
+            "name": "verifyStructure",
+            "line": 29,
+            "complexity": 1
+          },
+          {
+            "name": "initializeChildren",
+            "line": 32,
+            "complexity": 16
+          },
+          {
+            "name": "buildMove",
+            "line": 54,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 1
+          },
+          {
+            "name": "buildScale",
+            "line": 58,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 1
+          },
+          {
+            "name": "[insertGroupChild]",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "[removeGroupChild]",
+            "line": 68,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgNode.ts",
+        "physicalLines": 146,
+        "codeLines": 123,
+        "functionCount": 29,
+        "functionComplexity": 45,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 18,
+            "complexity": 5
+          },
+          {
+            "name": "id",
+            "line": 36,
+            "complexity": 1
+          },
+          {
+            "name": "parent",
+            "line": 37,
+            "complexity": 1
+          },
+          {
+            "name": "document",
+            "line": 38,
+            "complexity": 1
+          },
+          {
+            "name": "displayType",
+            "line": 40,
+            "complexity": 1
+          },
+          {
+            "name": "isContainer",
+            "line": 41,
+            "complexity": 1
+          },
+          {
+            "name": "children",
+            "line": 43,
+            "complexity": 1
+          },
+          {
+            "name": "getGeometry",
+            "line": 47,
+            "complexity": 1
+          },
+          {
+            "name": "getPosition",
+            "line": 48,
+            "complexity": 1
+          },
+          {
+            "name": "planMove",
+            "line": 50,
+            "complexity": 1
+          },
+          {
+            "name": "move",
+            "line": 55,
+            "complexity": 1
+          },
+          {
+            "name": "planScale",
+            "line": 59,
+            "complexity": 2
+          },
+          {
+            "name": "scale",
+            "line": 65,
+            "complexity": 1
+          },
+          {
+            "name": "planSetAttribute",
+            "line": 69,
+            "complexity": 5
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 73,
+            "complexity": 1
+          },
+          {
+            "name": "setAttribute",
+            "line": 78,
+            "complexity": 1
+          },
+          {
+            "name": "buildMove",
+            "line": 82,
+            "complexity": 1
+          },
+          {
+            "name": "buildScale",
+            "line": 83,
+            "complexity": 1
+          },
+          {
+            "name": "buildAttributeChange",
+            "line": 84,
+            "complexity": 1
+          },
+          {
+            "name": "geometryValue",
+            "line": 85,
+            "complexity": 1
+          },
+          {
+            "name": "writeStyle",
+            "line": 87,
+            "complexity": 2
+          },
+          {
+            "name": "describeGeometry",
+            "line": 97,
+            "complexity": 1
+          },
+          {
+            "name": "getAttributes",
+            "line": 101,
+            "complexity": 1
+          },
+          {
+            "name": "describeSvg",
+            "line": 105,
+            "complexity": 2
+          },
+          {
+            "name": "[Symbol.iterator]",
+            "line": 111,
+            "complexity": 4
+          },
+          {
+            "name": "finite",
+            "line": 126,
+            "complexity": 2
+          },
+          {
+            "name": "nonNegative",
+            "line": 133,
+            "complexity": 2
+          },
+          {
+            "name": "[setNodeLocation]",
+            "line": 142,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/SvgNumber.ts",
+        "physicalLines": 10,
+        "codeLines": 9,
+        "functionCount": 1,
+        "functionComplexity": 4,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "parse",
+            "line": 3,
+            "complexity": 4
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/domain/internal/TreeAccess.ts",
+        "physicalLines": 8,
+        "codeLines": 3,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/extensions/CommandToken.ts",
+        "physicalLines": 5,
+        "codeLines": 4,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/extensions/Contracts.ts",
+        "physicalLines": 53,
+        "codeLines": 50,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/extensions/ExtensionRegistry.ts",
+        "physicalLines": 16,
+        "codeLines": 15,
+        "functionCount": 4,
+        "functionComplexity": 11,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 4,
+            "complexity": 1
+          },
+          {
+            "name": "register",
+            "line": 5,
+            "complexity": 8
+          },
+          {
+            "name": "get",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "values",
+            "line": 15,
+            "complexity": 1
+          }
+        ],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/extensions/PluginContext.ts",
+        "physicalLines": 25,
+        "codeLines": 24,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/core/public.ts",
+        "physicalLines": 32,
+        "codeLines": 32,
+        "functionCount": 0,
+        "functionComplexity": 0,
+        "topLevelDecisions": 0,
+        "functions": [],
+        "category": "core",
+        "responsibility": "domain, application, extension contracts"
+      },
+      {
+        "file": "src/host/cli/CommandDispatcher.ts",
+        "physicalLines": 16,
+        "codeLines": 15,
+        "functionCount": 2,
+        "functionComplexity": 7,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 6,
+            "complexity": 1
+          },
+          {
+            "name": "parse",
+            "line": 7,
+            "complexity": 6
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/cli/CommandTokenizer.ts",
+        "physicalLines": 46,
+        "codeLines": 45,
+        "functionCount": 2,
+        "functionComplexity": 16,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "tokenize",
+            "line": 4,
+            "complexity": 14
+          },
+          {
+            "name": "(anonymous)",
+            "line": 12,
+            "complexity": 2
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/cli/NodeFormatter.ts",
+        "physicalLines": 61,
+        "codeLines": 55,
+        "functionCount": 11,
+        "functionComplexity": 26,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "reference",
+            "line": 5,
+            "complexity": 1
+          },
+          {
+            "name": "tree",
+            "line": 9,
+            "complexity": 6
+          },
+          {
+            "name": "show",
+            "line": 28,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 30,
+            "complexity": 1
+          },
+          {
+            "name": "summary",
+            "line": 37,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 46,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 48,
+            "complexity": 1
+          },
+          {
+            "name": "decorate",
+            "line": 51,
+            "complexity": 1
+          },
+          {
+            "name": "otherAttributes",
+            "line": 53,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 55,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 56,
+            "complexity": 4
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/cli/ResultFormatter.ts",
+        "physicalLines": 46,
+        "codeLines": 44,
+        "functionCount": 3,
+        "functionComplexity": 31,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "format",
+            "line": 8,
+            "complexity": 29
+          },
+          {
+            "name": "(anonymous)",
+            "line": 14,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 40,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/cli/SvgCli.ts",
+        "physicalLines": 61,
+        "codeLines": 53,
+        "functionCount": 4,
+        "functionComplexity": 10,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 9,
+            "complexity": 1
+          },
+          {
+            "name": "run",
+            "line": 18,
+            "complexity": 7
+          },
+          {
+            "name": "(anonymous)",
+            "line": 26,
+            "complexity": 1
+          },
+          {
+            "name": "writeError",
+            "line": 58,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/composition.ts",
+        "physicalLines": 30,
+        "codeLines": 27,
+        "functionCount": 3,
+        "functionComplexity": 3,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "createPluginContext",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "createDefaultContext",
+            "line": 19,
+            "complexity": 1
+          },
+          {
+            "name": "createCommandDispatcher",
+            "line": 26,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/main.ts",
+        "physicalLines": 13,
+        "codeLines": 12,
+        "functionCount": 1,
+        "functionComplexity": 1,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "(anonymous)",
+            "line": 10,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/svg/AtomicFileWriter.ts",
+        "physicalLines": 38,
+        "codeLines": 33,
+        "functionCount": 2,
+        "functionComplexity": 6,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 10,
+            "complexity": 1
+          },
+          {
+            "name": "write",
+            "line": 14,
+            "complexity": 5
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/svg/SvgFileStore.ts",
+        "physicalLines": 37,
+        "codeLines": 33,
+        "functionCount": 3,
+        "functionComplexity": 5,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 12,
+            "complexity": 1
+          },
+          {
+            "name": "read",
+            "line": 16,
+            "complexity": 3
+          },
+          {
+            "name": "save",
+            "line": 33,
+            "complexity": 1
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/svg/SvgReader.ts",
+        "physicalLines": 142,
+        "codeLines": 132,
+        "functionCount": 16,
+        "functionComplexity": 62,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "constructor",
+            "line": 19,
+            "complexity": 1
+          },
+          {
+            "name": "parse",
+            "line": 21,
+            "complexity": 3
+          },
+          {
+            "name": "parseInput",
+            "line": 31,
+            "complexity": 2
+          },
+          {
+            "name": "(anonymous)",
+            "line": 36,
+            "complexity": 14
+          },
+          {
+            "name": "(anonymous)",
+            "line": 50,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 51,
+            "complexity": 3
+          },
+          {
+            "name": "(anonymous)",
+            "line": 57,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 58,
+            "complexity": 1
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 4
+          },
+          {
+            "name": "(anonymous)",
+            "line": 63,
+            "complexity": 1
+          },
+          {
+            "name": "buildCandidate",
+            "line": 69,
+            "complexity": 12
+          },
+          {
+            "name": "(anonymous)",
+            "line": 97,
+            "complexity": 2
+          },
+          {
+            "name": "attributes",
+            "line": 110,
+            "complexity": 4
+          },
+          {
+            "name": "canvas",
+            "line": 120,
+            "complexity": 10
+          },
+          {
+            "name": "(anonymous)",
+            "line": 130,
+            "complexity": 1
+          },
+          {
+            "name": "dimension",
+            "line": 138,
+            "complexity": 2
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      },
+      {
+        "file": "src/host/svg/SvgWriter.ts",
+        "physicalLines": 65,
+        "codeLines": 60,
+        "functionCount": 5,
+        "functionComplexity": 33,
+        "topLevelDecisions": 0,
+        "functions": [
+          {
+            "name": "serialize",
+            "line": 6,
+            "complexity": 11
+          },
+          {
+            "name": "close",
+            "line": 38,
+            "complexity": 2
+          },
+          {
+            "name": "name",
+            "line": 43,
+            "complexity": 2
+          },
+          {
+            "name": "escape",
+            "line": 48,
+            "complexity": 12
+          },
+          {
+            "name": "(anonymous)",
+            "line": 59,
+            "complexity": 6
+          }
+        ],
+        "category": "host",
+        "responsibility": "CLI, composition, I/O adapters and loading"
+      }
+    ]
+  },
+  "delta": {
+    "core": {
+      "fileCount": -11,
+      "physicalLines": -83,
+      "codeLines": -57,
+      "functionCount": -13,
+      "functionComplexity": 17,
+      "topLevelDecisions": 0
+    },
+    "host": {
+      "fileCount": 0,
+      "physicalLines": -92,
+      "codeLines": -87,
+      "functionCount": -18,
+      "functionComplexity": -38,
+      "topLevelDecisions": 0
+    },
+    "plugins": {
+      "fileCount": 37,
+      "physicalLines": 797,
+      "codeLines": 725,
+      "functionCount": 130,
+      "functionComplexity": 214,
+      "topLevelDecisions": 0
+    },
+    "vscode": {
+      "fileCount": 6,
+      "physicalLines": 165,
+      "codeLines": 143,
+      "functionCount": 19,
+      "functionComplexity": 49,
+      "topLevelDecisions": 0
+    },
+    "cliTotal": {
+      "fileCount": 26,
+      "physicalLines": 622,
+      "codeLines": 581,
+      "functionCount": 99,
+      "functionComplexity": 193,
+      "topLevelDecisions": 0
+    }
+  },
+  "note": "Historical Git blobs only. Moving built-in commands/shapes into plugins redistributes categories; compare cliTotal too. VSCode is separate. This snapshot does not include uncommitted work."
+}

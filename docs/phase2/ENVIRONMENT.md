@@ -12,6 +12,8 @@
 
 ## 1. Git 基线：已核对正确
 
+P2-2c 更新：前置提交 4a4ed73，无新增依赖/锁文件变更；新增 metrics、verify:assemblies、verify:plugin-diff 脚本。Node 24.14.0 原生 ESM 解析/清单发现已实测，Windows 清单扩展路径需 native realpath。未知 workspace 的隔离构建/编译后加载、286项主测试和字节回放通过。PlantUML 1.2024.3 已实际渲染前后图；独立扩展8项单测通过，GUI/VSIX 本轮未重跑。首次指标只取 final→已提交4a4ed73，本轮冻结 SHA 随审阅提交确定。见 [P2-2c 记录](P2-2c_REPORT.md)。
+
 | 项目 | 实测结果 |
 |---|---|
 | 标签名/类型 | final / annotated tag（附注标签） |

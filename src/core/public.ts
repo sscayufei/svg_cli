@@ -11,6 +11,7 @@ export * from './application/commands/NodeEditCommand.js';
 export * from './application/ports/SvgReadPort.js';
 export * from './application/ports/SvgSavePort.js';
 export * from './application/ports/ShapeConstructionPort.js';
+export * from './application/ports/DirectoryPort.js';
 export * from './domain/ChangeSet.js';
 export * from './domain/GeometryState.js';
 export * from './domain/SceneEditor.js';

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    { "category": "core", "prefixes": ["src/core/", "src/domain/", "src/application/"], "responsibility": "domain, application, extension contracts" },
+    { "category": "host", "prefixes": ["src/host/", "src/cli/", "src/infrastructure/"], "responsibility": "CLI, composition, I/O adapters and loading" },
+    { "category": "plugins", "prefixes": ["plugins/"], "responsibility": "registered feature implementations" },
+    { "category": "vscode", "prefixes": ["extensions/vscode-svg/src/"], "responsibility": "independent VSCode extension" }
+  ],
+  "exclusions": ["test", "tests", "fixtures", "dist", "node_modules"],
+  "complexity": "Each function with body starts at 1; if, for/for-in/for-of, while, do, non-default case, catch, ternary, &&, ||, ?? and logical assignments add 1. Nested functions are separate. Top-level decisions start at 0. else, default, try and optional chaining add 0.",
+  "lines": "Normalize CRLF/CR to LF; final newline adds no physical line; code lines have non-whitespace tokens, excluding comments/trivia. AST literal ranges protect string, regex and template content during scanning."
+}

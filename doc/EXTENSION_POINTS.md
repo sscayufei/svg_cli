@@ -1,6 +1,6 @@
-# 扩展点清单（P2-2b）
+# 扩展点清单（P2-2c）
 
-更新日期：2026-11-17。本清单对应当前事务/复合模型/生命周期代码；P2-2c 的配置安装事务尚未完成，接口尚未冻结。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
+更新日期：2026-11-17。本清单覆盖当前事务/复合模型/生命周期及安装/加载框架；本地验收通过，冻结 SHA 待本轮审阅提交确定。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
 
 ## 接口、调用位置与缺省行为
 
@@ -13,7 +13,7 @@
 
 上表文件路径省略仓库前缀：core = src/core；host = src/host；插件 = plugins/包名/src。ShapeProvider 等的共同注册实现为 core/extensions/ExtensionRegistry.ts：register/get/values；每类独立名称空间，保留注册顺序。语法规则与错误在插件内定义，分发器不枚举十九个命令名；ShapeFactory 不枚举六种图形名。
 
-生产默认装配在 host/composition.ts：createDefaultContext。先注册 BuiltinShapesPlugin，再注册 BuiltinCommandsPlugin，最后 main 构造 REPL。createPluginContext 返回完全空的核心扩展上下文，不偷偷装默认实现。这里是临时代码装配路径；配置加载和 A/B 共用的失败回滚安装路径在 P2-2c 实现，不能把当前直接 activate 当成最终的安装契约。
+生产装配在 host/composition.ts：createApplication/createDefaultContext。默认 BuiltinShapesPlugin、BuiltinCommandsPlugin 及 A 可选列表均通过 PluginInstaller；B 经 PluginLoader 后也进入同一 installer。main/bootstrap 使用同一 REPL。createPluginContext 返回没有默认贡献的空注册上下文，另提供明确的目录/资源服务。
 
 ## 公共 API 与结果协议
 
@@ -51,6 +51,19 @@ NodeSnapshot 区分 semanticType/displayType/isContainer，空容器也有容器
 
 P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描述。正式设计依据见 [ADR 001](adr/001-attribute-transactions.md)、[ADR 002](adr/002-composite-restore.md)、[ADR 003](adr/003-lifecycle-and-labels.md)。真实业务插件的语义与接入证据仍按后续阶段验收。
 
-注册器当前验证名称、重复名和必需方法；manifest 集合匹配、options、激活事务与订阅回滚属于 P2-2c。没有实现 stats/dir/box/star，也没有宣称新增插件零核心修改证明或框架冻结。
+## 安装、加载与外部端口
+
+| 能力 | 公开契约与实际调用 | 缺省/错误 |
+|---|---|---|
+| 窄注册表 | ExtensionRegistrations；PluginContext 的四字段；StagedRegistry 暂存，ExtensionRegistry.registerBatch 提供宿主提交收据 | 名称/方法/help 校验，重复锁存；按完整类别回滚，不向插件上下文暴露恢复原语 |
+| 插件与清单 | Plugin.activate、PluginManifest；PluginInstaller.install、PluginManifestReader | 无参类或实例；同步 void；四贡献缺省空集合；不匹配/抛错清理当前插件 |
+| 作用域资源 | SessionEventSource.subscribe、ResourceOwner.add；PluginResources；应用退出 dispose | 提交前订阅休眠，失败释放，成功退出释放；清理异常独立诊断，无热卸载 |
+| A/B 入口 | composition.optionalPlugins / createApplication；PluginConfiguration.read/parse；PluginLoader.load | 显式配置替换 A 可选列表；错误仅启内置；顺序加载，disabled 不解析 |
+| 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
+| 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory | 未 init 可用；startup path、冻结直接条目、不跟随链接；失败 cannot read directory: path；排序/展示待 DirCommand |
+
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。没有实现真实 stats/dir/box/star，fixture 回放和差异测试不冒充业务接入提交。
 
 可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。两个插件包各有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
+
+P2-2c 增加 test/loading 的注册/清单/提交/订阅恢复与解析失败分类、NodeDirectoryAdapter 真实/替身测试、tools/framework-tools 的 A/B 原始输出/生成文件、未知 workspace 和真实 Git fixture 检查；架构扫描约束 loading/filesystem 不依赖具体插件。

@@ -3,7 +3,10 @@ import { resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+const toolRoot = fileURLToPath(new URL('../', import.meta.url));
+const rootArgument = process.argv.indexOf('--root');
+if (rootArgument !== -1 && !process.argv[rootArgument + 1]) throw new Error('--root requires a directory');
+const root = rootArgument === -1 ? toolRoot : resolve(process.argv[rootArgument + 1]);
 const manifest = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 const directories = manifest.workspaces.flatMap(pattern => pattern.endsWith('/*')
   ? readdirSync(resolve(root, pattern.slice(0, -2)), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => pattern.slice(0, -1) + entry.name)
@@ -35,4 +38,4 @@ function build(project) {
 }
 for (const project of projects.sort((a, b) => a.name.localeCompare(b.name))) build(project);
 clean('.');
-run([resolve(root, 'node_modules/typescript/bin/tsc'), '-p', 'tsconfig.json']);
+run([resolve(toolRoot, 'node_modules/typescript/bin/tsc'), '-p', 'tsconfig.json']);

@@ -1,7 +1,7 @@
 import { SvgDocument } from '../domain/SvgDocument.js';
 import { ShapeFactory } from './ShapeFactory.js';
 import { AttributeService } from './AttributeService.js';
-import { ExtensionRegistry } from '../extensions/ExtensionRegistry.js';
+import { ExtensionRegistry, type ExtensionRegistrations } from '../extensions/ExtensionRegistry.js';
 import type { TreeDecorator } from '../extensions/Contracts.js';
 import { SceneQuery } from './SceneQuery.js';
 import { SessionEvents } from './SessionEvents.js';
@@ -13,11 +13,11 @@ export class EditorSession {
   public constructor(
     private readonly shapeFactory = new ShapeFactory(),
     private readonly attributeService = new AttributeService(),
-    private readonly treeDecorators = new ExtensionRegistry<TreeDecorator>('decorators'),
+    private readonly treeDecorators: ExtensionRegistrations<TreeDecorator> = new ExtensionRegistry<TreeDecorator>('decorators'),
   ) {}
   public get shapes(): ShapeFactory { return this.shapeFactory; }
   public get attributes(): AttributeService { return this.attributeService; }
-  public get decorators(): ExtensionRegistry<TreeDecorator> { return this.treeDecorators; }
+  public get decorators(): ExtensionRegistrations<TreeDecorator> { return this.treeDecorators; }
   #document: SvgDocument | null = null;
   #sourcePath: string | null = null;
 
