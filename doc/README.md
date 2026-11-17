@@ -466,3 +466,11 @@ P2-1a 已提交为 5a5bcbf；P2-1b 已完成本地验收，待提交。扩展 0.
 完整安装/启动步骤、真实截图、接口/对象组合/调用关系、Decorator/Adapter 差异及 Phase 1 复用评估见 [VSCode 实践说明（A.3）](VSCODE_EXTENSION.md)。核心职责：VSCode 负责激活、视图渲染和导航；扩展注册类实例，由宿主回调并提供文件装饰与 DocumentSymbol。文件装饰没有包装同接口的文件 Component，不能仅凭名称等同于经典 Decorator；语法树到 DocumentSymbol 的转换体现 Adapter。大纲复用 saxes，独立保存源码偏移，不复用会补 ID/施加领域约束的 SvgReader/模型。
 
 证据：[大纲第 3 行定位](evidence/phase2/p2-1b-svg-outline-navigation.png)、[异常 XML](evidence/phase2/p2-1b-svg-outline-incomplete.png)、[恢复](evidence/phase2/p2-1b-svg-outline-recovered.png)、[已安装宿主检查](evidence/phase2/p2-1b-outline-checks.json)。SVG 需使用文本编辑关联，示例工作区已有配置；扩展不修改全局偏好。详见 [P2-1b 记录](../docs/phase2/P2-1b_REPORT.md)。
+
+### P2-2a：注册式内核与包边界
+
+第一部分已提交 c093c7f。本轮迁移为 src/core、src/host、plugins/builtin-shapes、plugins/builtin-commands；四扩展点位于 core，内置十九条命令/六种图形经类实例注册。帮助由注册元数据生成，命令分发器与形状服务不再枚举具体实现。domain 只依赖自身，插件只依赖 core public，host 仅在组合根导入具体插件。
+
+当前接口、调用位置、实现、缺省与契约错误见 [扩展点清单](EXTENSION_POINTS.md)。AttributeHandler 暂为纯 ChangeSet 计划契约，完整受控事务与复合结构保护在 P2-2b；配置安装回滚和首次指标在 P2-2c，尚未冻结框架。
+
+全工作区干净构建、测试源码类型检查通过；27文件/232项主测试、两个内置包各2项独立测试、扩展8项单测与真实宿主回归通过。三份 final 会话逐字节一致，见 [字节兼容摘要](evidence/phase2/p2-2a-baseline.json) 与 [P2-2a 记录](../docs/phase2/P2-2a_REPORT.md)。当前编译入口为 dist/host/main.js，首次安装后先构建本地包。本节点待审阅提交。

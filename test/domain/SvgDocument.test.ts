@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CircleShape } from '../../src/domain/CircleShape.js';
-import { RectShape } from '../../src/domain/RectShape.js';
-import { SvgDocument } from '../../src/domain/SvgDocument.js';
-import { SvgGroup } from '../../src/domain/SvgGroup.js';
+import { CircleShape } from '../../plugins/builtin-shapes/src/CircleShape.js';
+import { RectShape } from '../../plugins/builtin-shapes/src/RectShape.js';
+import { SvgDocument } from '@svgframe/core';
+import { SvgGroup } from '@svgframe/core';
 
 describe('SvgDocument aggregate and Composite structure', () => {
   const createScene = () => {

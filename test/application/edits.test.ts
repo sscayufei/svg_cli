@@ -1,15 +1,16 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it } from 'vitest';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { InitCommand } from '../../src/application/commands/InitCommand.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { MoveCommand } from '../../src/application/commands/MoveCommand.js';
-import { ScaleCommand } from '../../src/application/commands/ScaleCommand.js';
-import { SetAttributeCommand } from '../../src/application/commands/SetAttributeCommand.js';
-import { DeleteCommand } from '../../src/application/commands/DeleteCommand.js';
+import { EditorSession } from '@svgframe/core';
+import { InitCommand } from '../../plugins/builtin-commands/src/InitCommand.js';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import { MoveCommand } from '../../plugins/builtin-commands/src/MoveCommand.js';
+import { ScaleCommand } from '../../plugins/builtin-commands/src/ScaleCommand.js';
+import { SetAttributeCommand } from '../../plugins/builtin-commands/src/SetAttributeCommand.js';
+import { DeleteCommand } from '../../plugins/builtin-commands/src/DeleteCommand.js';
 
 describe('M3 edit command records', () => {
   const scene = () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     new InitCommand(session).execute();
     new CreateCommand(session, 'g', 'g', []).execute();
     new CreateCommand(session, 'rect', 'r', ['0.1', '0.2', '3', '4'], 'g').execute();

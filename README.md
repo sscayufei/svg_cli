@@ -1,8 +1,22 @@
-# SVG CLI — Lab1 Phase 1
+# SVG CLI — Lab1 Phase 2（框架重构中）
 
-TypeScript + Node.js SVG 命令行编辑器，按 M0～M8 分阶段开发。
+TypeScript + Node.js SVG 命令行编辑器。Phase 1 已完成并由 final 标签固定；Phase 2 按 [开发计划](docs/phase2/DEVELOPMENT_PLAN.md) 推进。
 
-M0～M8 的实现、综合本地验收和正式报告已完成，待用户验收本轮修改并完成最终 Git 提交、推送和 final 标签。支持完整编辑 CLI、Undo/Redo 和 SVG 读写。
+当前已交付 VSCode 文件标记/大纲；P2-2a 已完成 core/host/内置插件包迁移与注册式装配，本地验收通过，待审阅提交。四扩展点、通用输出/反馈和公开撤销协议已就位；完整属性事务、复合结构保护、配置加载器与业务插件仍按后续阶段实现。详见 [P2-2a 记录](docs/phase2/P2-2a_REPORT.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
+
+首次安装后需构建本地工作区包，再启动 CLI；core 与插件通过 package exports 使用编译产物，tsx 不替代包构建。
+
+```powershell
+npm.cmd ci
+npm.cmd run build
+npm.cmd run cli
+# 或直接运行编译后的入口
+node dist/host/main.js
+```
+
+`build:all` 同时构建扩展；`check:tests` 检查测试源码类型；`test` 运行 CLI/插件测试；`test:all` 再运行扩展单测与真实宿主测试。两个内置包可用 `npm.cmd test --workspace @svgframe/builtin-shapes` 与 `npm.cmd test --workspace @svgframe/builtin-commands` 独立测试。
+
+以下 M0～M8 功能说明为保持兼容的 Phase 1 行为。
 
 M1 提供六种图形的封装模型、统一几何/属性查询、Composite 子树、前序遍历、文档级 ID 索引和受控挂接/摘除。领域模型也可通过 TypeScript API 使用。图形尺寸和半径允许为零，画布尺寸必须为正，所有几何数值必须有限。
 
@@ -30,6 +44,7 @@ M7 支持 `read <file.svg>`，可直接建立当前文档。完整解析、补 I
 
 ```powershell
 npm.cmd ci
+npm.cmd run build
 npm.cmd run cli
 ```
 
@@ -62,7 +77,7 @@ Windows PowerShell 5 用管道回放含中文的命令时，先设置 `$OutputEn
 ```powershell
 npm.cmd run build
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
+Get-Content -Encoding UTF8 examples/demo.cli | node dist/host/main.js
 ```
 
 读取现有示例并另存：
@@ -80,7 +95,7 @@ save copy.svg
 ```powershell
 npm.cmd run build
 npm.cmd test
-node dist/cli/main.js
+node dist/host/main.js
 git diff --check
 ```
 

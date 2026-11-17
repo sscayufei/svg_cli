@@ -4,19 +4,26 @@
   "private": true,
   "description": "Software design Lab1 Phase 1 SVG command-line editor",
   "type": "module",
-  "workspaces": ["extensions/vscode-svg"],
+  "workspaces": [
+    "src/core",
+    "plugins/*",
+    "extensions/vscode-svg"
+  ],
   "engines": {
     "node": ">=24 <25"
   },
   "scripts": {
-    "cli": "tsx src/cli/main.ts",
-    "build": "tsc -p tsconfig.json",
+    "cli": "tsx src/host/main.ts",
+    "build": "node scripts/build-workspaces.mjs",
     "test": "vitest run",
+    "check:tests": "tsc -p tsconfig.tests.json",
     "build:extension": "npm run build --workspace svg-cli-companion",
     "test:extension:unit": "npm run test:unit --workspace svg-cli-companion",
     "test:extension": "node scripts/test-extension.mjs",
     "verify:baseline": "node scripts/verify-baseline.mjs",
-    "package:extension": "npm run build:extension && node scripts/package-extension.mjs"
+    "package:extension": "npm run build:extension && node scripts/package-extension.mjs",
+    "build:all": "node scripts/build-workspaces.mjs --all",
+    "test:all": "npm test && npm run test:extension:unit && npm run test:extension"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
@@ -25,6 +32,9 @@
     "vitest": "5.0.5"
   },
   "dependencies": {
-    "saxes": "6.0.0"
+    "saxes": "6.0.0",
+    "@svgframe/core": "0.2.0",
+    "@svgframe/builtin-shapes": "0.2.0",
+    "@svgframe/builtin-commands": "0.2.0"
   }
 }

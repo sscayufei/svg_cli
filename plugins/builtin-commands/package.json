@@ -1,0 +1,42 @@
+{
+  "name": "@svgframe/builtin-commands",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/public.d.ts",
+      "import": "./dist/public.js"
+    }
+  },
+  "contributes": {
+    "commands": [
+      "init",
+      "canvas",
+      "create",
+      "tree",
+      "show",
+      "move",
+      "scale",
+      "set",
+      "delete",
+      "group",
+      "ungroup",
+      "addto",
+      "front",
+      "back",
+      "read",
+      "save",
+      "undo",
+      "redo",
+      "help"
+    ]
+  },
+  "dependencies": {
+    "@svgframe/core": "0.2.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node ../../scripts/test-workspace.mjs"
+  }
+}

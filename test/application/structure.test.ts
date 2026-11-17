@@ -1,17 +1,18 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it } from 'vitest';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { InitCommand } from '../../src/application/commands/InitCommand.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { GroupCommand } from '../../src/application/commands/GroupCommand.js';
-import { UngroupCommand } from '../../src/application/commands/UngroupCommand.js';
-import { AddToCommand } from '../../src/application/commands/AddToCommand.js';
-import { FrontCommand } from '../../src/application/commands/FrontCommand.js';
-import { BackCommand } from '../../src/application/commands/BackCommand.js';
-import { MoveCommand } from '../../src/application/commands/MoveCommand.js';
+import { EditorSession } from '@svgframe/core';
+import { InitCommand } from '../../plugins/builtin-commands/src/InitCommand.js';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import { GroupCommand } from '../../plugins/builtin-commands/src/GroupCommand.js';
+import { UngroupCommand } from '../../plugins/builtin-commands/src/UngroupCommand.js';
+import { AddToCommand } from '../../plugins/builtin-commands/src/AddToCommand.js';
+import { FrontCommand } from '../../plugins/builtin-commands/src/FrontCommand.js';
+import { BackCommand } from '../../plugins/builtin-commands/src/BackCommand.js';
+import { MoveCommand } from '../../plugins/builtin-commands/src/MoveCommand.js';
 
 describe('M4 concrete command records', () => {
   const scene = () => {
-    const session = new EditorSession(); new InitCommand(session).execute();
+    const session = new EditorSession(createBuiltinShapeFactory()); new InitCommand(session).execute();
     new CreateCommand(session, 'g', 'outer', []).execute();
     new CreateCommand(session, 'rect', 'a', ['1', '2', '3', '4'], 'outer').execute();
     new CreateCommand(session, 'g', 'b', [], 'outer').execute();

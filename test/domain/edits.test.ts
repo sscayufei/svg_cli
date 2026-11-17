@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { ChangeSet } from '../../src/domain/ChangeSet.js';
-import { CircleShape } from '../../src/domain/CircleShape.js';
-import { EllipseShape } from '../../src/domain/EllipseShape.js';
-import { LineShape } from '../../src/domain/LineShape.js';
-import { RectShape } from '../../src/domain/RectShape.js';
-import { SvgDocument } from '../../src/domain/SvgDocument.js';
-import { SvgGroup } from '../../src/domain/SvgGroup.js';
-import { TextShape } from '../../src/domain/TextShape.js';
+import { ChangeSet } from '@svgframe/core';
+import { CircleShape } from '../../plugins/builtin-shapes/src/CircleShape.js';
+import { EllipseShape } from '../../plugins/builtin-shapes/src/EllipseShape.js';
+import { LineShape } from '../../plugins/builtin-shapes/src/LineShape.js';
+import { RectShape } from '../../plugins/builtin-shapes/src/RectShape.js';
+import { SvgDocument } from '@svgframe/core';
+import { SvgGroup } from '@svgframe/core';
+import { TextShape } from '../../plugins/builtin-shapes/src/TextShape.js';
 
 describe('polymorphic geometry edits', () => {
   it.each([

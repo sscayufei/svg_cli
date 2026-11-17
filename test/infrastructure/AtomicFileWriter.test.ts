@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { AtomicFileWriter } from '../../src/infrastructure/svg/AtomicFileWriter.js';
+import { AtomicFileWriter } from '../../src/host/svg/AtomicFileWriter.js';
 
 describe('AtomicFileWriter on the real filesystem', () => {
   let directory: string;
@@ -18,7 +18,7 @@ describe('AtomicFileWriter on the real filesystem', () => {
 
   it('preserves an existing file and removes a partially written temporary file after write failure', () => {
     const target = join(directory, 'original.svg'); fs.writeFileSync(target, 'original');
-    const writer = new AtomicFileWriter({ ...fs, writeFileSync: (file: number) => {
+    const writer = new AtomicFileWriter({ ...fs, writeFileSync: (file: fs.PathOrFileDescriptor) => {
       fs.writeFileSync(file, 'partial'); throw new Error('disk full');
     } });
     expect(() => writer.write(target, 'replacement')).toThrow('disk full');

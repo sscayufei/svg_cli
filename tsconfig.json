@@ -1,17 +1,10 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2023",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "rootDir": "src",
-    "outDir": "dist",
-    "strict": true,
-    "skipLibCheck": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "noEmitOnError": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "rootDir": "src/host",
+    "outDir": "dist/host"
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/host/**/*.ts"
+  ]
 }

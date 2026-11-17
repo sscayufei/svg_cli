@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CommandTokenizer } from '../../src/cli/CommandTokenizer.js';
+import { CommandTokenizer } from '../../src/host/cli/CommandTokenizer.js';
 
 describe('CommandTokenizer', () => {
   const tokenizer = new CommandTokenizer();

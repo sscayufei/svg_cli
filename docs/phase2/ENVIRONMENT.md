@@ -6,6 +6,8 @@
 
 > P2-1b 更新：已安装 vsce 4.1.1，完成扩展 0.2.0 的 VSIX 打包及仓库外隔离安装测试；相同宿主环境中验证大纲定位、更新与错误恢复。见 [P2-1b 记录](P2-1b_REPORT.md)。以下保留原始核查与阶段准备口径。
 
+> P2-2a 更新：core 与两个内置插件已成为本地工作区包，使用包 exports 的编译产物。新增机器准备不需要第三方依赖；首次 npm ci 后先 npm run build。build:all 包含扩展，check:tests 检查测试源码，test:all 汇总主测试/扩展单测/宿主。TypeScript 7 AST 扫描使用其原生快照 API，不能照搬 TS 5 的 createSourceFile。详见 [P2-2a 记录](P2-2a_REPORT.md)。
+
 ## 1. Git 基线：已核对正确
 
 | 项目 | 实测结果 |

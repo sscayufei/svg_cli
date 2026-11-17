@@ -18,7 +18,7 @@ describe('Phase 1 complete acceptance transcripts', () => {
   const run = (input: string) => {
     const result = spawnSync(process.execPath, [
       '--import', pathToFileURL(createRequire(import.meta.url).resolve('tsx')).href,
-      fileURLToPath(new URL('../../src/cli/main.ts', import.meta.url)),
+      fileURLToPath(new URL('../../src/host/main.ts', import.meta.url)),
     ], { cwd: directory, input, encoding: 'utf8', timeout: 10_000 });
     expect(result.error).toBeUndefined(); expect(result.status, result.stderr).toBe(0);
     return { output: normalize(result.stdout), errors: normalize(result.stderr) };

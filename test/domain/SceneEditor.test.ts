@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { SceneEditor } from '../../src/domain/SceneEditor.js';
-import { SvgDocument } from '../../src/domain/SvgDocument.js';
-import { SvgGroup } from '../../src/domain/SvgGroup.js';
-import { RectShape } from '../../src/domain/RectShape.js';
-import type { ChangeSet } from '../../src/domain/ChangeSet.js';
+import { SceneEditor } from '@svgframe/core';
+import { SvgDocument } from '@svgframe/core';
+import { SvgGroup } from '@svgframe/core';
+import { RectShape } from '../../plugins/builtin-shapes/src/RectShape.js';
+import type { ChangeSet } from '@svgframe/core';
 
 describe('M4 structural transactions', () => {
   const scene = (document = new SvgDocument()) => {

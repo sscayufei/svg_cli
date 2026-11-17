@@ -1,14 +1,15 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it, vi } from 'vitest';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { CommandExecutor } from '../../src/application/CommandExecutor.js';
-import { CommandHistory } from '../../src/application/CommandHistory.js';
-import { SaveCommand } from '../../src/application/commands/SaveCommand.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { InitCommand } from '../../src/application/commands/InitCommand.js';
+import { EditorSession } from '@svgframe/core';
+import { CommandExecutor } from '@svgframe/core';
+import { CommandHistory } from '@svgframe/core';
+import { SaveCommand } from '../../plugins/builtin-commands/src/SaveCommand.js';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import { InitCommand } from '../../plugins/builtin-commands/src/InitCommand.js';
 
 describe('SaveCommand and the history boundary', () => {
   const scene = () => {
-    const session = new EditorSession(); const history = new CommandHistory(); const executor = new CommandExecutor(history);
+    const session = new EditorSession(createBuiltinShapeFactory()); const history = new CommandHistory(); const executor = new CommandExecutor(history);
     executor.execute(new InitCommand(session)); executor.execute(new CreateCommand(session, 'g', 'g', []));
     executor.execute(new CreateCommand(session, 'text', 't', ['1', '2', '中文'], 'g')); history.undo();
     return { session, history, executor };
@@ -16,7 +17,7 @@ describe('SaveCommand and the history boundary', () => {
 
   it('requires a document before validating the save target', () => {
     const save = vi.fn();
-    expect(() => new SaveCommand(new EditorSession(), { save }).execute()).toThrow("no document. use 'init' or 'read' first");
+    expect(() => new SaveCommand(new EditorSession(createBuiltinShapeFactory()), { save }).execute()).toThrow("no document. use 'init' or 'read' first");
     expect(save).not.toHaveBeenCalled();
   });
 

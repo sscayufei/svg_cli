@@ -1,14 +1,15 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it } from 'vitest';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { CommandExecutor } from '../../src/application/CommandExecutor.js';
-import { CommandHistory } from '../../src/application/CommandHistory.js';
-import { CanvasCommand } from '../../src/application/commands/CanvasCommand.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { InitCommand } from '../../src/application/commands/InitCommand.js';
+import { EditorSession } from '@svgframe/core';
+import { CommandExecutor } from '@svgframe/core';
+import { CommandHistory } from '@svgframe/core';
+import { CanvasCommand } from '../../plugins/builtin-commands/src/CanvasCommand.js';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import { InitCommand } from '../../plugins/builtin-commands/src/InitCommand.js';
 
 describe('Command requests and session receivers', () => {
   it('leaves the session untouched on failed initialization and resize', () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     const executor = new CommandExecutor(new CommandHistory());
     expect(executor.execute(new InitCommand(session)).ok).toBe(true);
     const original = session.requireDocument();
@@ -19,7 +20,7 @@ describe('Command requests and session receivers', () => {
   });
 
   it('classifies queries, documents and edits for the invoker', () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     expect(new InitCommand(session).kind).toBe('document');
     expect(new CanvasCommand(session).kind).toBe('query');
     expect(new CanvasCommand(session, [400, 300]).kind).toBe('document');
@@ -27,7 +28,7 @@ describe('Command requests and session receivers', () => {
   });
 
   it('stores the minimal create record and restores the same node at the same position', () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     new InitCommand(session).execute();
     new CreateCommand(session, 'g', 'parent', []).execute();
     const args = ['1', '2', '3', '4', '#abc'];
@@ -49,7 +50,7 @@ describe('Command requests and session receivers', () => {
   });
 
   it('does not lose an undo record when redo fails on an ID collision', () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     new InitCommand(session).execute();
     const create = new CreateCommand(session, 'g', 'g', []);
     expect(() => create.undo()).toThrow();
@@ -67,7 +68,7 @@ describe('Command requests and session receivers', () => {
   });
 
   it('rejects stale edits after the session document changes', () => {
-    const session = new EditorSession();
+    const session = new EditorSession(createBuiltinShapeFactory());
     new InitCommand(session).execute();
     const create = new CreateCommand(session, 'g', 'g', []);
     create.execute();

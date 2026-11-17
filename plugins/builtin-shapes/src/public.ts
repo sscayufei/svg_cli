@@ -1,0 +1,14 @@
+export * from './BaseShapeProvider.js';
+export * from './BuiltinShapesPlugin.js';
+export * from './CircleProvider.js';
+export * from './CircleShape.js';
+export * from './EllipseProvider.js';
+export * from './EllipseShape.js';
+export * from './GroupProvider.js';
+export * from './LineProvider.js';
+export * from './LineShape.js';
+export * from './RectProvider.js';
+export * from './RectShape.js';
+export * from './TextProvider.js';
+export * from './TextShape.js';
+export { BuiltinShapesPlugin as default } from './BuiltinShapesPlugin.js';

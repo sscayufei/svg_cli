@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 describe('M5 undo/redo CLI transcripts', () => {
   const run = (lines: readonly string[]) => {
-    const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/cli/main.ts'], {
+    const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/host/main.ts'], {
       cwd: fileURLToPath(new URL('../../', import.meta.url)), input: lines.join('\n'), encoding: 'utf8', timeout: 10_000,
     });
     expect(result.error).toBeUndefined(); expect(result.status, result.stderr).toBe(0);

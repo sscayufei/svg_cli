@@ -1,16 +1,17 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
+import { createCommandDispatcher } from '../../src/host/composition.js';
 import { describe, expect, it } from 'vitest';
-import { CommandHistory } from '../../src/application/CommandHistory.js';
-import { CommandExecutor } from '../../src/application/CommandExecutor.js';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { CommandDispatcher } from '../../src/cli/CommandDispatcher.js';
-import type { SvgNode } from '../../src/domain/SvgNode.js';
+import { CommandHistory } from '@svgframe/core';
+import { CommandExecutor } from '@svgframe/core';
+import { EditorSession } from '@svgframe/core';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import type { SvgNode } from '@svgframe/core';
 
 function harness() {
-  const session = new EditorSession();
+  const session = new EditorSession(createBuiltinShapeFactory());
   const history = new CommandHistory();
   const executor = new CommandExecutor(history);
-  const dispatcher = new CommandDispatcher(session, history, {
+  const dispatcher = createCommandDispatcher(session, history, {
     save: () => { throw new Error('unexpected file write'); }, read: () => { throw new Error('unexpected file read'); },
   });
   const run = (line: string) => {

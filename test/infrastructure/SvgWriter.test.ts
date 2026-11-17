@@ -1,12 +1,13 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it } from 'vitest';
-import { SvgWriter } from '../../src/infrastructure/svg/SvgWriter.js';
-import { SvgDocument } from '../../src/domain/SvgDocument.js';
-import { ShapeFactory } from '../../src/domain/ShapeFactory.js';
-import type { SvgNode } from '../../src/domain/SvgNode.js';
+import { SvgWriter } from '../../src/host/svg/SvgWriter.js';
+import { SvgDocument } from '@svgframe/core';
+import { ShapeFactory } from '@svgframe/core';
+import type { SvgNode } from '@svgframe/core';
 
 describe('SvgWriter', () => {
   it('serializes all six types, nested order, optional styles and text as XML content', () => {
-    const document = new SvgDocument(400, 200); const factory = new ShapeFactory();
+    const document = new SvgDocument(400, 200); const factory = createBuiltinShapeFactory();
     const group = factory.create('g', 'scene', []); document.append(group);
     const nested = factory.create('g', 'nested', []); document.append(nested, group);
     group.setAttribute('fill', '#abc'); group.setAttribute('stroke-width', 0);
@@ -36,7 +37,7 @@ describe('SvgWriter', () => {
   });
 
   it('escapes attribute delimiters and preserves XML-normalized whitespace and Unicode', () => {
-    const document = new SvgDocument(); const factory = new ShapeFactory();
+    const document = new SvgDocument(); const factory = createBuiltinShapeFactory();
     const node = factory.create('text', 'id"<&\t\n\r', ['0', '0', '中文😀\r\n\t']);
     node.setAttribute('fill', 'x"/><evil a="&\t\n\r'); document.append(node);
     const xml = new SvgWriter().serialize(document);
@@ -47,19 +48,19 @@ describe('SvgWriter', () => {
   });
 
   it.each(['\0', '\u0001', '\u000b', '\ud800', '\udfff', '\ufffe', '\uffff'])('rejects invalid XML characters %j', value => {
-    const document = new SvgDocument(); document.append(new ShapeFactory().create('text', 't', ['0', '0', value]));
+    const document = new SvgDocument(); document.append(createBuiltinShapeFactory().create('text', 't', ['0', '0', value]));
     expect(() => new SvgWriter().serialize(document)).toThrow('invalid XML character');
   });
 
   it('retains empty text and serializes an empty canvas', () => {
     const document = new SvgDocument(); const writer = new SvgWriter();
     expect(writer.serialize(document)).toContain('viewBox="0 0 800 600">\n</svg>\n');
-    document.append(new ShapeFactory().create('text', 't', ['0', '0', '']));
+    document.append(createBuiltinShapeFactory().create('text', 't', ['0', '0', '']));
     expect(writer.serialize(document)).toContain('<text id="t" x="0" y="0"></text>');
   });
 
   it('uses preorder traversal without overflowing the call stack on deep groups', () => {
-    const document = new SvgDocument(); const factory = new ShapeFactory(); let parent: SvgNode | null = null;
+    const document = new SvgDocument(); const factory = createBuiltinShapeFactory(); let parent: SvgNode | null = null;
     for (let index = 0; index < 1500; index++) {
       const group = factory.create('g', `g${index}`, []); document.append(group, parent); parent = group;
     }

@@ -1,23 +1,24 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { describe, expect, it } from 'vitest';
-import { EditorSession } from '../../src/application/EditorSession.js';
-import { CommandExecutor } from '../../src/application/CommandExecutor.js';
-import { CommandHistory } from '../../src/application/CommandHistory.js';
-import { ReadCommand } from '../../src/application/commands/ReadCommand.js';
-import { SaveCommand } from '../../src/application/commands/SaveCommand.js';
-import { InitCommand } from '../../src/application/commands/InitCommand.js';
-import { CreateCommand } from '../../src/application/commands/CreateCommand.js';
-import { SvgDocument } from '../../src/domain/SvgDocument.js';
-import { ShapeFactory } from '../../src/domain/ShapeFactory.js';
+import { EditorSession } from '@svgframe/core';
+import { CommandExecutor } from '@svgframe/core';
+import { CommandHistory } from '@svgframe/core';
+import { ReadCommand } from '../../plugins/builtin-commands/src/ReadCommand.js';
+import { SaveCommand } from '../../plugins/builtin-commands/src/SaveCommand.js';
+import { InitCommand } from '../../plugins/builtin-commands/src/InitCommand.js';
+import { CreateCommand } from '../../plugins/builtin-commands/src/CreateCommand.js';
+import { SvgDocument } from '@svgframe/core';
+import { ShapeFactory } from '@svgframe/core';
 
 describe('ReadCommand atomic session replacement and source paths', () => {
   const candidate = (sourcePath = '/read/source.svg') => {
     const document = new SvgDocument(400, 300);
-    document.append(new ShapeFactory().create('g', 'g', []));
+    document.append(createBuiltinShapeFactory().create('g', 'g', []));
     return { document, sourcePath, warnings: ['assigned id g to unnamed <g>'] };
   };
 
   it('can initialize an empty session and commits a validated candidate with warnings', () => {
-    const session = new EditorSession(); const history = new CommandHistory(); const executor = new CommandExecutor(history);
+    const session = new EditorSession(createBuiltinShapeFactory()); const history = new CommandHistory(); const executor = new CommandExecutor(history);
     const input = candidate();
     expect(executor.execute(new ReadCommand(session, { read: () => input }, 'source.svg'))).toEqual({
       ok: true, result: { kind: 'read', path: 'source.svg', count: 1, warnings: input.warnings },
@@ -27,7 +28,7 @@ describe('ReadCommand atomic session replacement and source paths', () => {
   });
 
   it('preserves the old document, source and redo when a later read fails', () => {
-    const session = new EditorSession(); const history = new CommandHistory(); const executor = new CommandExecutor(history);
+    const session = new EditorSession(createBuiltinShapeFactory()); const history = new CommandHistory(); const executor = new CommandExecutor(history);
     const first = candidate(); executor.execute(new ReadCommand(session, { read: () => first }, 'source.svg'));
     executor.execute(new CreateCommand(session, 'g', 'fresh', [])); history.undo();
     const before = history.status;
@@ -39,7 +40,7 @@ describe('ReadCommand atomic session replacement and source paths', () => {
   });
 
   it('saves by read source, preserves it after explicit save, and clears it only after successful init', () => {
-    const session = new EditorSession(); const input = candidate();
+    const session = new EditorSession(createBuiltinShapeFactory()); const input = candidate();
     new ReadCommand(session, { read: () => input }, 'source.svg').execute();
     const targets: string[] = []; const store = { save: (_document: SvgDocument, path: string) => { targets.push(path); } };
     new SaveCommand(session, store, 'copy.svg').execute(); new SaveCommand(session, store).execute();
@@ -51,7 +52,7 @@ describe('ReadCommand atomic session replacement and source paths', () => {
   });
 
   it('releases prior history after a successful second read', () => {
-    const session = new EditorSession(); const history = new CommandHistory(); const executor = new CommandExecutor(history);
+    const session = new EditorSession(createBuiltinShapeFactory()); const history = new CommandHistory(); const executor = new CommandExecutor(history);
     new InitCommand(session).execute(); executor.execute(new CreateCommand(session, 'g', 'old', [])); history.undo();
     const input = candidate('/new.svg'); executor.execute(new ReadCommand(session, { read: () => input }, 'new.svg'));
     expect(history.status).toEqual({ undoCount: 0, redoCount: 0, blocked: true });
@@ -60,7 +61,7 @@ describe('ReadCommand atomic session replacement and source paths', () => {
   });
 
   it('validates replacement metadata before changing the active document or history', () => {
-    const session = new EditorSession(); const history = new CommandHistory(); const executor = new CommandExecutor(history);
+    const session = new EditorSession(createBuiltinShapeFactory()); const history = new CommandHistory(); const executor = new CommandExecutor(history);
     const original = candidate(); executor.execute(new ReadCommand(session, { read: () => original }, 'first.svg'));
     executor.execute(new CreateCommand(session, 'g', 'fresh', [])); const status = history.status;
     const invalid = candidate('');

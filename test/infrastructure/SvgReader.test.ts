@@ -1,7 +1,8 @@
+import { createBuiltinShapeFactory } from '../support/composition.js';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { SvgReader } from '../../src/infrastructure/svg/SvgReader.js';
-import { SvgWriter } from '../../src/infrastructure/svg/SvgWriter.js';
+import { SvgReader } from '../../src/host/svg/SvgReader.js';
+import { SvgWriter } from '../../src/host/svg/SvgWriter.js';
 
 const svg = (body: string, attributes = 'width="400" height="300"') => `<svg ${attributes}>${body}</svg>`;
 const state = (result: ReturnType<SvgReader['parse']>) => ({
@@ -16,7 +17,7 @@ const state = (result: ReturnType<SvgReader['parse']>) => ({
 describe('SvgReader validated candidates', () => {
   it('reserves later explicit IDs before assigning missing and empty IDs in preorder', () => {
     const input = svg('<g><rect/><rect id="rect1"/><circle/><g id="g1"/></g><rect id="rect2"/><rect id=""/>');
-    const reader = new SvgReader(); const result = reader.parse(input);
+    const reader = new SvgReader(createBuiltinShapeFactory()); const result = reader.parse(input);
     expect([...result.document].map(node => node.id)).toEqual(['g2', 'rect3', 'rect1', 'circle1', 'g1', 'rect2', 'rect4']);
     expect(result.warnings).toEqual([
       'assigned id g2 to unnamed <g>', 'assigned id rect3 to unnamed <rect>',
@@ -27,14 +28,14 @@ describe('SvgReader validated candidates', () => {
   });
 
   it('imports the original other.svg fixture with its exact warning and seven elements', () => {
-    const result = new SvgReader().parse(readFileSync(new URL('../fixtures/other.svg', import.meta.url), 'utf8'));
+    const result = new SvgReader(createBuiltinShapeFactory()).parse(readFileSync(new URL('../fixtures/other.svg', import.meta.url), 'utf8'));
     expect(result.document.size).toBe(7);
     expect(result.warnings).toEqual(['assigned id rect1 to unnamed <rect>']);
     expect(result.document.requireById('r2').parent).toBe(result.document.requireById('g1'));
   });
 
   it('reads all shapes, defaults, px canvas dimensions and common styles through the shared factory', () => {
-    const result = new SvgReader().parse(svg([
+    const result = new SvgReader(createBuiltinShapeFactory()).parse(svg([
       '<g id="g" fill="red" stroke="blue" stroke-width="0">',
       '<rect id="r" x="0.1" height="4"/><circle id="c" r="2" fill="green"/>',
       '<ellipse id="e" rx="3"/><line id="l" x2="10"/><text id="t">中文😀</text></g>',
@@ -48,7 +49,7 @@ describe('SvgReader validated candidates', () => {
 
   it('preserves decoded text, CDATA, empty text and writer-normalized attribute whitespace', () => {
     const input = svg('<text id="t" fill="red&#9;&#10;&#13;">  &lt;&amp;<![CDATA[<你好>]]>&#13;\n\t </text><text id="empty"/>');
-    const reader = new SvgReader(); const first = reader.parse(input);
+    const reader = new SvgReader(createBuiltinShapeFactory()); const first = reader.parse(input);
     expect(first.document.requireById('t').getAttributes().text).toBe('  <&<你好>\r\n\t ');
     expect(first.document.requireById('empty').getAttributes().text).toBe('');
     const output = new SvgWriter().serialize(first.document);
@@ -56,14 +57,14 @@ describe('SvgReader validated candidates', () => {
   });
 
   it('accepts SVG namespace prefixes and ignores comments without losing shape order', () => {
-    const result = new SvgReader().parse('<?xml version="1.0" encoding="UTF-8"?><!-- outside -->' +
+    const result = new SvgReader(createBuiltinShapeFactory()).parse('<?xml version="1.0" encoding="UTF-8"?><!-- outside -->' +
       '<s:svg xmlns:s="http://www.w3.org/2000/svg" width="1" height="2"><!-- inside -->' +
       '<s:g id="g"><s:rect id="r"/></s:g></s:svg>');
     expect([...result.document].map(node => node.id)).toEqual(['g', 'r']);
   });
 
   it('round-trips all six types with styles, parents, order and case-sensitive IDs', () => {
-    const reader = new SvgReader(); const writer = new SvgWriter();
+    const reader = new SvgReader(createBuiltinShapeFactory()); const writer = new SvgWriter();
     const input = svg('<g id="R" fill="red"><g id="nested"><rect id="r" x="1e-8"/>' +
       '<circle id="c" r="1"/><ellipse id="e" rx="2" ry="3"/><line id="l" stroke="black"/>' +
       '<text id="t">&lt;文本&gt;</text></g></g>');
@@ -96,6 +97,6 @@ describe('SvgReader validated candidates', () => {
     ['<?xml version="1.1"?><svg width="1" height="1"/>', 'XML 1.0'],
     ['<?xml version="1.0" encoding="UTF-16"?><svg width="1" height="1"/>', 'UTF-8'],
   ])('rejects unsupported or malformed input %j (%s)', (input, error) => {
-    expect(() => new SvgReader().parse(input)).toThrow(error);
+    expect(() => new SvgReader(createBuiltinShapeFactory()).parse(input)).toThrow(error);
   });
 });

@@ -36,7 +36,7 @@ const npmCli = process.env.npm_execpath;
 if (!npmCli) throw new Error('run through npm run verify:baseline so npm_execpath is available');
 run(process.execPath, [npmCli, 'ci', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: baseline });
 run(process.execPath, [resolve(baseline, 'node_modules/typescript/bin/tsc'), '-p', 'tsconfig.json'], { cwd: baseline });
-const currentEntry = resolve(root, process.env.SVG_CLI_ENTRY ?? 'dist/cli/main.js');
+const currentEntry = resolve(root, process.env.SVG_CLI_ENTRY ?? 'dist/host/main.js');
 const transcripts = resolve(root, 'doc/transcript');
 const cwd = resolve(output, 'cwd');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
