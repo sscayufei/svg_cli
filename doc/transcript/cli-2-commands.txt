@@ -1,0 +1,20 @@
+dir
+dir extra
+stats
+init 40 50
+dir
+stats
+create rect r 1 2 3 4
+set r fill red
+undo
+dir
+redo
+stats
+save ../dir-session.svg
+dir
+read docs/source.svg
+dir
+stats
+canvas 60 70
+dir
+stats

@@ -1,0 +1,43 @@
+svg-editor 0.1 — type 'help' for commands
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+canvas 40x50 created
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+(total 0, containers 0)
+rect#r created
+rect#r updated: fill=red
+rect#r updated: fill removed
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+rect#r updated: fill=red
+rect: 1  (total 1, containers 0)
+saved to ../dir-session.svg (1 elements)
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+read docs/source.svg (1 elements)
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+rect: 1  (total 1, containers 0)
+canvas 60x70 resized
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+rect: 1  (total 1, containers 0)

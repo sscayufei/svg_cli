@@ -1,0 +1,2 @@
+error: usage: dir
+error: no document. use 'init' or 'read' first

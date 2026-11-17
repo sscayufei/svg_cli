@@ -1,13 +1,13 @@
-# 扩展点清单（P2-3a）
+# 扩展点清单（P2-3b）
 
-更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及新接入 stats。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
+更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及独立 stats、dir。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
 
 ## 接口、调用位置与缺省行为
 
 | 扩展点 | 核心接口及职责 | 当前实际调用点 | 当前实现 | 缺省/禁用 | 契约错误 |
 |---|---|---|---|---|---|
 | ShapeProvider | core/extensions/Contracts.ts；创建离线节点、恢复完整子树、提供 help 与可选创建反馈 | core/application/ShapeFactory.ts：create、fromAttributes、restore、creationFeedback、help；CreateCommand 与 SvgReader 调用服务 | builtin-shapes 中六类 provider；复合使用 FixtureProvider 测试替身 | 空表创建未知类型报错；未知 g 的 data-kind 降级普通 g；默认六种 provider | 重复/缺必需方法拒绝；无效节点/身份/归属拒绝；已注册复合标记缺 restore 或结构损坏拒绝，不降级 |
-| Command | core/application/commands/Command.ts：执行协议；Contracts.ts 的 CommandDefinition 提供命令名、语法、help 和 build | host/cli/CommandDispatcher.ts：parse；core/application/CommandExecutor.ts：execute；command-stats/StatsCommandDefinition.build、StatsCommand.execute | builtin-commands 十九个命令；独立 command-stats 的 StatsPlugin/Definition/Command | 内置十九条不变，默认 A 另启 stats；空配置/disabled 不含 stats，执行报 unknown command: stats | 重复/缺 build 拒绝；无有效 execute/kind 拒绝；stats 多参数报 usage、无文档沿用 no document；query 不建历史 |
+| Command | core/application/commands/Command.ts：执行协议；Contracts.ts 的 CommandDefinition 提供命令名、语法、help 和 build | host/cli/CommandDispatcher.parse；core/application/CommandExecutor.execute；command-stats 的 Definition.build/Command.execute；command-dir/DirCommandDefinition.build、DirCommand.execute | builtin-commands 十九条；独立 StatsPlugin、DirPlugin 分别注册自己的 Definition/Command 类 | 内置十九条不变，默认 A 另启 stats、dir；可分别禁用，未装时 unknown command | 重复/缺 build 或无效 execute/kind 拒绝；多参数各报 usage；stats 无文档报错，dir 不依赖文档；dir 读失败 cannot read directory: path；query 不建历史 |
 | AttributeHandler | Contracts.ts：纯 handles；apply 接收只读目标及 AttributeEdits，可返回 applied/undone 反馈 | core/application/AttributeService.ts：resolve/plan；EditTransaction；SetAttributeCommand.plan 调用 | test/extensions 的 ProbeHandler、PairHandler；正式业务处理器在 P2-4 | 无匹配调用 SvgNode.planSetAttribute，保留原白名单 | 多匹配报 attribute handler conflict；操作/反馈/不变量失败逆序恢复，不转默认；门面关闭后报 transaction is closed |
 | TreeDecorator | Contracts.ts：读取只读 TreeRow，返回可选后缀 | core/application/SceneQuery.ts：tree/suffixes；NodeFormatter.tree 拼接通用 suffixes | 本阶段使用 ProbeDecorator 测试类；正式标签在 P2-4/P2-5 | 空表后缀为空，tree 与 final 字节不变 | 重复/缺 decorate 拒绝；非字符串或换行后缀报 invalid tree decorator result；异常使本次查询失败 |
 
@@ -60,10 +60,12 @@ P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描
 | 作用域资源 | SessionEventSource.subscribe、ResourceOwner.add；PluginResources；应用退出 dispose | 提交前订阅休眠，失败释放，成功退出释放；清理异常独立诊断，无热卸载 |
 | A/B 入口 | composition.optionalPlugins / createApplication；PluginConfiguration.read/parse；PluginLoader.load | 显式配置替换 A 可选列表；错误仅启内置；顺序加载，disabled 不解析 |
 | 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
-| 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory | 未 init 可用；startup path、冻结直接条目、不跟随链接；失败 cannot read directory: path；排序/展示待 DirCommand |
+| 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory；command-dir/DirCommand.execute | 未 init 可用；Adapter 保持 startup path/不跟随链接；DirCommand 过滤点项、分组字符串排序/两空格/空目录并规范失败；无模型/历史副作用 |
 
-配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats 已真实接入，使用通用 lines 和文档 Iterator；dir/box/star 仍待后续。工作区边界/fixture 测试不冒充尚未产生的业务接入提交 SHA。
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；box/star 仍待后续。stats 提交92cde9f已通过实际差异检查，dir 当前仅为本地工作区，接入 SHA 待提交。
 
-可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。两个插件包各有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
+可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。内置及新增命令包均有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
+
+P2-3b 增加 command-dir/test 的端口替身用例与 test/integration/dir 的真实目录/链接/失败继续交互、状态/历史/保存点观察者、A/B 同服务及两命令独立启禁用。Adapter 角色和固定 cwd 回放证据见 [P2-3b 报告](../docs/phase2/P2-3b_REPORT.md)。
 
 P2-2c 增加 test/loading 的注册/清单/提交/订阅恢复与解析失败分类、NodeDirectoryAdapter 真实/替身测试、tools/framework-tools 的 A/B 原始输出/生成文件、未知 workspace 和真实 Git fixture 检查；架构扫描约束 loading/filesystem 不依赖具体插件。

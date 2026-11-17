@@ -1,0 +1,6 @@
+{
+  "plugins": [
+    { "module": "@svgframe/command-stats" },
+    { "module": "@svgframe/command-dir" }
+  ]
+}

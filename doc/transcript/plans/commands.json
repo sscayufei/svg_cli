@@ -1,0 +1,7 @@
+{
+  "codeEntry": "../../../dist/host/main.js",
+  "configEntry": "../../../dist/host/main.js",
+  "configPath": "../inputs/commands.plugins.json",
+  "transcript": "../cli-2-commands.txt",
+  "fixtureDirectory": "../inputs/dir-workspace"
+}

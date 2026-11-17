@@ -1,5 +1,5 @@
 {
-  "codeEntry": "../../../dist/host/main.js",
+  "codeEntry": "../../../test/fixtures/entries/stats-only.mjs",
   "configEntry": "../../../dist/host/main.js",
   "configPath": "../inputs/stats.plugins.json",
   "transcript": "../cli-2-stats.txt"

@@ -39,6 +39,7 @@
     "@svgframe/core": "0.2.0",
     "@svgframe/builtin-shapes": "0.2.0",
     "@svgframe/builtin-commands": "0.2.0",
-    "@svgframe/command-stats": "0.2.0"
+    "@svgframe/command-stats": "0.2.0",
+    "@svgframe/command-dir": "0.2.0"
   }
 }

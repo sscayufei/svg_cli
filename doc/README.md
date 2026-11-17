@@ -510,3 +510,13 @@ P2-2c 已提交，冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，�
 36文件/300项主测试、stats 单包11项、编译/类型检查通过。单包使用公开叶子/复合容器替身，不 import 其他插件或 host；集成验证真实形状和 A/B。新会话对手工语义预期检查，并以 raw 两输出流/生成 SVG 比较 A/B；无扩展三份旧会话仍与 final 逐字节一致。
 
 见 [P2-3a 报告](../docs/phase2/P2-3a_REPORT.md)、[验证摘要](evidence/phase2/p2-3a-checks.json)、[A/B 摘要](evidence/phase2/p2-3a-assemblies.json)、[边界摘要](evidence/phase2/p2-3a-boundary.json)。本轮未创建项目提交，stats 接入 SHA/正式提交差异证明待审阅提交后补齐；下一阶段为 dir，真实 box/星号及最终 p2 指标仍按计划推进。
+
+### P2-3b：dir 与命令插件完成节点
+
+stats 已提交为92cde9f，相对冻结1ff4352的 [真实接入差异检查](evidence/phase2/p2-3a-committed-diff.json) 通过。本阶段新增独立 command-dir，只依赖 core public 的目录端口，默认 A 在 stats 后启用 dir，B 可配置相同集合/顺序，也可分别启禁用。已有运行改动只在 composition；核心、NodeDirectoryAdapter、加载器、渲染器、构建编排及 stats 均未修改。
+
+Adapter 角色：DirCommand 是 Client，DirectoryPort 是 Target，NodeDirectoryAdapter 是 Adapter，Node fs.readdirSync/Dirent 是 Adaptee。宿主负责适配直接条目与 startup path；命令负责过滤点项、分组字符串排序与两空格输出，特殊链接/其他项分别标 [LINK]/[OTHER]。不依赖当前 SVG，不跟随链接/递归或改变 cwd；失败后仍可继续交互。
+
+38文件/319项主测试、dir单包9项、构建/类型检查通过。真实目录/链接和替身覆盖空/混合/隐藏/特殊项；成功与失败均比较场景/来源/保存点观察者/双栈/blocked 并实际 undo/redo。read/save 前后的六次列表在同一 cwd 保持相同；联合 A/B 两流 raw 字节及列目录 fixture 内容一致，日志和保存目标在目录外。stats-only 与三份无扩展 final 回放仍通过。
+
+见 [P2-3b 报告](../docs/phase2/P2-3b_REPORT.md)、[验证摘要](evidence/phase2/p2-3b-checks.json)、[A/B 摘要](evidence/phase2/p2-3b-assemblies.json)、[边界摘要](evidence/phase2/p2-3b-boundary.json)。命令插件节点本地验收就绪，未创建项目提交；dir 提交后补接入 SHA/差异，下一步在 box 开发前独立准备一致 A/B 清单及演示基线 F，正式 modified-star 仍待 P2-5。

@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CommandExecutor } from '@svgframe/core';
-import { StatsCommand } from '@svgframe/command-stats';
+import { StatsCommand, StatsPlugin } from '@svgframe/command-stats';
 import { createApplication } from '../../src/host/composition.js';
 import { CommandDispatcher } from '../../src/host/cli/CommandDispatcher.js';
 
@@ -15,7 +15,7 @@ const normalize = (value: string) => value.replace(/\r\n/g, '\n').replace(/^(?:s
 
 describe('Independent stats package through the frozen framework', () => {
   it('uses the same command class through A and B, adds dynamic help and retains history', async () => {
-    const a = await createApplication();
+    const a = await createApplication({ codePlugins: [{ module: '@svgframe/command-stats', plugin: new StatsPlugin() }] });
     const b = await createApplication({ args: ['--config', statsConfig] });
     try {
       expect(a.diagnostics).toEqual([]); expect(b.diagnostics).toEqual([]);
