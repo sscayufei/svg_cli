@@ -62,7 +62,7 @@ P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描
 | 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
 | 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory；command-dir/DirCommand.execute | 未 init 可用；Adapter 保持 startup path/不跟随链接；DirCommand 过滤点项、分组字符串排序/两空格/空目录并规范失败；无模型/历史副作用 |
 
-配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；box/star 仍待后续。stats 提交92cde9f已通过实际差异检查，dir 当前仅为本地工作区，接入 SHA 待提交。
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；92cde9f/8dc8e39 两个接入提交均通过真实差异检查。根配置现与 A 的 stats/dir 一致，独立空配置保留禁用行为；box/star 仍待后续。
 
 可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。内置及新增命令包均有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
 

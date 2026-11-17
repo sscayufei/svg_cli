@@ -520,3 +520,9 @@ Adapter 角色：DirCommand 是 Client，DirectoryPort 是 Target，NodeDirector
 38文件/319项主测试、dir单包9项、构建/类型检查通过。真实目录/链接和替身覆盖空/混合/隐藏/特殊项；成功与失败均比较场景/来源/保存点观察者/双栈/blocked 并实际 undo/redo。read/save 前后的六次列表在同一 cwd 保持相同；联合 A/B 两流 raw 字节及列目录 fixture 内容一致，日志和保存目标在目录外。stats-only 与三份无扩展 final 回放仍通过。
 
 见 [P2-3b 报告](../docs/phase2/P2-3b_REPORT.md)、[验证摘要](evidence/phase2/p2-3b-checks.json)、[A/B 摘要](evidence/phase2/p2-3b-assemblies.json)、[边界摘要](evidence/phase2/p2-3b-boundary.json)。命令插件节点本地验收就绪，未创建项目提交；dir 提交后补接入 SHA/差异，下一步在 box 开发前独立准备一致 A/B 清单及演示基线 F，正式 modified-star 仍待 P2-5。
+
+### Box 前置：共同演示基线准备
+
+dir 已提交为8dc8e39，实际接入差异检查通过，见 [提交证据](evidence/phase2/p2-3b-committed-diff.json)。本轮将根配置与代码装配对齐为 stats、dir；无扩展测试独立使用固定空配置，原断言保留。新增真实根配置的共同命令回放及回归，不修改生产源码、插件实现/manifest、依赖或构建工具。
+
+39文件/323项测试、构建/类型检查、真实根配置 raw A/B 与三份无扩展 final 回放通过。证据：[检查摘要](evidence/phase2/p2-4-prep-checks.json)、[A/B](evidence/phase2/p2-4-prep-assemblies.json)、[边界](evidence/phase2/p2-4-prep-boundary.json)。本轮是独立的 F 候选准备，未实现 box、未创建项目提交或分支；实际 F 要在本轮提交后记录，再以它为 C_A/C_B 的共同父提交。范围和操作顺序见 [基线准备记录](../docs/phase2/P2-4_BASELINE_PREPARATION.md)。

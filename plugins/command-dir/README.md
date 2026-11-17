@@ -24,4 +24,4 @@ node dist/host/main.js
 node dist/host/main.js --config doc/transcript/inputs/commands.plugins.json
 ```
 
-默认 A 启用 stats、dir；配置方式使用 `{ "module": "@svgframe/command-dir" }`，可以单独启用或设置 enabled:false 禁用。根配置当前仍为空列表，所有可选贡献可显式禁用。SVG read/save 不改变目录，查询成功或失败不修改文档、来源、保存点观察状态、双栈或历史屏障。
+默认 A 和根配置均启用 stats、dir；配置方式使用 `{ "module": "@svgframe/command-dir" }`，可以单独启用或设置 enabled:false 禁用。所有可选贡献可用独立空配置 test/fixtures/entries/no-optional.json 禁用。SVG read/save 不改变目录，查询成功或失败不修改文档、来源、保存点观察状态、双栈或历史屏障。

@@ -22,4 +22,4 @@ node dist/host/main.js
 node dist/host/main.js --config doc/transcript/inputs/stats.plugins.json
 ```
 
-根 plugins.config.json 仍为空列表，可显式禁用全部可选插件。包独立测试使用公开 SvgNode/SvgGroup 和复合替身，不 import 内置形状、命令、host 或 box。
+根 plugins.config.json 与默认代码装配均启用 stats、dir；显式空配置 test/fixtures/entries/no-optional.json 可禁用全部可选插件。包独立测试使用公开 SvgNode/SvgGroup 和复合替身，不 import 内置形状、命令、host 或 box。

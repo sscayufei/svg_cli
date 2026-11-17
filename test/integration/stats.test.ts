@@ -11,6 +11,7 @@ const root = resolve(import.meta.dirname, '../..');
 const temporary = resolve(root, '.tmp/phase2'); mkdirSync(temporary, { recursive: true });
 const main = resolve(root, 'dist/host/main.js');
 const statsConfig = resolve(root, 'doc/transcript/inputs/stats.plugins.json');
+const noOptionalConfig = resolve(root, 'test/fixtures/entries/no-optional.json');
 const normalize = (value: string) => value.replace(/\r\n/g, '\n').replace(/^(?:svg> )+/gm, '').trim();
 
 describe('Independent stats package through the frozen framework', () => {
@@ -40,7 +41,7 @@ describe('Independent stats package through the frozen framework', () => {
     const directory = mkdtempSync(resolve(temporary, 'stats-disabled-'));
     const disabled = resolve(directory, 'disabled.json');
     writeFileSync(disabled, JSON.stringify({ plugins: [{ module: '@svgframe/command-stats', enabled: false }] }));
-    for (const path of [resolve(root, 'plugins.config.json'), disabled]) {
+    for (const path of [noOptionalConfig, disabled]) {
       const app = await createApplication({ args: ['--config', path] });
       try {
         expect(app.diagnostics).toEqual([]); const dispatcher = new CommandDispatcher(app.context.commands);
@@ -65,7 +66,7 @@ describe('Independent stats package through the frozen framework', () => {
     const saved = readFileSync(resolve(evidence, 'code.files/stats.svg'));
     expect(saved.equals(readFileSync(resolve(evidence, 'config.files/stats.svg')))).toBe(true);
     expect(saved.toString('utf8')).toContain('<g id="nested">');
-    const empty = spawnSync(process.execPath, [main, '--config', resolve(root, 'plugins.config.json')], { cwd: root, input: 'stats\n', encoding: 'utf8' });
+    const empty = spawnSync(process.execPath, [main, '--config', noOptionalConfig], { cwd: root, input: 'stats\n', encoding: 'utf8' });
     expect(empty.status).toBe(0); expect(empty.stderr).toBe('error: unknown command: stats\n');
   });
 });

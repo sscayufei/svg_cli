@@ -12,6 +12,8 @@
 
 ## 1. Git 基线：已核对正确
 
+P2-4 前置准备更新：dir 已提交8dc8e39，39个接入变更路径零违反项。根配置现启用 stats/dir，与代码装配相同；无扩展测试使用固定 no-optional.json，不再依赖根演示配置。生产源码、依赖、构建工具均未改；323项测试、根配置两路 raw 比较和三份 final 回放通过。F 在本轮独立准备提交后登记，不使用旧8dc8e39代替。见 [基线准备记录](P2-4_BASELINE_PREPARATION.md)。
+
 P2-3b 更新：前置 stats 提交92cde9f，相对冻结1ff4352的实际接入差异检查通过。离线增加 @svgframe/command-dir 本地 workspace，无第三方新增，冻结 DirectoryPort/NodeDirectoryAdapter/构建工具未改。默认 A 启用 stats、dir；根配置仍为空，联合测试配置为 doc/transcript/inputs/commands.plugins.json。319项主测试、单包9项、真实目录/链接/失败继续交互、A/B 与三份无扩展 raw 基线通过。见 [P2-3b 记录](P2-3b_REPORT.md)。
 
 P2-3a 更新：框架冻结提交为 1ff4352de83ac64943f36c9d51684101249fa1f6，补齐 final→该 SHA 的历史指标。本轮离线安装仅增加 @svgframe/command-stats 本地 workspace 链接，无新增第三方依赖/工具版本。build 自动发现新包，未改编排。默认 A 启用 stats；无扩展基线通过 SVG_CLI_ENTRY 指向 test/fixtures/entries/no-optional.mjs，以显式空配置运行冻结 bootstrap。300项主测试、单包11项、A/B 和三份 raw 基线通过。见 [P2-3a 记录](P2-3a_REPORT.md)。

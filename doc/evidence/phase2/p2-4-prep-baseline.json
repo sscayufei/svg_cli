@@ -1,0 +1,37 @@
+{
+  "baselineSha": "2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d",
+  "currentHead": "8dc8e39174e1953550f46de3a34c3ac0e5c0e291",
+  "currentEntry": "D:\\software_design\\svg_cli\\test\\fixtures\\entries\\no-optional.mjs",
+  "sessions": [
+    {
+      "name": "cli-1-basics.txt",
+      "inputSha256": "e0261c570ebf61a58557ec269d5a8ddd3193fb9136e8e826cfaab93c96f73905",
+      "stdoutSha256": "0dbe5dbe8b9ce20d1d0a2e77fcd43b2db8d9ccee12b9516449f1ff4b921d7c78",
+      "stderrSha256": "584f7b38034750c5ca79d6a950125e6f3da7f5938012276f9260155f7fc8619c",
+      "files": {
+        "other.svg": "93f1d325c18c3a4d4743aa771c4d86ac06b5ce277d6c15f7761434191a767f69",
+        "中文 output.svg": "914cebf5614d45f6fc774e447d6900cf0df778d1b51f8adfce544b343529b703"
+      }
+    },
+    {
+      "name": "cli-1-flowchart.txt",
+      "inputSha256": "7a8f4e4068819cc40f18de2dd1eaa9f028d6f70774433adb306741b5490ae4b7",
+      "stdoutSha256": "39ab060f5e0607e71bb809664b95321cf0a77f6b7a76b350426c5b11a29bf9fe",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "files": {
+        "demo.svg": "8bc34757cc066d93b5a897df84e077134cf0db7e47b113b90e6b15ecf10c4cd8",
+        "other.svg": "93f1d325c18c3a4d4743aa771c4d86ac06b5ce277d6c15f7761434191a767f69"
+      }
+    },
+    {
+      "name": "cli-1.txt",
+      "inputSha256": "fab867ec405a4c7c2d9a8dcc39dd677b27e38170dc5b28c3acd6020ffd172b90",
+      "stdoutSha256": "616ffecd0aff4b7374137492d40a14a4c50829e3029de0ff1a12de306a4e749f",
+      "stderrSha256": "fafb518382996d2465b20b0cc5d08906277464707621725505b4368bf26f1f89",
+      "files": {
+        "demo.svg": "7ce8f300aae3599973f3650febaabdc48901160c9b1d5734522c45dfab7868be",
+        "other.svg": "93f1d325c18c3a4d4743aa771c4d86ac06b5ce277d6c15f7761434191a767f69"
+      }
+    }
+  ]
+}

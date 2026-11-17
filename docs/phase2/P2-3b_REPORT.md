@@ -1,6 +1,6 @@
 # P2-3b：dir 独立命令插件与命令阶段验收
 
-日期：2026-11-17。开始时工作区干净，HEAD 为 stats 接入提交 `92cde9f057f3b46080b8750f20555ef94c7f83dd`；框架冻结 SHA 仍为 `1ff4352de83ac64943f36c9d51684101249fa1f6`。状态：本地开发与验收通过，待审阅提交；dir 接入 SHA 尚未产生。
+日期：2026-11-17。开始时工作区干净，HEAD 为 stats 接入提交 `92cde9f057f3b46080b8750f20555ef94c7f83dd`；框架冻结 SHA 仍为 `1ff4352de83ac64943f36c9d51684101249fa1f6`。状态：dir 已提交 `8dc8e39174e1953550f46de3a34c3ac0e5c0e291`，实际接入差异检查通过，见 [提交证据](../../doc/evidence/phase2/p2-3b-committed-diff.json)。下文保留执行时记录。
 
 ## 实现与 Adapter 角色
 

@@ -27,11 +27,11 @@ node dist/host/main.js --config plugins.config.json
 
 根仅接受 plugins 数组，条目仅接受 module、enabled、options。module 必须是非空字符串，enabled 如出现必须是布尔值；options 原样传入 activate，由插件验证。结构校验在加载任何条目前完成。
 
-显式配置替换 A 的可选列表，内置能力始终安装。enabled:false 完全跳过解析和求值。配置文件相对启动 cwd；相对模块以配置文件目录为基准，包名按该目录的 Node ESM 上下文解析。包目录支持 exports 或 main/index.js，明确的 .js/.mjs/.cjs 入口使用所属包的清单，入口必须已构建。根 plugins.config.json 当前为显式空配置，可用于兼容回放。
+显式配置替换 A 的可选列表，内置能力始终安装。enabled:false 完全跳过解析和求值。配置文件相对启动 cwd；相对模块以配置文件目录为基准，包名按该目录的 Node ESM 上下文解析。包目录支持 exports 或 main/index.js，明确的 .js/.mjs/.cjs 入口使用所属包的清单，入口必须已构建。根 plugins.config.json 当前与 A 一致，按 stats、dir 顺序配置；无扩展兼容回放固定使用 test/fixtures/entries/no-optional.json。
 
 package.json 的 contributes 支持 shapes、commands、decorators、attributes 四类名称数组，缺省均为空；名称集合须与实际注册一致。接口实现使用类/实例，四类在各自名称空间中重名即拒绝。默认导出类由宿主无参构造，实例需提供同步 activate(ctx, options):void。
 
-当前真实 stats 配置示例为 doc/transcript/inputs/stats.plugins.json（模块 @svgframe/command-stats），运行 `node dist/host/main.js --config doc/transcript/inputs/stats.plugins.json` 与默认 A 都提供 stats。`node dist/host/main.js --config plugins.config.json` 使用根空列表，禁用全部可选贡献；根配置将在后续 stats/dir 一致演示基线准备时再调整。
+当前真实 stats 配置示例为 doc/transcript/inputs/stats.plugins.json（模块 @svgframe/command-stats），只提供 stats；默认 A 与根 plugins.config.json 提供 stats、dir。`node dist/host/main.js --config test/fixtures/entries/no-optional.json` 禁用全部可选贡献，仍保留内置十九条命令和六种形状。
 
 联合配置为 doc/transcript/inputs/commands.plugins.json，按 stats、dir 顺序与默认 A 保持一致；`node dist/host/main.js --config doc/transcript/inputs/commands.plugins.json` 提供两条命令。只列其中一个或用 enabled:false 可独立禁用另一个；help 由实际注册集合生成。
 
@@ -70,6 +70,8 @@ metrics 使用真实 Git blob，提供完整 SHA、文件职责、物理/代码�
 stats 的真实 A/B 回放可直接运行 `npm.cmd run verify:assemblies -- doc/transcript/plans/stats.json`。无扩展 final 基线应把 SVG_CLI_ENTRY 设为 test/fixtures/entries/no-optional.mjs，再运行 verify:baseline；此测试 wrapper 只调用冻结 bootstrap 和相邻的独立空配置，不修改 loader 或基线脚本，也不依赖未来根演示配置的内容。它确保比较条件是禁用可选插件，而不是带新增 help 的默认 A。
 
 联合 stats/dir 回放运行 `npm.cmd run verify:assemblies -- doc/transcript/plans/commands.json`，两侧同一直接 node 入口；seed 在每轮前复制到同一 cwd，保存目标及日志在被列目录外。stats-only 的旧 plan 使用显式测试入口提供仅 stats 的 A 列表，避免后来新增 dir 改变它的比较集合；原语义/错误预期保持不变。
+
+实际根配置回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/commands-root-config.json`。此基线验证共同命令，不替代后续 box 的全集合和独立提交比较；F/C_A/C_B 的记录与执行顺序见 [P2-4 基线准备](../docs/phase2/P2-4_BASELINE_PREPARATION.md)。
 
 `npm.cmd run verify:assemblies -- plan.json` 的 plan 包含 codeEntry、configEntry、configPath、transcript 和可选 fixtureDirectory，路径均相对 plan 文件。两入口都直接 node 运行并使用同一 bootstrap；B 追加 --config。工具在 .tmp/phase2 生成同一 cwd，A/B 顺序执行，日志位于 cwd 外，逐字节比较两个输出流与生成文件。复制后的 fixture 在每轮前重置；链接按链接内容记录，不跟随。fixture A/B 已验证 options、错误流与 SVG 字节，后续业务会话继续复用。
 

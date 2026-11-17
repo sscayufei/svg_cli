@@ -1,0 +1,22 @@
+{
+  "stage": "P2-4 baseline preparation",
+  "date": "2026-11-17",
+  "parentSha": "8dc8e39174e1953550f46de3a34c3ac0e5c0e291",
+  "frameworkFreezeSha": "1ff4352de83ac64943f36c9d51684101249fa1f6",
+  "demonstrationBaselineF": null,
+  "testedUncommittedWorkingTree": true,
+  "checks": [
+    { "command": "npm.cmd run verify:plugin-diff -- 92cde9f 8dc8e39 --plugin plugins/command-dir --mode code", "result": "passed", "evidence": "p2-3b-committed-diff.json", "changes": 39, "violations": 0 },
+    { "command": "npm.cmd run build", "result": "passed" },
+    { "command": "npm.cmd run check:tests", "result": "passed" },
+    { "command": "npm.cmd test", "result": "passed", "files": 39, "tests": 323, "newTests": 4 },
+    { "tool": "verify:assemblies", "plan": "doc/transcript/plans/commands-root-config.json", "result": "passed", "scope": "real root config, code assembly, identical stats/dir collection/order/options, raw stdout/stderr and listed fixture bytes", "evidence": "p2-4-prep-assemblies.json", "rawRun": ".tmp/phase2/assemblies-YP1o5O" },
+    { "tool": "verify:baseline", "entryOverride": "test/fixtures/entries/no-optional.mjs", "result": "passed", "sessions": 3, "evidence": "p2-4-prep-baseline.json", "rawRun": ".tmp/phase2/baseline-Qt1tX1" },
+    { "tool": "production code and metadata boundary diff", "result": "passed", "evidence": "p2-4-prep-boundary.json" }
+  ],
+  "productionCodeChanged": false,
+  "dependenciesChanged": false,
+  "notRerun": ["VSCode unit tests", "GUI and Extension Host", "VSIX installation"],
+  "deferred": ["actual separate preparation commit F", "shape-box implementation", "C_A and C_B demonstration commits and proofs"],
+  "projectGitWrites": false
+}

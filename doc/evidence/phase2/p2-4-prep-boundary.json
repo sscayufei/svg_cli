@@ -1,0 +1,67 @@
+{
+  "stage": "P2-4 preparation",
+  "frameworkFreezeSha": "1ff4352de83ac64943f36c9d51684101249fa1f6",
+  "candidateParentSha": "8dc8e39174e1953550f46de3a34c3ac0e5c0e291",
+  "demonstrationBaselineF": null,
+  "scope": "reviewable preparation working tree; F is the future separate preparation commit",
+  "baseConfig": {
+    "plugins": [
+      {
+        "module": "@svgframe/command-stats"
+      },
+      {
+        "module": "@svgframe/command-dir"
+      }
+    ]
+  },
+  "rootConfigSha256": "16eb71e44b870792e12e55409c7c49a9072f3d35b8e9a501f69ef911fc905d2d",
+  "unchangedRuntimePaths": [
+    "src",
+    "scripts",
+    "package.json",
+    "package-lock.json",
+    "plugins/builtin-commands/src",
+    "plugins/builtin-commands/test",
+    "plugins/builtin-commands/package.json",
+    "plugins/builtin-commands/tsconfig.json",
+    "plugins/builtin-shapes/src",
+    "plugins/builtin-shapes/test",
+    "plugins/builtin-shapes/package.json",
+    "plugins/builtin-shapes/tsconfig.json",
+    "plugins/command-stats/src",
+    "plugins/command-stats/test",
+    "plugins/command-stats/package.json",
+    "plugins/command-stats/tsconfig.json",
+    "plugins/command-dir/src",
+    "plugins/command-dir/test",
+    "plugins/command-dir/package.json",
+    "plugins/command-dir/tsconfig.json",
+    "extensions"
+  ],
+  "baselineRegressionScope": "common stats/dir prefix; later box integration is validated independently",
+  "projectGitWrites": false,
+  "reviewedChangedPaths": [
+    "README.md",
+    "doc/EXTENSION_POINTS.md",
+    "doc/PLUGIN_LOADING.md",
+    "doc/README.md",
+    "doc/evidence/phase2/p2-3b-committed-diff.json",
+    "doc/evidence/phase2/p2-4-prep-assemblies.json",
+    "doc/evidence/phase2/p2-4-prep-baseline.json",
+    "doc/evidence/phase2/p2-4-prep-boundary.json",
+    "doc/evidence/phase2/p2-4-prep-checks.json",
+    "doc/transcript/plans/commands-root-config.json",
+    "docs/phase2/ACCEPTANCE.md",
+    "docs/phase2/DEVELOPMENT_PLAN.md",
+    "docs/phase2/ENVIRONMENT.md",
+    "docs/phase2/P2-3b_REPORT.md",
+    "docs/phase2/P2-4_BASELINE_PREPARATION.md",
+    "docs/phase2/README.md",
+    "plugins.config.json",
+    "plugins/command-dir/README.md",
+    "plugins/command-stats/README.md",
+    "test/integration/box-baseline.test.ts",
+    "test/integration/stats.test.ts"
+  ],
+  "pathViolations": []
+}
