@@ -4,6 +4,8 @@
 
 2026-11-17 进度：V-01 已完成本地验收，见 [P2-1a 记录](P2-1a_REPORT.md) 和 [真实截图](../../doc/evidence/phase2/p2-1a-svg-badge.png)。V-02/V-03 的 SVG 大纲仍待 P2-1b；内置 TypeScript 大纲的观察记录仅为先行学习证据。
 
+P2-1b 更新：V-02/V-03/V-04 已通过本地验收，见 [阶段记录](P2-1b_REPORT.md) 和 [正式 VSCode 实践说明](../../doc/VSCODE_EXTENSION.md)。已安装 VSIX 的定位/更新/异常恢复、包内依赖及 A.3 分析均有证据；第一部分待审阅提交。
+
 ## 1. 需求追踪
 
 | 编号 | 需求 | 实现阶段 | 必备验证与证据 |

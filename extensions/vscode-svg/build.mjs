@@ -1,5 +1,6 @@
 import { build } from 'esbuild';
-await build({
+import { writeFileSync } from 'node:fs';
+const result = await build({
   entryPoints: ['src/extension.ts'],
   outfile: 'dist/extension.cjs',
   bundle: true,
@@ -8,4 +9,6 @@ await build({
   target: 'node22',
   external: ['vscode'],
   sourcemap: true,
+  metafile: true,
 });
+writeFileSync('dist/bundle-meta.json', JSON.stringify(result.metafile, null, 2));

@@ -1,0 +1,8 @@
+[
+    "extension.vsixmanifest",
+    "[Content_Types].xml",
+    "extension/package.json",
+    "extension/readme.md",
+    "extension/fixtures/example.svg",
+    "extension/dist/extension.cjs"
+]

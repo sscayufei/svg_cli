@@ -1,0 +1,27 @@
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const extension = resolve(root, 'extensions/vscode-svg');
+const manifest = JSON.parse(readFileSync(resolve(extension, 'package.json'), 'utf8'));
+const output = resolve(root, '.tmp/phase2');
+mkdirSync(output, { recursive: true });
+const artifact = resolve(output, `${manifest.name}-${manifest.version}.vsix`);
+const require = createRequire(import.meta.url);
+const vsce = resolve(dirname(require.resolve('@vscode/vsce/package.json')), 'vsce');
+const result = spawnSync(process.execPath, [vsce, 'package', '--no-dependencies', '--allow-missing-repository', '--skip-license', '--out', artifact], { cwd: extension, encoding: 'utf8' });
+process.stdout.write(result.stdout ?? '');
+process.stderr.write(result.stderr ?? '');
+if (result.error) throw result.error;
+if (result.status !== 0) throw new Error(`VSIX packaging failed: ${result.status}`);
+const bytes = readFileSync(artifact);
+const metadata = JSON.parse(readFileSync(resolve(extension, 'dist/bundle-meta.json'), 'utf8'));
+const inputs = Object.keys(metadata.inputs);
+const externalImports = [...new Set(Object.values(metadata.outputs).flatMap(output => output.imports.filter(entry => entry.external).map(entry => entry.path)))];
+if (!inputs.some(path => path.includes('saxes')) || externalImports.some(path => path !== 'vscode')) throw new Error('unexpected bundle dependencies');
+writeFileSync(resolve(output, 'vsix-package.json'), JSON.stringify({ artifact, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'), version: manifest.version, bundleInputs: inputs, externalImports }, null, 2));
+console.log(`VSIX: ${artifact}`);

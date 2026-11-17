@@ -15,7 +15,8 @@
     "build:extension": "npm run build --workspace svg-cli-companion",
     "test:extension:unit": "npm run test:unit --workspace svg-cli-companion",
     "test:extension": "node scripts/test-extension.mjs",
-    "verify:baseline": "node scripts/verify-baseline.mjs"
+    "verify:baseline": "node scripts/verify-baseline.mjs",
+    "package:extension": "npm run build:extension && node scripts/package-extension.mjs"
   },
   "devDependencies": {
     "@types/node": "24.19.2",

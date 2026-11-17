@@ -2,6 +2,8 @@
 
 日期：2026-11-17。前置提交：`e5ae494`（P2-0）。开始时工作区干净。状态：本地验收通过，待用户审阅提交。
 
+后续更新：已由用户提交为 5a5bcbf；下文保留本阶段交付记录。
+
 ## 实现与调用关系
 
 `extension.activate` 创建 `SvgFileDecorationProvider`，通过 `window.registerFileDecorationProvider` 注册给 VSCode。VSCode 在 Explorer 渲染资源时回调 `provideFileDecoration`；该类委托纯逻辑 `SvgBadgePolicy`，通过 workspace.fs.stat 判断真实文件类型，返回 badge `[]`、tooltip 和 propagate=false。

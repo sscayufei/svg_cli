@@ -458,3 +458,11 @@ Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
 P2-0 已完成扩展开发骨架、隔离调试配置、资源释放单测及真实 VSCode 宿主激活/释放烟测；CLI 严格编译和原 214 项测试通过。三份纯命令会话与 final 原始 stdout/stderr、生成文件逐字节一致。详细命令、环境问题的修正和证据见 [P2-0 记录](../docs/phase2/P2-0_REPORT.md)、[基线摘要](evidence/phase2/p2-0-baseline.json) 和 [宿主摘要](evidence/phase2/p2-0-host.json)。本节点尚待审阅提交；文件标记、大纲与 CLI 插件重构按后续节点实施。
 
 2026-11-17：P2-0 已提交为 e5ae494。P2-1a 已实现 Explorer SVG 文件标记，覆盖目录排除、文件变化刷新、取消/失败和释放；真实宿主核对文件名与内容不变，并保存 [SVG 标记截图](evidence/phase2/p2-1a-svg-badge.png)。实现前观察了内置 Outline 的嵌套、定位与编辑更新，最终重跑补齐折叠/展开验证；这不代表 SVG 大纲已实现。扩展四项单元测试、两种宿主场景、CLI 构建及四项既有综合验收通过。详见 [P2-1a 记录](../docs/phase2/P2-1a_REPORT.md)，本节点待审阅提交。
+
+### 第一部分交付：SVG 标记与原生大纲
+
+P2-1a 已提交为 5a5bcbf；P2-1b 已完成本地验收，待提交。扩展 0.2.0 支持 SVG 根/容器/叶子层级、标签名#id、无 id、点击源码定位、未保存编辑更新和不完整 XML 后恢复；VSIX 已在仓库外独立目录安装并通过同一套真实宿主测试。CLI 214 项回归及扩展 8 项单测通过。
+
+完整安装/启动步骤、真实截图、接口/对象组合/调用关系、Decorator/Adapter 差异及 Phase 1 复用评估见 [VSCode 实践说明（A.3）](VSCODE_EXTENSION.md)。核心职责：VSCode 负责激活、视图渲染和导航；扩展注册类实例，由宿主回调并提供文件装饰与 DocumentSymbol。文件装饰没有包装同接口的文件 Component，不能仅凭名称等同于经典 Decorator；语法树到 DocumentSymbol 的转换体现 Adapter。大纲复用 saxes，独立保存源码偏移，不复用会补 ID/施加领域约束的 SvgReader/模型。
+
+证据：[大纲第 3 行定位](evidence/phase2/p2-1b-svg-outline-navigation.png)、[异常 XML](evidence/phase2/p2-1b-svg-outline-incomplete.png)、[恢复](evidence/phase2/p2-1b-svg-outline-recovered.png)、[已安装宿主检查](evidence/phase2/p2-1b-outline-checks.json)。SVG 需使用文本编辑关联，示例工作区已有配置；扩展不修改全局偏好。详见 [P2-1b 记录](../docs/phase2/P2-1b_REPORT.md)。

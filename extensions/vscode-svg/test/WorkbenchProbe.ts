@@ -40,10 +40,11 @@ export class WorkbenchProbe {
     const response = await this.send<{ data: string }>('Page.captureScreenshot', { format: 'png' });
     writeFileSync(path, Buffer.from(response.data, 'base64'));
   }
-  public async click(expression: string): Promise<void> {
+  public async click(expression: string, clickCount = 1): Promise<void> {
     const point = await this.evaluate<{ x: number; y: number }>(`(() => { const element = ${expression}; if (!element) throw new Error('element missing'); const r = element.getBoundingClientRect(); return { x:r.x+r.width/2, y:r.y+r.height/2 }; })()`);
-    await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', clickCount: 1, ...point });
-    await this.send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, ...point });
+    await this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
+    await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', button: 'left', buttons: 1, clickCount, ...point });
+    await this.send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', buttons: 0, clickCount, ...point });
   }
   public dispose(): void { this.socket.close(); }
 }

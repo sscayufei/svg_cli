@@ -1,11 +1,12 @@
 import { ok, equal } from 'node:assert/strict';
-import { writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import * as vscode from 'vscode';
 import type { ExtensionLifecycle } from '../src/ExtensionLifecycle';
 import { dirname, resolve } from 'node:path';
 import { WorkbenchProbe } from './WorkbenchProbe';
 import { SvgFileDecorationProvider } from '../src/SvgFileDecorationProvider';
 import { createHash } from 'node:crypto';
+import { verifySvgOutline } from './SvgOutlineHostChecks';
 
 const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -131,15 +132,20 @@ export async function run(): Promise<void> {
   equal(vscode.version, '1.143.1', 'recorded test host version must match the pinned target');
   const extension = vscode.extensions.getExtension<ExtensionLifecycle>('svgframe-local.svg-cli-companion');
   ok(extension, 'development extension must be discoverable');
+  if (process.env.SVG_TEST_VSIX) {
+    ok(!extension.extensionPath.toLowerCase().startsWith(resolve(__dirname, '../../../..').toLowerCase()), 'installed bundle must be outside repository dependency tree');
+    equal(existsSync(resolve(extension.extensionPath, 'node_modules')), false);
+    equal(extension.packageJSON.version, '0.2.0');
+  }
   await waitFor(() => extension.isActive, 'automatic startup activation');
   const api = await extension.activate();
   equal(extension.isActive, true);
   equal(api.disposed, false);
   if (process.env.SVG_OBSERVE_OUTLINE === '1') await observeOutline();
-  else await verifyBadges();
+  else { await verifyBadges(); await verifySvgOutline(); }
   api.dispose();
   equal(api.disposed, true);
-  const evidence = { vscode: vscode.version, versions: process.versions, activation: 'passed', disposal: 'passed' };
+  const evidence = { vscode: vscode.version, versions: process.versions, activation: 'passed', disposal: 'passed', installedVsix: !!process.env.SVG_TEST_VSIX, extensionPath: extension.extensionPath };
   console.log(JSON.stringify(evidence));
   const evidencePath = process.env.SVG_EXTENSION_EVIDENCE;
   if (evidencePath) writeFileSync(evidencePath, JSON.stringify(evidence, null, 2) + '\n');
