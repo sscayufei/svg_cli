@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "publisher": "svgframe-local",
-  "description": "SVG course extension development scaffold",
+  "description": "Read-only SVG file badges in VSCode Explorer",
   "type": "commonjs",
   "engines": { "vscode": "^1.143.1" },
   "main": "./dist/extension.cjs",

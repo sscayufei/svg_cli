@@ -1,0 +1,18 @@
+{
+  "before": "Flow\nstart\nfinish",
+  "after": "Flow\nstart\ncomplete",
+  "collapseExpand": "passed",
+  "clickLine": 7,
+  "symbols": [
+    {
+      "name": "Flow",
+      "children": [
+        "start"
+      ]
+    },
+    {
+      "name": "finish",
+      "children": []
+    }
+  ]
+}

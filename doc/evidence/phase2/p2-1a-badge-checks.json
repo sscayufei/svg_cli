@@ -1,0 +1,27 @@
+{
+  "noSvgOpened": true,
+  "before": {
+    "example.svg": "1521c44bf09ddef916df6de077fb8cfed9950c01a16d766b320baf0f6c05bf92",
+    "folder.svg": "directory",
+    "outline-observation.ts": "6a96ed1be99b994ae42059781dac501e9fa024870e93f6dede93defa77430a87",
+    "plain.txt": "56953dfbed2955c5367027032fc84a14e8146526065938b5fa5ceab4f909eb4a"
+  },
+  "after": {
+    "example.svg": "1521c44bf09ddef916df6de077fb8cfed9950c01a16d766b320baf0f6c05bf92",
+    "folder.svg": "directory",
+    "outline-observation.ts": "6a96ed1be99b994ae42059781dac501e9fa024870e93f6dede93defa77430a87",
+    "plain.txt": "56953dfbed2955c5367027032fc84a14e8146526065938b5fa5ceab4f909eb4a"
+  },
+  "refresh": [
+    "create",
+    "change",
+    "rename-old",
+    "rename-new",
+    "delete"
+  ],
+  "directoryExcluded": true,
+  "missingExcluded": true,
+  "cancellation": "passed",
+  "disposal": "passed",
+  "explorerBadge": "nonenone nonenone nonenone nonenone nonenone \"[]\"\"\" nonenone nonenone nonenone nonenone"
+}

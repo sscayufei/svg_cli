@@ -456,3 +456,5 @@ Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
 2026-11-16 更新：上文保留 Phase 1 收尾时的历史记录。现已核对本地附注标签 final 指向 `2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d`；当前 HEAD 为新增第二阶段需求的 `0ebd382…`。第二阶段设计与执行入口见 [docs/phase2](../docs/phase2/README.md)。
 
 P2-0 已完成扩展开发骨架、隔离调试配置、资源释放单测及真实 VSCode 宿主激活/释放烟测；CLI 严格编译和原 214 项测试通过。三份纯命令会话与 final 原始 stdout/stderr、生成文件逐字节一致。详细命令、环境问题的修正和证据见 [P2-0 记录](../docs/phase2/P2-0_REPORT.md)、[基线摘要](evidence/phase2/p2-0-baseline.json) 和 [宿主摘要](evidence/phase2/p2-0-host.json)。本节点尚待审阅提交；文件标记、大纲与 CLI 插件重构按后续节点实施。
+
+2026-11-17：P2-0 已提交为 e5ae494。P2-1a 已实现 Explorer SVG 文件标记，覆盖目录排除、文件变化刷新、取消/失败和释放；真实宿主核对文件名与内容不变，并保存 [SVG 标记截图](evidence/phase2/p2-1a-svg-badge.png)。实现前观察了内置 Outline 的嵌套、定位与编辑更新，最终重跑补齐折叠/展开验证；这不代表 SVG 大纲已实现。扩展四项单元测试、两种宿主场景、CLI 构建及四项既有综合验收通过。详见 [P2-1a 记录](../docs/phase2/P2-1a_REPORT.md)，本节点待审阅提交。
