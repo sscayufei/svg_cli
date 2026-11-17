@@ -1,0 +1,20 @@
+# No document, help, empty tree, quoted arguments and common failures
+tree
+help
+init
+tree
+create hexagon bad
+create rect r1 0 0 10 20
+create rect r1 0 0 1 1
+set r1 label unsupported
+scale r1 0
+move missing 1 2
+create text t1 5 6 "中文 with spaces"
+set t1 text ""
+tree
+show t1
+undo
+redo
+save "中文 output.svg"
+undo
+unknown

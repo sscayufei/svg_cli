@@ -1,0 +1,22 @@
+{
+  "name": "svg-cli-companion",
+  "displayName": "SVG CLI Companion",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "svgframe-local",
+  "description": "SVG course extension development scaffold",
+  "type": "commonjs",
+  "engines": { "vscode": "^1.143.1" },
+  "main": "./dist/extension.cjs",
+  "activationEvents": ["onStartupFinished"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node build.mjs",
+    "test:unit": "node --test dist/test/unit.test.js"
+  },
+  "dependencies": { "saxes": "6.0.0" },
+  "devDependencies": {
+    "@types/vscode": "1.140.0",
+    "@vscode/test-electron": "3.1.0",
+    "esbuild": "0.28.2"
+  }
+}

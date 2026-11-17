@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "Build SVG extension",
+    "type": "process",
+    "command": "npm.cmd",
+    "linux": { "command": "npm" },
+    "osx": { "command": "npm" },
+    "args": ["run", "build:extension"],
+    "problemMatcher": "$tsc",
+    "group": "build"
+  }]
+}

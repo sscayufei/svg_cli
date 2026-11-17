@@ -1,0 +1,8 @@
+error: no document. use 'init' or 'read' first
+error: unknown shape type: hexagon (is the plugin loaded?)
+error: id already exists: r1
+error: unknown attribute: label
+error: scale factor must be positive
+error: no such shape: missing
+error: undo not allowed after io command
+error: unknown command: unknown

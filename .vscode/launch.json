@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+    "name": "SVG extension development host",
+    "type": "extensionHost",
+    "request": "launch",
+    "runtimeExecutable": "${execPath}",
+    "args": [
+      "--extensionDevelopmentPath=${workspaceFolder}/extensions/vscode-svg",
+      "--user-data-dir=${workspaceFolder}/.tmp/phase2/debug-user-data",
+      "--extensions-dir=${workspaceFolder}/.tmp/phase2/debug-extensions",
+      "${workspaceFolder}/extensions/vscode-svg/fixtures"
+    ],
+    "outFiles": ["${workspaceFolder}/extensions/vscode-svg/dist/**/*.cjs"],
+    "preLaunchTask": "Build SVG extension"
+  }]
+}

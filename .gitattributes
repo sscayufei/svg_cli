@@ -1,0 +1,4 @@
+/doc/transcript/** text eol=lf
+/scripts/*.mjs text eol=lf
+/extensions/vscode-svg/** text eol=lf
+/.vscode/*.json text eol=lf

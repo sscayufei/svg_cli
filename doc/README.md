@@ -450,3 +450,9 @@ Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
 本地已有分阶段提交，M8 没有自动提交。检查时分支为 master，已配置 origin，本地 origin/master 引用显示领先 9 次提交；没有联网核验远端最新状态，final 标签尚不存在。
 
 用户需审阅本轮 diff 并验收，提交 M8 后确认提交 SHA、实际截止时间、远端和分支，推送提交并在最终提交创建/推送 final 标签；已有同名标签时先核查，不能强制覆盖。完成这些手续后再核对远端 final 是否指向已验证的最终提交。本轮未执行任何提交、推送或标签创建，不将本地测试通过写成远端交付完成。
+
+## Phase 2 过程记录
+
+2026-11-16 更新：上文保留 Phase 1 收尾时的历史记录。现已核对本地附注标签 final 指向 `2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d`；当前 HEAD 为新增第二阶段需求的 `0ebd382…`。第二阶段设计与执行入口见 [docs/phase2](../docs/phase2/README.md)。
+
+P2-0 已完成扩展开发骨架、隔离调试配置、资源释放单测及真实 VSCode 宿主激活/释放烟测；CLI 严格编译和原 214 项测试通过。三份纯命令会话与 final 原始 stdout/stderr、生成文件逐字节一致。详细命令、环境问题的修正和证据见 [P2-0 记录](../docs/phase2/P2-0_REPORT.md)、[基线摘要](evidence/phase2/p2-0-baseline.json) 和 [宿主摘要](evidence/phase2/p2-0-host.json)。本节点尚待审阅提交；文件标记、大纲与 CLI 插件重构按后续节点实施。

@@ -1,0 +1,42 @@
+svg-editor 0.1 — type 'help' for commands
+svg> svg> svg> init [w] [h] — create canvas (default 800x600)
+canvas [w h] — inspect or resize canvas
+create <type> <id> [params...] [in <containerId>] — create a shape
+tree [id] — show scene or subtree
+show <id> — show parent and attributes
+move <id> <dx> <dy> — translate a shape or group
+scale <id> <factor> — scale all geometry by a positive factor
+set <id> <attr> <value> — set a whitelisted attribute
+delete <id> — delete a shape and its descendants
+group <newGid> <id1> <id2>... — group existing shapes in document order
+ungroup <gid> — promote a nested group's children
+addto <gid> <id> — move an existing shape into a container
+front <id> — move to the last sibling slot (painted in front)
+back <id> — move to the first sibling slot
+read <file.svg> — load SVG as the current document
+save [file.svg] — save SVG (path required without a read source)
+undo — undo the last edit
+redo — redo the last undone edit
+help — show command syntax
+create rect <id> <x> <y> <w> <h> [fill] — rectangle
+create circle <id> <cx> <cy> <r> [fill] — circle
+create ellipse <id> <cx> <cy> <rx> <ry> [fill] — ellipse
+create line <id> <x1> <y1> <x2> <y2> [stroke] — line
+create text <id> <x> <y> "content" — text
+create g <id> — empty group; all creates accept in <containerId>
+EOF — exit (Ctrl+Z then Enter on Windows; Ctrl+D on Unix).
+svg> canvas 800x600 created
+svg> svg (800x600)
+svg> svg> rect#r1 created
+svg> svg> svg> svg> svg> text#t1 created
+svg> text#t1 updated: text=""
+svg> svg (800x600)
+├── rect#r1  x=0 y=0 w=10 h=20
+└── text#t1  (5,6) ""
+svg> text#t1  parent=svg
+  x=5 y=6
+  text=""
+svg> text#t1 updated: text="中文 with spaces"
+svg> text#t1 updated: text=""
+svg> saved to 中文 output.svg (2 elements)
+svg> svg> svg> 
