@@ -1,0 +1,6 @@
+{
+  "codeEntry": "../../../test/fixtures/entries/box-code.mjs",
+  "configEntry": "../../../dist/host/main.js",
+  "configPath": "../inputs/box.plugins.json",
+  "transcript": "../cli-2-box.txt"
+}

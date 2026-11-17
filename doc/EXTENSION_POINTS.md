@@ -1,15 +1,15 @@
-# 扩展点清单（P2-3b）
+# 扩展点清单（P2-4）
 
-更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及独立 stats、dir。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
+更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及独立 stats、dir、box。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
 
 ## 接口、调用位置与缺省行为
 
 | 扩展点 | 核心接口及职责 | 当前实际调用点 | 当前实现 | 缺省/禁用 | 契约错误 |
 |---|---|---|---|---|---|
-| ShapeProvider | core/extensions/Contracts.ts；创建离线节点、恢复完整子树、提供 help 与可选创建反馈 | core/application/ShapeFactory.ts：create、fromAttributes、restore、creationFeedback、help；CreateCommand 与 SvgReader 调用服务 | builtin-shapes 中六类 provider；复合使用 FixtureProvider 测试替身 | 空表创建未知类型报错；未知 g 的 data-kind 降级普通 g；默认六种 provider | 重复/缺必需方法拒绝；无效节点/身份/归属拒绝；已注册复合标记缺 restore 或结构损坏拒绝，不降级 |
+| ShapeProvider | core/extensions/Contracts.ts；创建离线节点、恢复完整子树、提供 help 与可选创建反馈 | core/application/ShapeFactory.ts：create、fromAttributes、restore、creationFeedback、help；CreateCommand 与 SvgReader 调用服务 | builtin-shapes 中六类 provider；shape-box/BoxShapeProvider | 空表创建未知类型报错；未知 g 的 data-kind 降级普通 g；内置六种，默认可选 box | 重复/缺必需方法拒绝；无效节点/身份/归属拒绝；已注册复合标记缺 restore 或结构损坏拒绝，不降级 |
 | Command | core/application/commands/Command.ts：执行协议；Contracts.ts 的 CommandDefinition 提供命令名、语法、help 和 build | host/cli/CommandDispatcher.parse；core/application/CommandExecutor.execute；command-stats 的 Definition.build/Command.execute；command-dir/DirCommandDefinition.build、DirCommand.execute | builtin-commands 十九条；独立 StatsPlugin、DirPlugin 分别注册自己的 Definition/Command 类 | 内置十九条不变，默认 A 另启 stats、dir；可分别禁用，未装时 unknown command | 重复/缺 build 或无效 execute/kind 拒绝；多参数各报 usage；stats 无文档报错，dir 不依赖文档；dir 读失败 cannot read directory: path；query 不建历史 |
-| AttributeHandler | Contracts.ts：纯 handles；apply 接收只读目标及 AttributeEdits，可返回 applied/undone 反馈 | core/application/AttributeService.ts：resolve/plan；EditTransaction；SetAttributeCommand.plan 调用 | test/extensions 的 ProbeHandler、PairHandler；正式业务处理器在 P2-4 | 无匹配调用 SvgNode.planSetAttribute，保留原白名单 | 多匹配报 attribute handler conflict；操作/反馈/不变量失败逆序恢复，不转默认；门面关闭后报 transaction is closed |
-| TreeDecorator | Contracts.ts：读取只读 TreeRow，返回可选后缀 | core/application/SceneQuery.ts：tree/suffixes；NodeFormatter.tree 拼接通用 suffixes | 本阶段使用 ProbeDecorator 测试类；正式标签在 P2-4/P2-5 | 空表后缀为空，tree 与 final 字节不变 | 重复/缺 decorate 拒绝；非字符串或换行后缀报 invalid tree decorator result；异常使本次查询失败 |
+| AttributeHandler | Contracts.ts：纯 handles；apply 接收只读目标及 AttributeEdits，可返回 applied/undone 反馈 | core/application/AttributeService.ts：resolve/plan；EditTransaction；SetAttributeCommand.plan 调用 | shape-box/BoxFillHandler、BoxLabelHandler；另有框架测试替身 | 无匹配调用 SvgNode.planSetAttribute，保留原白名单 | 多匹配报 attribute handler conflict；操作/反馈/不变量失败逆序恢复，不转默认；门面关闭后报 transaction is closed |
+| TreeDecorator | Contracts.ts：读取只读 TreeRow，返回可选后缀 | core/application/SceneQuery.ts：tree/suffixes；NodeFormatter.tree 拼接通用 suffixes | shape-box/BoxTypeDecorator；modified-star 待 P2-5 | 空表后缀为空，tree 与 final 字节不变 | 重复/缺 decorate 拒绝；非字符串或换行后缀报 invalid tree decorator result；异常使本次查询失败 |
 
 上表文件路径省略仓库前缀：core = src/core；host = src/host；插件 = plugins/包名/src。ShapeProvider 等的共同注册实现为 core/extensions/ExtensionRegistry.ts：register/get/values；每类独立名称空间，保留注册顺序。语法规则与错误在插件内定义，分发器不枚举十九个命令名；ShapeFactory 不枚举六种图形名。
 
@@ -49,7 +49,9 @@ NodeSnapshot 区分 semanticType/displayType/isContainer，空容器也有容器
 
 ## 当前边界与下一阶段
 
-P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描述。正式设计依据见 [ADR 001](adr/001-attribute-transactions.md)、[ADR 002](adr/002-composite-restore.md)、[ADR 003](adr/003-lifecycle-and-labels.md)。真实业务插件的语义与接入证据仍按后续阶段验收。
+P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描述。P2-4 使用这些冻结契约完成真实 box，无需调整架构。正式设计依据见 [ADR 001](adr/001-attribute-transactions.md)、[ADR 002](adr/002-composite-restore.md)、[ADR 003](adr/003-lifecycle-and-labels.md)；[P2-4 报告](../docs/phase2/P2-4_REPORT.md)记录同一 F 的真实 C_A/C_B、完整包一致及逐字节回放。modified-star 仍待 P2-5。
+
+box 的 shape/box 由 BoxShapeProvider.create/restore 提供；BoxShape.verifyStructure/assertCanRelease/assertCanUngroup 校验并保护直接 rect/text 部件，拒绝分别为 `invalid box structure: id`、`cannot remove required component: id`、`cannot ungroup composite shape: id`。属性 box-fill/box-label 的 apply 仅通过 AttributeEdits 修改本 box 的部件，无匹配时普通组样式回退、label 未知；已安装 provider 的损坏子树拒绝，缺 provider 静默降级 g。decorator/box-type-label 的 BoxTypeDecorator.decorate 只对 box 行返回 `(box)`，不标根。调用链仍为通用 ShapeFactory、AttributeService、SceneQuery 和 formatter。
 
 ## 安装、加载与外部端口
 
@@ -62,7 +64,7 @@ P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描
 | 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
 | 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory；command-dir/DirCommand.execute | 未 init 可用；Adapter 保持 startup path/不跟随链接；DirCommand 过滤点项、分组字符串排序/两空格/空目录并规范失败；无模型/历史副作用 |
 
-配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；92cde9f/8dc8e39 两个接入提交均通过真实差异检查。根配置现与 A 的 stats/dir 一致，独立空配置保留禁用行为；box/star 仍待后续。
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；92cde9f/8dc8e39 两个接入提交均通过真实差异检查。当前整合根配置与 A 均为 stats/dir/box，独立空配置保留禁用行为。box 两份真实接入 C_A=f20745a、C_B=9a8aeb6 均通过；star 仍待 P2-5。
 
 可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。内置及新增命令包均有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
 

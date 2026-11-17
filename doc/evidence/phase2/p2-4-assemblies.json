@@ -1,0 +1,19 @@
+{
+  "node": "v24.14.0",
+  "cwd": "D:\\software_design\\svg_cli\\.tmp\\phase2\\assemblies-jZCFyR\\cwd",
+  "inputSha256": "6fa90687b4fccc4f8c08579008854d85869531b185ae82485f4b08fc97d7f56c",
+  "codeCommand": [
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\box-proof\\A\\dist\\host\\main.js"
+  ],
+  "configCommand": [
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\box-proof\\B\\dist\\host\\main.js",
+    "--config",
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\box-proof\\B\\plugins.config.json"
+  ],
+  "stdoutSha256": "a007beaaf69954ee90b7f8af680a080ddb9cb98dbd2d145beba270295e88bb9c",
+  "stderrSha256": "ddbf1d258b533fe5d82e7b21bcb3e050704284328b704d467248b5dda7e77ac6",
+  "files": {
+    "flowchart-box.svg": "746e10d9af7eb5c483d98e51dc5a325f40d933c3e9e91f567ef0a33b18cd9b56",
+    "roundtrip-box.svg": "8b6f249c5051a09188086e5690125d720c24edc00814fb4a57ee424ef12e5f96"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "stage": "P2-4",
+  "F": "f5236b500194d129345479799d149e22d18acb52",
+  "C_A": "f20745a82f12765a95b415b12893f8605cb52a4d",
+  "C_B": "9a8aeb65f21f14abd807c4e1c2f27dad40d0519a",
+  "branches": {
+    "A": "phase2/box-a-f5236b5",
+    "B": "phase2/box-b-f5236b5"
+  },
+  "worktrees": {
+    "A": "D:\\software_design\\svg_cli\\.tmp\\phase2\\box-proof\\A",
+    "B": "D:\\software_design\\svg_cli\\.tmp\\phase2\\box-proof\\B"
+  },
+  "pluginFilesSha256": {
+    "plugins/shape-box/package.json": "231c620018e959ff7ce1ba8b2810a5ceeb2a0e41245d8c8c385f01abe4471205",
+    "plugins/shape-box/README.md": "8059b1f8fbd4fd6c989030b2e2ba37ab059762de3da1d1d786d6ff49c387f3b7",
+    "plugins/shape-box/src/BoxFillHandler.ts": "cd2239f505afe33fd3c83340593de724e6a64f343d0f359ec8a61b1a760b3666",
+    "plugins/shape-box/src/BoxLabelHandler.ts": "8da60f00efd668c8208de1022c15159bcfcf09de3c06367ff179667fac9e431c",
+    "plugins/shape-box/src/BoxPlugin.ts": "46d509c4d2a16eb2397ca2670fa7d72e398d22d808d1b98ba11060df3d568fdf",
+    "plugins/shape-box/src/BoxShape.ts": "dfbabe6a21bd004910b38be22d74f11cba686ca225a9a7cd7ccaede3c8510614",
+    "plugins/shape-box/src/BoxShapeProvider.ts": "3fa9fdce65d4f86bef3d78f309ceab0654b6052de518ee086983c06fc0b804e8",
+    "plugins/shape-box/src/BoxTypeDecorator.ts": "ab62fe1d2b0550ea21b2594e00fa02ff1e9d0c7f14bfa44d51ccb7d49338d76f",
+    "plugins/shape-box/src/public.ts": "dceef083ec7ea3dccf338a7c254c97d104fee4d7160d4e0e189b480ef35d2970",
+    "plugins/shape-box/test/box.test.ts": "6030b05fa8350d62ce83baa8ba1e0401df5af7f476917e74db9a480f400d062f",
+    "plugins/shape-box/test/support.ts": "788321a207aaf86d19fffd456121dbc6c8d4448497969912823d2bf1703d1a7d",
+    "plugins/shape-box/tsconfig.json": "14af8fc50eb7388ea54cfbb7008d0142debfcfbe610f9520565d95cfc0b4cb8b"
+  },
+  "unchangedPathsFromF": [
+    "src/core",
+    "src/host/loading",
+    "src/host/filesystem",
+    "src/host/cli",
+    "src/host/svg",
+    "src/host/main.ts",
+    "src/host/bootstrap.ts",
+    "scripts",
+    "plugins/builtin-commands",
+    "plugins/builtin-shapes",
+    "plugins/command-stats",
+    "plugins/command-dir",
+    "extensions"
+  ],
+  "primaryWorkingTree": {
+    "head": "f5236b500194d129345479799d149e22d18acb52",
+    "committed": false,
+    "compositionMatches": "C_A",
+    "rootConfigMatches": "C_B",
+    "pluginMatchesBoth": true
+  },
+  "authorizedLocalProofCommits": true,
+  "pushOrTag": false
+}

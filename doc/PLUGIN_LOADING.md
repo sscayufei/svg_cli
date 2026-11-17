@@ -1,6 +1,6 @@
 # 插件装配、配置与验证
 
-框架已冻结于 1ff4352，保留六种形状和十九条内置命令；默认代码装配另按顺序启用独立 stats、dir。新机器先 npm ci 和 npm run build；运行入口为 dist/host/main.js。
+框架已冻结于 1ff4352，保留六种形状和十九条内置命令；当前整合工作区的默认代码装配及根配置另按顺序启用独立 stats、dir、box。新机器先 npm ci 和 npm run build；运行入口为 dist/host/main.js。
 
 ## A：代码装配
 
@@ -27,13 +27,13 @@ node dist/host/main.js --config plugins.config.json
 
 根仅接受 plugins 数组，条目仅接受 module、enabled、options。module 必须是非空字符串，enabled 如出现必须是布尔值；options 原样传入 activate，由插件验证。结构校验在加载任何条目前完成。
 
-显式配置替换 A 的可选列表，内置能力始终安装。enabled:false 完全跳过解析和求值。配置文件相对启动 cwd；相对模块以配置文件目录为基准，包名按该目录的 Node ESM 上下文解析。包目录支持 exports 或 main/index.js，明确的 .js/.mjs/.cjs 入口使用所属包的清单，入口必须已构建。根 plugins.config.json 当前与 A 一致，按 stats、dir 顺序配置；无扩展兼容回放固定使用 test/fixtures/entries/no-optional.json。
+显式配置替换 A 的可选列表，内置能力始终安装。enabled:false 完全跳过解析和求值。配置文件相对启动 cwd；相对模块以配置文件目录为基准，包名按该目录的 Node ESM 上下文解析。包目录支持 exports 或 main/index.js，明确的 .js/.mjs/.cjs 入口使用所属包的清单，入口必须已构建。根 plugins.config.json 当前与 A 一致，按 stats、dir、box 顺序配置；无扩展兼容回放固定使用 test/fixtures/entries/no-optional.json。
 
 package.json 的 contributes 支持 shapes、commands、decorators、attributes 四类名称数组，缺省均为空；名称集合须与实际注册一致。接口实现使用类/实例，四类在各自名称空间中重名即拒绝。默认导出类由宿主无参构造，实例需提供同步 activate(ctx, options):void。
 
-当前真实 stats 配置示例为 doc/transcript/inputs/stats.plugins.json（模块 @svgframe/command-stats），只提供 stats；默认 A 与根 plugins.config.json 提供 stats、dir。`node dist/host/main.js --config test/fixtures/entries/no-optional.json` 禁用全部可选贡献，仍保留内置十九条命令和六种形状。
+当前真实 stats 配置示例为 doc/transcript/inputs/stats.plugins.json（模块 @svgframe/command-stats），只提供 stats；默认 A 与根 plugins.config.json 提供 stats、dir、box。`node dist/host/main.js --config test/fixtures/entries/no-optional.json` 禁用全部可选贡献，仍保留内置十九条命令和六种形状。
 
-联合配置为 doc/transcript/inputs/commands.plugins.json，按 stats、dir 顺序与默认 A 保持一致；`node dist/host/main.js --config doc/transcript/inputs/commands.plugins.json` 提供两条命令。只列其中一个或用 enabled:false 可独立禁用另一个；help 由实际注册集合生成。
+联合命令配置为 doc/transcript/inputs/commands.plugins.json，仅按 stats、dir 顺序提供两条命令；完整 box 配置为 doc/transcript/inputs/box.plugins.json，与当前默认 A 同集合。只列其中一个或用 enabled:false 可独立禁用另一个；help 由实际注册集合生成。
 
 ## 错误和资源边界
 
@@ -71,7 +71,9 @@ stats 的真实 A/B 回放可直接运行 `npm.cmd run verify:assemblies -- doc/
 
 联合 stats/dir 回放运行 `npm.cmd run verify:assemblies -- doc/transcript/plans/commands.json`，两侧同一直接 node 入口；seed 在每轮前复制到同一 cwd，保存目标及日志在被列目录外。stats-only 的旧 plan 使用显式测试入口提供仅 stats 的 A 列表，避免后来新增 dir 改变它的比较集合；原语义/错误预期保持不变。
 
-实际根配置回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/commands-root-config.json`。此基线验证共同命令，不替代后续 box 的全集合和独立提交比较；F/C_A/C_B 的记录与执行顺序见 [P2-4 基线准备](../docs/phase2/P2-4_BASELINE_PREPARATION.md)。
+实际根配置回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/commands-root-config.json`。此基线验证共同命令。box 完整功能回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/box.json`，A 显式测试入口与 B 同装 stats/dir/box，以便同一测试在两份证明提交运行。
+
+真实独立证明已完成：F=f5236b5；C_A=f20745a（phase2/box-a-f5236b5）仅改 composition 接入；C_B=9a8aeb6（phase2/box-b-f5236b5）仅改根配置接入，两者父提交均为 F、box 包完全相同。另用两个隔离工作区的真实 main + B 根配置逐字节比较两流和两份 SVG，区别于通用功能测试入口。主工作区同时整合 A/B，尚未提交，保留两份本地证明分支、不 push/tag。完整 SHA、命令及证据见 [P2-4 报告](../docs/phase2/P2-4_REPORT.md)。
 
 `npm.cmd run verify:assemblies -- plan.json` 的 plan 包含 codeEntry、configEntry、configPath、transcript 和可选 fixtureDirectory，路径均相对 plan 文件。两入口都直接 node 运行并使用同一 bootstrap；B 追加 --config。工具在 .tmp/phase2 生成同一 cwd，A/B 顺序执行，日志位于 cwd 外，逐字节比较两个输出流与生成文件。复制后的 fixture 在每轮前重置；链接按链接内容记录，不跟随。fixture A/B 已验证 options、错误流与 SVG 字节，后续业务会话继续复用。
 

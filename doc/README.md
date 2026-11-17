@@ -526,3 +526,13 @@ Adapter 角色：DirCommand 是 Client，DirectoryPort 是 Target，NodeDirector
 dir 已提交为8dc8e39，实际接入差异检查通过，见 [提交证据](evidence/phase2/p2-3b-committed-diff.json)。本轮将根配置与代码装配对齐为 stats、dir；无扩展测试独立使用固定空配置，原断言保留。新增真实根配置的共同命令回放及回归，不修改生产源码、插件实现/manifest、依赖或构建工具。
 
 39文件/323项测试、构建/类型检查、真实根配置 raw A/B 与三份无扩展 final 回放通过。证据：[检查摘要](evidence/phase2/p2-4-prep-checks.json)、[A/B](evidence/phase2/p2-4-prep-assemblies.json)、[边界](evidence/phase2/p2-4-prep-boundary.json)。本轮是独立的 F 候选准备，未实现 box、未创建项目提交或分支；实际 F 要在本轮提交后记录，再以它为 C_A/C_B 的共同父提交。范围和操作顺序见 [基线准备记录](../docs/phase2/P2-4_BASELINE_PREPARATION.md)。
+
+### P2-4：真实 box 双装配接入
+
+共同基线已由用户提交为 F=f5236b500194d129345479799d149e22d18acb52。新增独立 shape-box，依公开 Composite、构建端口、受控属性事务及树装饰接口完成模板/部件保护/完整恢复、fill/label 与 `(box)` 类型标签；冻结 core/loader/渲染器/内置包/stats/dir 均未修改。类型标签与假星号的顺序组合通过，正式 modified-star 仍待 P2-5。
+
+用户授权创建本地证明分支并各提交一次：C_A=f20745a82f12765a95b415b12893f8605cb52a4d（phase2/box-a-f5236b5，仅 composition 接入），C_B=9a8aeb65f21f14abd807c4e1c2f27dad40d0519a（phase2/box-b-f5236b5，仅根配置接入）。唯一父提交均为 F，完整 box 包一致，各24个变更路径/零违反项；两侧独立构建、类型检查和365项测试通过，真实 main/root 配置逐字节回放两流及两份SVG一致。主工作区同时整合两种装配，HEAD仍为F、整合未提交，未 push/tag；两证明分支保留可达。
+
+主工作区41文件/365项测试、单包27项和三份无扩展 final 字节回放通过。初次并行测试的资源竞争超时与串行限worker重跑均有日志；未修改超时或原断言，未重跑未改动的GUI/VSIX。ADR001～003与扩展点已补真实调用位置，metrics分别从F→C_A/C_B的真实Git blob生成（core增量0；A host增2代码行，B host增量0）。
+
+详见 [P2-4 报告](../docs/phase2/P2-4_REPORT.md)、[检查摘要](evidence/phase2/p2-4-checks.json)、[提交/包校验](evidence/phase2/p2-4-proof.json)、[实际跨工作区回放](evidence/phase2/p2-4-assemblies.json) 与 [历史指标说明](../docs/metrics/README.md)。本阶段本地退出条件满足，当前整合变更由用户审阅提交，随后进行 P2-5。

@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器。Phase 1 已完成并由 final 标签固定；Phase 2 按 [开发计划](docs/phase2/DEVELOPMENT_PLAN.md) 推进。
 
-已交付 VSCode 文件标记/大纲、冻结框架和独立 stats/dir 插件，两个命令接入提交均通过差异核验。本轮已将代码装配与根配置统一为 stats、dir，323项测试及三份无扩展 final 字节回放通过；这份独立准备提交将作为 box 演示的共同基线 F。box 实现及两份独立接入提交尚待后续。详见 [基线准备记录](docs/phase2/P2-4_BASELINE_PREPARATION.md)、[装配说明](doc/PLUGIN_LOADING.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
+已交付 VSCode 文件标记/大纲、冻结框架和独立 stats/dir/box 插件。box 共同基线 F=f5236b5；两份授权的本地接入证明 C_A=f20745a（代码）、C_B=9a8aeb6（配置）均通过差异核验、独立365项测试及真实入口字节回放。当前待审阅工作区已整合两种装配，默认与根配置均启用 stats、dir、box；未提交整合内容、未 push/tag，modified-star 待下一阶段。详见 [P2-4 报告](docs/phase2/P2-4_REPORT.md)、[装配说明](doc/PLUGIN_LOADING.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
 
 首次安装后需构建本地工作区包，再启动 CLI；core 与插件通过 package exports 使用编译产物，tsx 不替代包构建。
 
@@ -16,7 +16,7 @@ node dist/host/main.js
 
 `build:all` 同时构建扩展；`check:tests` 检查测试源码类型；`test` 运行 CLI/插件测试；`test:all` 再运行扩展单测与真实宿主测试。两个内置包可用 `npm.cmd test --workspace @svgframe/builtin-shapes` 与 `npm.cmd test --workspace @svgframe/builtin-commands` 独立测试。
 
-无 --config 使用代码装配；`node dist/host/main.js --config plugins.config.json` 使用根配置装配，两者现均启用 stats、dir 并保留所有内置能力。`stats` 按 DFS 首次类型顺序统计叶子与容器；`dir` 使用目录端口列出启动目录，均不修改历史。显式禁用全部可选插件可指定 `--config test/fixtures/entries/no-optional.json`。配置或插件失败会报告并继续启动，详见 [插件说明](doc/PLUGIN_LOADING.md)。
+无 --config 使用代码装配；`node dist/host/main.js --config plugins.config.json` 使用根配置装配，两者现均启用 stats、dir、box 并保留所有内置能力。`stats` 按 DFS 首次类型顺序统计叶子与容器；`dir` 使用目录端口列出启动目录，均不修改历史。box 用法见 [插件 README](plugins/shape-box/README.md)。显式禁用全部可选插件可指定 `--config test/fixtures/entries/no-optional.json`。配置或插件失败会报告并继续启动，详见 [插件说明](doc/PLUGIN_LOADING.md)。
 
 以下 M0～M8 功能说明为保持兼容的 Phase 1 行为。
 
