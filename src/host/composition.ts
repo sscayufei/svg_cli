@@ -6,6 +6,7 @@ import { BuiltinCommandsPlugin } from '@svgframe/builtin-commands';
 import { StatsPlugin } from '@svgframe/command-stats';
 import { DirPlugin } from '@svgframe/command-dir';
 import { BoxPlugin } from '@svgframe/shape-box';
+import { TreeStarPlugin } from '@svgframe/tree-star';
 import { SvgFileStore } from './svg/SvgFileStore.js';
 import { SvgReader } from './svg/SvgReader.js';
 import { CommandDispatcher } from './cli/CommandDispatcher.js';
@@ -25,6 +26,7 @@ export function optionalPlugins(): readonly CodePluginRegistration[] {
     { module: '@svgframe/command-stats', plugin: new StatsPlugin() },
     { module: '@svgframe/command-dir', plugin: new DirPlugin() },
     { module: '@svgframe/shape-box', plugin: new BoxPlugin() },
+    { module: '@svgframe/tree-star', plugin: new TreeStarPlugin() },
   ];
 }
 

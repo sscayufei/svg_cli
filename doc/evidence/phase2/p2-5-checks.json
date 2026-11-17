@@ -1,0 +1,80 @@
+{
+  "stage": "P2-5",
+  "date": "2026-11-17",
+  "baseSha": "1d1b64628860d619e24b561bc49b2eeb435c29cc",
+  "frameworkFreezeSha": "1ff4352de83ac64943f36c9d51684101249fa1f6",
+  "testedUncommittedWorkingTree": true,
+  "actualIntegrationSha": null,
+  "checks": [
+    {
+      "command": "npm.cmd install --offline --ignore-scripts --no-audit --no-fund",
+      "result": "passed",
+      "newLocalWorkspaceLinks": 1,
+      "newThirdPartyDependencies": 0
+    },
+    {
+      "command": "npm.cmd run build",
+      "result": "passed",
+      "buildScriptChanged": false
+    },
+    {
+      "command": "npm.cmd run check:tests",
+      "result": "passed"
+    },
+    {
+      "command": "npm.cmd test --workspace @svgframe/tree-star",
+      "result": "passed",
+      "tests": 22,
+      "scope": "standalone saved-content state machine"
+    },
+    {
+      "command": "npm.cmd test -- --maxWorkers=4 test/integration/tree-star.test.ts",
+      "result": "passed",
+      "tests": 12
+    },
+    {
+      "command": "npm.cmd test -- --maxWorkers=4",
+      "result": "passed",
+      "files": 43,
+      "tests": 399,
+      "newTests": 34,
+      "evidence": "p2-5-verification.json"
+    },
+    {
+      "command": "npm.cmd run verify:assemblies -- doc/transcript/plans/star.json",
+      "result": "passed",
+      "scope": "four plugins in identical order/options, same cwd; code composition versus configured directory loading; raw stdout/stderr and generated fixture/SVG files",
+      "evidence": "p2-5-assemblies.json",
+      "rawRun": ".tmp/phase2/assemblies-BmXlEb"
+    },
+    {
+      "command": "npm.cmd run verify:baseline",
+      "entryOverride": "test/fixtures/entries/no-optional.mjs",
+      "result": "passed",
+      "sessions": 3,
+      "evidence": "p2-5-baseline.json",
+      "rawRun": ".tmp/phase2/baseline-g4P7vD"
+    },
+    {
+      "tool": "worktree protected paths and metadata check",
+      "result": "passed",
+      "evidence": "p2-5-boundary.json",
+      "committedIntegrationProof": false
+    }
+  ],
+  "environment": {
+    "vitestSandboxStartup": "initial independent test blocked by spawn EPERM; approved external rerun passed",
+    "node": "v24.14.0"
+  },
+  "notRerun": [
+    "VSCode unit tests",
+    "GUI and Extension Host",
+    "VSIX installation"
+  ],
+  "deferred": [
+    "user review and integration commit, then record actual SHA and committed diff",
+    "post-commit historical metrics",
+    "P2-6 comprehensive delivery"
+  ],
+  "gitWrites": false
+}

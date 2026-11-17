@@ -1,0 +1,7 @@
+{
+  "codeEntry": "../../../dist/host/main.js",
+  "configEntry": "../../../dist/host/main.js",
+  "configPath": "../inputs/star.plugins.json",
+  "transcript": "../cli-2-star.txt",
+  "fixtureDirectory": "../inputs/dir-workspace"
+}

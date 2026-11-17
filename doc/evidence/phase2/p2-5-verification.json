@@ -1,0 +1,29 @@
+{
+  "fullSuite": {
+    "chunk_id": "3b1745",
+    "wall_time_seconds": 9.0289011,
+    "exit_code": 0,
+    "original_token_count": 111,
+    "output": "\n> svg-cli@0.1.0 test\n> vitest run --maxWorkers=4\n\n\n RUN  v5.0.5 D:/software_design/svg_cli\n\n\n Test Files  43 passed (43)\n      Tests  399 passed (399)\n   Start at  23:01:22\n   Duration  8.16s (tests 75%, import 18%, transform 6%, worker 1%)\n\n    Isolate  43 workers spawned · ~134ms startup each (spawn + environment, per file)\n             at least ~1.31s faster with isolate: false — reuses workers across files instead of one per file\n\n"
+  },
+  "baseline": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "23c12b",
+      "wall_time_seconds": 7.074549,
+      "exit_code": 0,
+      "original_token_count": 54,
+      "output": "\n> svg-cli@0.1.0 verify:baseline\n> node scripts/verify-baseline.mjs\n\nPASS: 3 sessions match 2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d byte for byte. Evidence: D:\\software_design\\svg_cli\\.tmp\\phase2\\baseline-g4P7vD\n"
+    }
+  },
+  "assemblies": {
+    "status": "fulfilled",
+    "value": {
+      "chunk_id": "d14796",
+      "wall_time_seconds": 0.8063477,
+      "exit_code": 0,
+      "original_token_count": 55,
+      "output": "\n> svg-cli@0.1.0 verify:assemblies\n> node scripts/verify-assemblies.mjs doc/transcript/plans/star.json\n\nPASS: A/B raw streams and generated files match. Evidence: D:\\software_design\\svg_cli\\.tmp\\phase2\\assemblies-BmXlEb\n"
+    }
+  }
+}

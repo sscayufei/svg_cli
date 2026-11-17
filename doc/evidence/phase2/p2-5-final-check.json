@@ -1,0 +1,11 @@
+{
+  "stage": "P2-5",
+  "baseSha": "1d1b64628860d619e24b561bc49b2eeb435c29cc",
+  "protectedPathsUnchanged": true,
+  "packageHashesCurrent": true,
+  "rawEvidenceHashesCurrent": true,
+  "validJsonFiles": 9,
+  "markdownFilesLinkChecked": 13,
+  "diffCheck": "passed",
+  "gitWrites": false
+}

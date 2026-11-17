@@ -6,7 +6,7 @@ describe('CLI startup and EOF regression', () => {
   const projectRoot = fileURLToPath(new URL('../../', import.meta.url));
 
   const runCli = (input: string) => {
-    const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/host/main.ts'], {
+    const result = spawnSync(process.execPath, ['--import', 'tsx', 'src/host/main.ts', '--config', 'test/fixtures/entries/no-optional.json'], {
       cwd: projectRoot,
       input,
       encoding: 'utf8',

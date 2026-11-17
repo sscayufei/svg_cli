@@ -20,3 +20,5 @@
 P2-3a 开始时已确认框架冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，生成 [framework-freeze.md](framework-freeze.md) / [JSON](framework-freeze.json)。该报告只包含冻结框架，不包含本轮未提交 stats；工具仍直接读取历史 Git blob。最终先确定运行源码终态 SHA，再产出报告提交，并在 final/p2 上重算验证运行源码一致。不得手改生成 JSON/Markdown 数字。
 
 P2-4 已取得真实共同基线 F=`f5236b500194d129345479799d149e22d18acb52`，及两个授权的本地证明提交。由冻结工具生成 [box-code-integration.md](box-code-integration.md) / [JSON](box-code-integration.json)（F→C_A=f20745a）、[box-config-integration.md](box-config-integration.md) / [JSON](box-config-integration.json)（F→C_B=9a8aeb6）。core 均不变；A host 增2代码行，B host不变；新插件增102代码行/48函数复杂度。两包完全一致，完整提交与验证见 [P2-4 报告](../phase2/P2-4_REPORT.md)。这些是接入指标，不是最终 final→p2 交付统计。
+
+P2-5从P2-4整合提交1d1b646新增tree-star，本地399项测试和双标签字节回放通过，当前变更待用户提交。未从工作区伪造历史指标；用户提交后以1d1b646→实际接入SHA生成本插件增量，并在P2-6取得源码终态后生成final→终态指标。当前边界和待办见 [P2-5报告](../phase2/P2-5_REPORT.md)。

@@ -14,6 +14,7 @@ describe('M6 real CLI save transcripts', () => {
     const result = spawnSync(process.execPath, [
       '--import', pathToFileURL(createRequire(import.meta.url).resolve('tsx')).href,
       fileURLToPath(new URL('../../src/host/main.ts', import.meta.url)),
+      '--config', fileURLToPath(new URL('../fixtures/entries/no-optional.json', import.meta.url)),
     ], { cwd: directory, input: lines.join('\n'), encoding: 'utf8', timeout: 10_000 });
     expect(result.error).toBeUndefined(); expect(result.status, result.stderr).toBe(0);
     return { output: result.stdout.replace(/^(?:svg> )+/gm, '').trim(), errors: result.stderr.trim() };

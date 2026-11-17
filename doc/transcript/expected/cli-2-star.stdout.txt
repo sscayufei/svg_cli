@@ -1,0 +1,82 @@
+svg-editor 0.1 — type 'help' for commands
+canvas 100x200 created
+[DIR]  Beta
+[DIR]  docs
+[FILE]  .hidden
+[FILE]  Z.txt
+[FILE]  alpha.txt
+svg (100x200)
+g#flow created
+box#p created (g#p + rect#p-rect + text#p-label) in g#flow
+svg (100x200) *
+└── g#flow *
+    └── g#p (box) *
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9 *
+        └── text#p-label  (20,35) "title" *
+saved to star-saved.svg (4 elements)
+svg (100x200)
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "title"
+box#p fill propagated to p-rect
+g#p (box) *
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=red *
+└── text#p-label  (20,35) "title"
+box#p fill restored: "#4a90d9"
+g#p (box)
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+└── text#p-label  (20,35) "title"
+box#p fill propagated to p-rect
+g#p (box) *
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=red *
+└── text#p-label  (20,35) "title"
+g#p (box) *
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=red *
+└── text#p-label  (20,35) "title"
+box#p label updated: "changed"
+g#p (box) *
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=red *
+└── text#p-label  (20,35) "changed" *
+box#p label restored: "title"
+box#p fill restored: "#4a90d9"
+g#p (box)
+├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+└── text#p-label  (20,35) "title"
+box#p label updated: "A & <中文>"
+saved to star-roundtrip.svg (4 elements)
+svg (100x200)
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "A & <中文>"
+canvas 110x220 resized
+svg (110x220) *
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "A & <中文>"
+canvas 100x200 resized
+svg (100x200)
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "A & <中文>"
+read star-saved.svg (4 elements)
+svg (100x200)
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "title"
+box#p deleted
+svg (100x200) *
+└── g#flow *
+box#p restored into g#flow
+svg (100x200)
+└── g#flow
+    └── g#p (box)
+        ├── rect#p-rect  x=0 y=0 w=10 h=20 fill=#4a90d9
+        └── text#p-label  (20,35) "title"
+rect: 1  text: 1  (total 2, containers 2)
+canvas 800x600 created
+svg (800x600)

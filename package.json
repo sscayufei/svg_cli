@@ -41,6 +41,7 @@
     "@svgframe/builtin-commands": "0.2.0",
     "@svgframe/command-stats": "0.2.0",
     "@svgframe/command-dir": "0.2.0",
-    "@svgframe/shape-box": "0.2.0"
+    "@svgframe/shape-box": "0.2.0",
+    "@svgframe/tree-star": "0.2.0"
   }
 }

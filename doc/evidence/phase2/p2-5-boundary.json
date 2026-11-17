@@ -1,0 +1,38 @@
+{
+  "stage": "P2-5",
+  "baseSha": "1d1b64628860d619e24b561bc49b2eeb435c29cc",
+  "testedUncommittedWorkingTree": true,
+  "protectedPathsUnchanged": [
+    "src/core",
+    "src/host/cli",
+    "src/host/filesystem",
+    "src/host/loading",
+    "src/host/svg",
+    "src/host/main.ts",
+    "src/host/bootstrap.ts",
+    "scripts",
+    "plugins/builtin-commands",
+    "plugins/builtin-shapes",
+    "plugins/command-stats",
+    "plugins/command-dir",
+    "plugins/shape-box",
+    "extensions"
+  ],
+  "existingRuntimeSourceChanges": [
+    "src/host/composition.ts"
+  ],
+  "rootManifestChange": "only @svgframe/tree-star dependency",
+  "rootConfigChange": "append tree-star after box",
+  "pluginFilesSha256": {
+    "plugins/tree-star/package.json": "920eaca4db960993cdf8b8cbb70415015127e3c411cb57902e99a5c9af962427",
+    "plugins/tree-star/README.md": "77cfeef7bc6e0ccc991bc9ae8b2b07274318aee7558a0f70b8b7f70e33255609",
+    "plugins/tree-star/src/ModifiedStarDecorator.ts": "0cf0ced5e2b178544d67a6fb6b1b5331b7639c55a566eafdc852c45ee05e0229",
+    "plugins/tree-star/src/public.ts": "528fc9608014a88ac7423be39f020683b84cb2ba6fad3dbb3cdc55eb58b8e4be",
+    "plugins/tree-star/src/TreeStarPlugin.ts": "ec51d06e14962873525ea210f393063ce42552780d0f88c825977e000326bc93",
+    "plugins/tree-star/test/modified-star.test.ts": "655d573e05ad44debee6c863d97d04625d6a80fc600f1363937e4e87365a9137",
+    "plugins/tree-star/tsconfig.json": "14af8fc50eb7388ea54cfbb7008d0142debfcfbe610f9520565d95cfc0b4cb8b"
+  },
+  "committedIntegrationProof": false,
+  "gitWrites": false,
+  "actualIntegrationSha": null
+}

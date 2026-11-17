@@ -536,3 +536,11 @@ dir 已提交为8dc8e39，实际接入差异检查通过，见 [提交证据](ev
 主工作区41文件/365项测试、单包27项和三份无扩展 final 字节回放通过。初次并行测试的资源竞争超时与串行限worker重跑均有日志；未修改超时或原断言，未重跑未改动的GUI/VSIX。ADR001～003与扩展点已补真实调用位置，metrics分别从F→C_A/C_B的真实Git blob生成（core增量0；A host增2代码行，B host增量0）。
 
 详见 [P2-4 报告](../docs/phase2/P2-4_REPORT.md)、[检查摘要](evidence/phase2/p2-4-checks.json)、[提交/包校验](evidence/phase2/p2-4-proof.json)、[实际跨工作区回放](evidence/phase2/p2-4-assemblies.json) 与 [历史指标说明](../docs/metrics/README.md)。本阶段本地退出条件满足，当前整合变更由用户审阅提交，随后进行 P2-5。
+
+### P2-5：内容差异星号与两个标签并存
+
+P2-4已整合提交1d1b64628860d619e24b561bc49b2eeb435c29cc。本阶段新增独立tree-star，只依赖core public。ModifiedStarDecorator实例保存基线签名与dirty缓存，订阅成功init/read/save/edit/undo/redo/canvas；新建即标星、回保存内容消星、变化向当前祖先传播，旧祖先通过孩子序列反映删除/迁移，画布尺寸只标根。路径/对象身份/历史位置不参与，查询和失败不更新基线。订阅由冻结安装器暂存及释放。
+
+默认A与根B在box之后追加modified-star，输出`g#p (box) *`；两标签互不调用、两个包互不依赖，完整box包/core/渲染器/loader均未修改。真实目录路径配置、独立star/禁用star、子树显示、安装失败释放和多会话均验证。独立22项、真实集成12项，全量43文件/399项通过；同集合/顺序/options/cwd的raw A/B两流、两SVG及fixture树一致，三份禁用可选插件的final会话逐字节一致。
+
+正式状态机和关键取舍落在 [ADR003](adr/003-lifecycle-and-labels.md)，实测过程见 [P2-5报告](../docs/phase2/P2-5_REPORT.md)、[检查摘要](evidence/phase2/p2-5-checks.json)、[边界](evidence/phase2/p2-5-boundary.json) 与 [字节回放](evidence/phase2/p2-5-assemblies.json)。本地开发验收完成，当前变更待用户审阅提交，实际接入SHA/差异/历史指标在提交后补验；不以工作区检查代替提交证明。P2-6进行综合验收和最终交付，本阶段未重跑未改动的GUI/VSIX、未执行Git写操作。
