@@ -1,0 +1,2 @@
+error: cannot ungroup composite shape: n1
+error: cannot remove required component: n1-rect
