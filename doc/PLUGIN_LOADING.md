@@ -77,7 +77,9 @@ stats 的真实 A/B 回放可直接运行 `npm.cmd run verify:assemblies -- doc/
 
 box 真实独立证明已完成：F=f5236b5；C_A=f20745a（phase2/box-a-f5236b5）仅改 composition 接入；C_B=9a8aeb6（phase2/box-b-f5236b5）仅改根配置接入，两者父提交均为 F、box 包完全相同。另用两个隔离工作区的真实 main + B 根配置逐字节比较两流和两份 SVG，区别于通用功能测试入口。P2-4 已整合提交1d1b646，两份本地证明分支保留可达。完整 SHA、命令及证据见 [P2-4 报告](../docs/phase2/P2-4_REPORT.md)。
 
-双标签回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/star.json`，A 直接启动当前真实 main，B 同一 main 配合 star.plugins.json 的插件目录加载。两流、两SVG及固定目录树逐字节比较通过；并与手工预期核对。默认 A/根配置 B 的四插件与贡献顺序另有集成测试。tree-star 当前尚未提交，本地边界和回放不冒充实际接入SHA，后续提交后补差异/历史指标，见 [P2-5 报告](../docs/phase2/P2-5_REPORT.md)。
+双标签回放为 `npm.cmd run verify:assemblies -- doc/transcript/plans/star.json`，A 直接启动当前真实 main，B 同一 main 配合 star.plugins.json 的插件目录加载。两流、两SVG及固定目录树逐字节比较通过；并与手工预期核对。默认 A/根配置 B 的四插件与贡献顺序另有集成测试。tree-star已提交360fac0，P2-6补齐 [真实差异](evidence/phase2/p2-5-committed-diff.json) 和 [历史指标](../docs/metrics/tree-star-integration.md)。
+
+最终全集合验收运行 `node scripts/verify-phase2-release.mjs`（先build），或用`--source <干净构建目录>`指定产物。它用真实main/default A与同一main/root配置B回放全部六会话，确认四插件配置集合/顺序，无options；原始两流和全部生成文件比较，不改提示符/换行。最终双标签会话cli-2-star-release.txt的保存文件位于被列cwd外，两路同cwd顺序重置，目录内/外产物一并捕获；手工语义预期另层检查。结果见 [P2-6报告](../docs/phase2/P2-6_REPORT.md)，发布后用`node scripts/verify-phase2-delivery.mjs --revision p2 --metrics --remote`重核源码/真实final-p2指标/远端引用。
 
 `npm.cmd run verify:assemblies -- plan.json` 的 plan 包含 codeEntry、configEntry、configPath、transcript 和可选 fixtureDirectory，路径均相对 plan 文件。两入口都直接 node 运行并使用同一 bootstrap；B 追加 --config。工具在 .tmp/phase2 生成同一 cwd，A/B 顺序执行，日志位于 cwd 外，逐字节比较两个输出流与生成文件。复制后的 fixture 在每轮前重置；链接按链接内容记录，不跟随。fixture A/B 已验证 options、错误流与 SVG 字节，后续业务会话继续复用。
 

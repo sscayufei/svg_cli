@@ -1,0 +1,42 @@
+{
+  "stage": "P2-6",
+  "recordedAtUtc": "2026-11-17T15:37:38.042859+00:00",
+  "sourceSha": "360fac0c68711a954d27213989fb735eeaec5adc",
+  "status": "local verification complete; final report commit and remote publication require review",
+  "productionChanges": false,
+  "mainTests": 399,
+  "extensionUnitTests": 8,
+  "independentPluginTests": {
+    "stats": 11,
+    "dir": 9,
+    "box": 27,
+    "star": 22
+  },
+  "developmentAndInstalledHosts": "passed",
+  "vsixBuiltPackagedInstalledBundleIdentical": true,
+  "finalRawSessions": 3,
+  "fourPluginRawSessions": 6,
+  "earlierAssemblyPlans": 5,
+  "realPluginIntegrationChecks": 5,
+  "finalFiguresRenderedAndViewed": true,
+  "validJsonFilesChecked": 25,
+  "markdownDocumentsLinkChecked": 20,
+  "diffCheck": "passed",
+  "sourceMetricsSha": "360fac0c68711a954d27213989fb735eeaec5adc",
+  "sourceMetricsCliCodeLines": 3093,
+  "remaining": [
+    "reviewed report commit",
+    "remote master, proof branches, final and p2 publication",
+    "actual final/p2 metrics and remote refs recheck"
+  ],
+  "publicationActionsPerformed": false,
+  "evidence": [
+    "p2-6-clean-checks.json",
+    "p2-6-baseline.json",
+    "p2-6-release-assemblies.json",
+    "p2-6-vsix.json",
+    "p2-6-runtime-source.json",
+    "p2-6-remote-before.json",
+    "p2-5-committed-diff.json"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "initialUi": "svg\ng#flow\nrect#start\ng#nested\ntext",
+  "updatedUi": "svg\ng#flow\nrect#updated\ng#nested\ntext",
+  "invalidUi": "No symbols found in document 'example.svg'",
+  "recoveredUi": "svg\ng#flow\nrect#start\ng#nested\ntext",
+  "clickLine": 3,
+  "nesting": "passed",
+  "noId": "passed",
+  "unsavedUpdate": "passed",
+  "incompleteXml": "passed",
+  "recovery": "passed",
+  "cancellation": "passed",
+  "staleVersion": "passed",
+  "xmlLanguageUppercasePath": "passed",
+  "utf16Ranges": "passed",
+  "installed": false
+}

@@ -1,6 +1,6 @@
 # ADR 004：清单校验与插件安装回滚
 
-日期：2026-11-17。状态：P2-2c 通用安装路径已实现，业务插件的接入提交证明待后续阶段。依据：D08、D09。
+日期：2026-11-17。状态：通用安装路径已实现并冻结于1ff4352，stats/dir/box/star真实接入已完成；P2-6干净环境复验通过，调用与回滚机制不变。依据：D08、D09。
 
 ## 选择与原因
 
@@ -34,4 +34,4 @@ ctx.events 的订阅在提交前休眠，ctx.resources.add 接管其他可释放
 | host/loading/PluginConfiguration、PluginLoader | 整体配置校验与有序逐项加载/继续 |
 | host/composition、bootstrap、main | 默认内置、A/B 选择、统一 REPL/输出 |
 
-路径前缀 core=src/core，host=src/host。`test/loading/PluginInstaller.test.ts` 覆盖四贡献、回滚、前后插件可用、内部/外部重名、捕获错误后仍拒绝、集合排序、默认导出、异步拒绝、资源绑定失败与后类别提交失败；`PluginLoader.test.ts` 覆盖各加载失败、路径、禁用、options 和真实编译入口。正式业务插件与 A/B Git 接入 SHA 不能由这些 fixture 替代。
+路径前缀 core=src/core，host=src/host。`test/loading/PluginInstaller.test.ts` 覆盖四贡献、回滚、前后插件可用、内部/外部重名、捕获错误后仍拒绝、集合排序、默认导出、异步拒绝、资源绑定失败与后类别提交失败；`PluginLoader.test.ts` 覆盖各加载失败、路径、禁用、options 和真实编译入口。正式插件和真实Git接入已单独验证，fixture不替代它们；完整SHA与证据见 [Phase2报告](../PHASE2_REPORT.md)，六份四插件A/B原始字节在P2-6通过。

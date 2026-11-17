@@ -1,0 +1,37 @@
+init 100 200
+dir
+tree
+create g flow
+create box p 0 0 10 20 "title" in flow
+tree
+save ../star-saved.svg
+tree
+set p fill red
+tree p
+undo
+tree p
+redo
+tree p
+save ../missing/fail.svg
+tree p
+set p label changed
+tree p
+undo
+undo
+tree p
+set p label "A & <中文>"
+save ../star-roundtrip.svg
+tree
+canvas 110 220
+tree
+canvas 100 200
+tree
+read ../star-saved.svg
+tree
+delete p
+tree
+undo
+tree
+stats
+init
+tree

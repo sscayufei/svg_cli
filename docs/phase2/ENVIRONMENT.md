@@ -12,6 +12,8 @@
 
 ## 1. Git 基线：已核对正确
 
+P2-6最终复验：起点360fac0干净，Git archive源码在全新目录按锁离线npm ci（201包），未复用旧node_modules/dist。build:all/check:tests、399主测试、8扩展单测、四独立包、开发与新VSIX安装真实宿主均通过。只复用固定VSCode1.143.1二进制缓存，不复用扩展产物；安装包/构建/安装bundle相同。三份final明确比较干净CLI；archive无Git根导致一次导出前缀失败后改从真实Git根调用原工具并指定干净入口，通过。最终图使用本机PlantUML1.2024.3实际渲染，Chrome本地真实渲染生成SVG并截图。本阶段无新增第三方依赖/生产改动；远端只读master=8dc8e39，最终标签和证明分支待审阅发布。见 [P2-6报告](P2-6_REPORT.md)。
+
 P2-5更新：起点为干净的P2-4整合提交1d1b64628860d619e24b561bc49b2eeb435c29cc。离线增加@svgframe/tree-star本地workspace链接，无第三方新增/工具升级，冻结build自动发现新包；build/check:tests、43文件/399项主测试、单包22项、真实集成12项、双标签raw A/B及三份无扩展final回放通过。首次独立Vitest被沙箱spawn EPERM拦截，获准重跑通过。最终主测试使用maxWorkers=4，不改默认配置/超时；未重跑GUI/宿主/VSIX。当前变更未提交，本轮未执行Git写操作；实际接入SHA与指标随后补验。见 [P2-5报告](P2-5_REPORT.md)。
 
 P2-4 更新：F 已核对为 f5236b500194d129345479799d149e22d18acb52；用户授权的 A/B 本地证明分支和独立工作区保留于 `.tmp/phase2/box-proof/A`、`B`，提交分别 f20745a、9a8aeb6。仅增加 @svgframe/shape-box 本地 workspace，不新增第三方依赖、不改构建脚本。两侧各自离线 npm ci、build、check:tests 和365项测试通过；首次并行全测导致既有5秒烟测超时，串行 `npm.cmd test -- --maxWorkers=4` 后均通过，未修改超时或测试断言。主工作区也通过365项、单包27项及无扩展 final 回放。未重跑 GUI/Extension Host/VSIX；无新增服务或环境升级要求。真实提交回放与历史指标见 [P2-4 报告](P2-4_REPORT.md)。以下保留先前阶段环境记录。

@@ -1,0 +1,24 @@
+{
+  "node": "v24.14.0",
+  "cwd": "D:\\software_design\\svg_cli\\.tmp\\phase2\\p2-6-9_frztat\\source\\.tmp\\phase2\\assemblies-lPXh3V\\cwd",
+  "inputSha256": "442f9561c0620b04302e61f1e17bc0225e57332f1477a7d66c1f279e54bae808",
+  "codeCommand": [
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\p2-6-9_frztat\\source\\dist\\host\\main.js"
+  ],
+  "configCommand": [
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\p2-6-9_frztat\\source\\dist\\host\\main.js",
+    "--config",
+    "D:\\software_design\\svg_cli\\.tmp\\phase2\\p2-6-9_frztat\\source\\doc\\transcript\\inputs\\star.plugins.json"
+  ],
+  "stdoutSha256": "27c433a9e33de9d4efb294a19d0c3c129d586bfcf72fee5cd0fe01b1da6dd70b",
+  "stderrSha256": "5058c49e048cf78a42a60dd44a5ab03c375a4c89e4a249e1bcecc4a7febd254c",
+  "files": {
+    ".hidden": "e83e0ca964304979aba0d46a9ce6d38222d3623931b0e8a53afa9df7c8411bbd",
+    "Beta/nested.txt": "65bbc94a55977f11e1d9615822bd55ae043886f0f985db9fa4cd0b98e29cbcbe",
+    "Z.txt": "c995ad4a5531dde3989c0fc9a5847e281f1dc8ed36a85a51a4c3c801c5a4bdcb",
+    "alpha.txt": "57311cdb5f08246aa1054abc553ee87d5000a123ae82c2a6778751eb0ccf417b",
+    "docs/source.svg": "058459a57e28dbaff619748927f77c60b38599639602cc263ac5dc0c96c46789",
+    "star-roundtrip.svg": "93d4fadb3ce21e2b1b930fded935d1680acaf732565ef391973caf3ce4735519",
+    "star-saved.svg": "5e8ca815d9e79daaf54f5bcaa431a4acfec0f5584a744468648235d99aa09cf8"
+  }
+}

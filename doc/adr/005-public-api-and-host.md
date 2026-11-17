@@ -30,4 +30,4 @@ metrics 只读取指定 Git revisions，按版本化职责映射分类并用 TS7
 
 替代方案：不使用跨包相对 import、不手写插件名称分派、不让 tsx 掩盖未构建入口；不以工作区估算替代 Git 历史指标，不用最终合并提交替代 A/B 的独立接入证据。
 
-验证位置：architecture/dependencies、loading、NodeDirectoryAdapter、tools/framework-tools 测试；三份 final 字节回放；真实前后 [PlantUML 图](../architecture/phase2-framework.svg)。真实 stats/dir/box/star、最终指标及接入提交证据仍按后续阶段补齐。
+验证位置：architecture/dependencies、loading、NodeDirectoryAdapter、tools/framework-tools测试；三份final字节回放。P2-6在运行终态360fac0干净依赖/构建下复验399项主测试，真实stats/dir/box/star、最终源码指标与接入提交均已补齐。最终实际 [PlantUML图](../architecture/phase2.svg) 含全部插件和独立VSIX；旧 [框架图](../architecture/phase2-framework.svg) 保留过程时间点。最终报告/p2须保持生产源码相同，交付工具从真实p2重算指标并核对远端引用，见 [发布流程](../../docs/phase2/RELEASE.md)。

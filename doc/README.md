@@ -1,4 +1,31 @@
-# Lab1 Phase 1 — SVG 命令行编辑器实验报告
+# Lab1 — SVG 编辑器 Phase 1 / Phase 2 实验报告
+
+Phase 2正式入口：[完整报告](PHASE2_REPORT.md)、[扩展点清单](EXTENSION_POINTS.md)、[装配/配置说明](PLUGIN_LOADING.md)、[VSCode实践与A.3](VSCODE_EXTENSION.md)、[五份ADR](adr/001-attribute-transactions.md)、[历史指标](../docs/metrics/README.md)。运行源码终态为360fac0；本轮干净环境399项主测试、8项扩展单测、四独立插件和两个真实宿主通过，六份全集合A/B及三份final会话原始字节一致。最终过程见 [P2-6报告](../docs/phase2/P2-6_REPORT.md) 与 [审阅发布顺序](../docs/phase2/RELEASE.md)。发布状态以实际远端refs核对结果为准。
+
+## Phase 2 当前架构与验收
+
+| 内核扩展点 | 实际调用 | 正式实现与缺省 |
+|---|---|---|
+| ShapeProvider | ShapeFactory.create/restore/help，CreateCommand及SvgReader | 六内置provider及BoxShapeProvider；未知创建报错，未知g语义标记静默降级，已安装但损坏拒绝 |
+| Command/CommandDefinition | CommandDispatcher.parse、CommandExecutor/History | 十九内置及Stats/Dir类；缺可选命令报unknown，query不建历史 |
+| AttributeHandler | AttributeService.resolve、EditTransaction | BoxFillHandler/BoxLabelHandler；零匹配原规则，多匹配拒绝，失败逆序恢复且不回退 |
+| TreeDecorator | SceneQuery.tree/suffixes、NodeFormatter.tree | BoxTypeDecorator/ModifiedStarDecorator；无标签原输出不变，默认`(box) *`，状态各自封装 |
+
+源码分core、host、独立plugins与独立VSIX；插件只依赖core公开包根。Composite/Command/Iterator与局部ChangeSet保留，内置实现从固定分支迁入注册包。dir的Target为DirectoryPort，NodeDirectoryAdapter将Node readdir/Dirent适配为冻结name/kind，DirCommand排序/格式化；两种装配共用同一启动目录端口，不跟随链接/递归/改cwd。
+
+A在composition追加对象，B以`--config plugins.config.json`替换可选列表；根配置依次为@svgframe/command-stats、@svgframe/command-dir、@svgframe/shape-box、@svgframe/tree-star。两路共用manifest校验与安装回滚，支持options/enabled及相对配置目录解析，非法配置只用内置启动。完整字段/错误见 [装配说明](PLUGIN_LOADING.md)。
+
+重构前后实际依赖图均由PlantUML渲染，源码为 [final.puml](architecture/final.puml) / [phase2.puml](architecture/phase2.puml)：
+
+![final架构](architecture/final.svg)
+
+![Phase2架构](architecture/phase2.svg)
+
+详细契约、真实截图、A.3模式/复用、全部测试证据、五个ADR、过程提交与指标在 [Phase2正式报告](PHASE2_REPORT.md)。[final→源码终态指标](../docs/metrics/phase2-source.md)读取真实Git历史，CLI总代码行1936→3093/函数复杂度683→1158，VSCode单列；最终p2须通过交付工具重算比对。
+
+以下保留第一阶段正式报告及两阶段过程记录。旧目录/“待提交”文字属于当时的历史状态，当前架构和验收以Phase 2正式报告及最新阶段记录为准。
+
+## Phase 1 历史报告
 
 本项目使用 TypeScript、Node.js 和面向对象设计，实现六种内置 SVG 图形、19 条命令、嵌套分组、精确 Undo/Redo 及 SVG 读写。原始需求为 [phase_cli_1.md](../docs/phase_cli_1.md)，优先于设计建议。本文记录真实实现和分阶段协作过程，不依赖被忽略的本地设计文件才能理解方案。
 

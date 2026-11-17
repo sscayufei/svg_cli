@@ -2,6 +2,8 @@
 
 完成日期：2026-11-17。扩展版本 0.2.0；验证宿主 VSCode 1.143.1。源码在 [extensions/vscode-svg](../extensions/vscode-svg)，操作说明在其 [README](../extensions/vscode-svg/README.md)。
 
+P2-6最终复验：从360fac0干净源码/依赖重建扩展，8项单测、开发版及新VSIX独立安装版真实宿主均通过。构建/打包/安装bundle完全相同，归档6文件。最新 [标记截图](evidence/phase2/p2-6-svg-badge.png)、[点击定位](evidence/phase2/p2-6-svg-outline-navigation.png)、[更新](evidence/phase2/p2-6-svg-outline-updated.png)、[异常](evidence/phase2/p2-6-svg-outline-incomplete.png)、[恢复](evidence/phase2/p2-6-svg-outline-recovered.png)、[宿主](evidence/phase2/p2-6-installed-host.json) 与 [VSIX哈希](evidence/phase2/p2-6-vsix.json) 为本轮新证据；下文P2-1b截图保留过程记录。
+
 ## 功能、运行与安装
 
 Explorer 的 SVG 文件显示 []；普通文件和目录不标记，不改名或改写内容。以文本方式打开 SVG 后，原生 Outline 展示根、容器和叶子；有 id 使用 标签名#id，无 id 保留标签名。点击节点定位，未保存编辑后更新；XML 不完整时清空，补全后恢复。

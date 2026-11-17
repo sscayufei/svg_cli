@@ -2,7 +2,7 @@
 
 TypeScript + Node.js SVG 命令行编辑器。Phase 1 已完成并由 final 标签固定；Phase 2 按 [开发计划](docs/phase2/DEVELOPMENT_PLAN.md) 推进。
 
-已交付 VSCode 文件标记/大纲、冻结框架和独立 stats/dir/box 插件，P2-4 已整合提交1d1b646，box 两份独立接入证明保留。P2-5 新增 modified-star，按保存内容差异标记节点/祖先，undo 回保存内容消星，与 `(box)` 标签稳定组合；core、渲染器和既有插件均未修改。当前43文件/399项测试、双标签A/B和三份无扩展final字节回放通过，变更保留待审阅提交。详见 [P2-5 报告](docs/phase2/P2-5_REPORT.md)、[装配说明](doc/PLUGIN_LOADING.md) 和 [扩展点清单](doc/EXTENSION_POINTS.md)。
+Phase 2运行源码已提交为360fac0。干净依赖/构建环境通过399项主测试、8项扩展单测、四插件独立测试及开发版/独立安装VSIX真实宿主；三份final和六份全集合A/B原始字节回放通过。正式报告、最终依赖图、真实截图、接入差异与历史指标已齐备。详见 [正式报告](doc/PHASE2_REPORT.md)、[P2-6记录](docs/phase2/P2-6_REPORT.md) 和 [最终审阅/发布流程](docs/phase2/RELEASE.md)；发布状态以实际远端Git引用核对为准。
 
 首次安装后需构建本地工作区包，再启动 CLI；core 与插件通过 package exports 使用编译产物，tsx 不替代包构建。
 

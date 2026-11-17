@@ -1,6 +1,8 @@
-# 扩展点清单（P2-5）
+# 扩展点清单（P2-6最终核对）
 
 更新日期：2026-11-17。框架冻结于 1ff4352；本清单覆盖事务/复合模型/生命周期/安装及独立 stats、dir、box、tree-star。插件只导入 `@svgframe/core` 的公开出口，禁止导入 core 内部路径、host 或其他插件。
+
+最终运行源码为360fac0，干净环境43文件/399项测试与四独立包通过，下面接口/类/调用点已重新核对。tree-star实际提交已通过 [差异审计](evidence/phase2/p2-5-committed-diff.json)，全部接入及最终字节/宿主/图/指标见 [正式报告](PHASE2_REPORT.md)；原先“待用户提交”的P2-5记录在此补齐，冻结core/loader/渲染器未改。
 
 ## 接口、调用位置与缺省行为
 
@@ -49,7 +51,7 @@ NodeSnapshot 区分 semanticType/displayType/isContainer，空容器也有容器
 
 ## 当前边界与下一阶段
 
-P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描述。P2-4/P2-5 使用冻结契约完成真实 box 和 modified-star，无需调整架构。正式设计依据见 [ADR 001](adr/001-attribute-transactions.md)、[ADR 002](adr/002-composite-restore.md)、[ADR 003](adr/003-lifecycle-and-labels.md)；[P2-4 报告](../docs/phase2/P2-4_REPORT.md)记录同一 F 的真实 C_A/C_B、完整包一致及逐字节回放。[P2-5 报告](../docs/phase2/P2-5_REPORT.md)记录正式内容状态机、双标签和A/B本地验证，接入SHA待用户提交后补。
+P2-2b 已补齐属性事务、复合部件保护、生命周期和完整 XML 描述。P2-4/P2-5 使用冻结契约完成真实 box 和 modified-star，无需调整架构。正式设计依据见 [ADR 001](adr/001-attribute-transactions.md)、[ADR 002](adr/002-composite-restore.md)、[ADR 003](adr/003-lifecycle-and-labels.md)；[P2-4 报告](../docs/phase2/P2-4_REPORT.md)记录同一 F 的真实 C_A/C_B、完整包一致及逐字节回放。[P2-5 报告](../docs/phase2/P2-5_REPORT.md)记录正式内容状态机，实际接入提交360fac0已在P2-6补验。
 
 tree-star 的 TreeStarPlugin.activate 从 session.snapshot 建立独立初始基线，通过 context.events 暂存订阅；ModifiedStarDecorator.observe 在 init/read/save 更新基线，在 edit/undo/redo/canvas 重算内容差异和祖先缓存，decorate只查缓存。新节点立即标星、回保存内容消星；删除/移出由旧父孩子序列体现，画布只标根；查询和失败不更新。默认安装顺序 box-type-label、modified-star，组合为 `(box) *`，两包互不依赖；安装失败和退出均由冻结安装器释放订阅。
 
@@ -66,7 +68,7 @@ box 的 shape/box 由 BoxShapeProvider.create/restore 提供；BoxShape.verifySt
 | 模块归属 | PluginModuleResolver.resolve/nativeResolve | Node ESM 条件；目录/包名/编译文件，清单不需 exports 子路径；顶层缺失与依赖求值失败区分 |
 | 目录访问 | application/ports/DirectoryPort；host/filesystem/NodeDirectoryAdapter.read；PluginContext.directory；command-dir/DirCommand.execute | 未 init 可用；Adapter 保持 startup path/不跟随链接；DirCommand 过滤点项、分组字符串排序/两空格/空目录并规范失败；无模型/历史副作用 |
 
-配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；92cde9f/8dc8e39 两个接入提交均通过真实差异检查。当前整合根配置与 A 均为 stats/dir/box/tree-star，独立空配置保留禁用行为。box 两份真实接入 C_A=f20745a、C_B=9a8aeb6 均通过；tree-star在1d1b646上新增，本地验证通过，实际接入提交待审阅。
+配置/错误的完整用户契约见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计落点见 [ADR004](adr/004-plugin-installation.md) 和 [ADR005](adr/005-public-api-and-host.md)。stats、dir 已真实接入，分别使用文档 Iterator 与目录端口，均返回通用 lines；92cde9f/8dc8e39 两个接入提交均通过真实差异检查。当前整合根配置与 A 均为 stats/dir/box/tree-star，独立空配置保留禁用行为。box 两份真实接入 C_A=f20745a、C_B=9a8aeb6 均通过；tree-star提交360fac0已补真实差异，接入core/既有插件增量0。
 
 可核验测试：test/extensions/contracts.test.ts 覆盖四扩展点；transactions.test.ts 覆盖事务、失败恢复和重试；composites.test.ts 覆盖离线构建/保护/完整恢复/降级；lifecycle.test.ts 覆盖只读快照、成功通知、释放、异常隔离和测试基线/假标签。内置及新增命令包均有独立测试。架构测试使用 TypeScript 7 原生 AST 扫描 import/re-export/require/dynamic import，覆盖 core、host、生产插件及 VSCode src，排除产物/测试，并检查内部符号与 package exports。
 

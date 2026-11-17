@@ -1,5 +1,7 @@
 # P2-5：modified-star 与双标签状态机
 
+> 后续核对：用户已提交为 `360fac0c68711a954d27213989fb735eeaec5adc`。P2-6补 [实际提交差异](../../doc/evidence/phase2/p2-5-committed-diff.json) 和 [历史指标](../metrics/tree-star-integration.md)，并在干净环境复验全部399项及最终回放。下文保留P2-5交付时的原始记录，最新进度见 [P2-6_REPORT.md](P2-6_REPORT.md)。
+
 日期：2026-11-17。状态：开发与本地验收完成，当前变更待用户审阅提交；实际接入 SHA、提交差异及历史指标在提交后补验。未自行创建项目提交、分支、标签或 push。下一阶段为 P2-6 综合验收与最终交付。
 
 ## 起点与变更边界

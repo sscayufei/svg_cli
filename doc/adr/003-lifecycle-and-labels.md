@@ -1,6 +1,6 @@
 # ADR 003：生命周期、内容差异与标签组合
 
-日期：2026-11-17。状态：通知/快照/组合基础已实现（P2-2b），box 类型标签已交付（P2-4），正式 modified-star 状态机与双标签本地验收通过（P2-5，待用户提交后补接入SHA）。来源：D06、D07。
+日期：2026-11-17。状态：通知/快照/组合基础已实现（P2-2b），box类型标签已交付（P2-4），modified-star与双标签完成并提交360fac0；P2-6已补实际接入差异/历史指标及干净环境复验。来源：D06、D07。
 
 ## 问题与选择
 
@@ -37,4 +37,4 @@ P2-5 实际落点为 `plugins/tree-star/src/ModifiedStarDecorator.ts` 的 observ
 
 拒绝用编辑计数或历史位置作为唯一 dirty 定义；拒绝把具体标签判断加进渲染器；拒绝观察者异常使成功保存失败。这里是装饰管线，与经典同接口对象包装式 Decorator 的差异保留在报告中。
 
-验证：`test/extensions/lifecycle.test.ts` 覆盖七类事件、提交后栈状态、查询/失败无事件、值快照不可变、dispose、观察者异常与成功保存隔离、多会话、同值编辑/保存点/undo/redo/分叉/失败保存/canvas 的测试基线及假标签；`contracts.test.ts` 覆盖根、子树与顺序组合。P2-5 新增独立 `plugins/tree-star/test/modified-star.test.ts` 22项状态机及 `test/integration/tree-star.test.ts` 12项真实集成，覆盖各比较字段、2500层祖先、真实失败IO/查询/编辑保留历史、双标签、安装失败的实际订阅释放和退出释放；完整399项、raw A/B及无扩展final字节回放通过。实际接入SHA和历史指标待用户提交后补验。
+验证：`test/extensions/lifecycle.test.ts` 覆盖七类事件、提交后栈状态、查询/失败无事件、值快照不可变、dispose、观察者异常与成功保存隔离、多会话、同值编辑/保存点/undo/redo/分叉/失败保存/canvas 的测试基线及假标签；`contracts.test.ts` 覆盖根、子树与顺序组合。P2-5新增独立 `plugins/tree-star/test/modified-star.test.ts` 22项状态机及 `test/integration/tree-star.test.ts` 12项真实集成，覆盖各比较字段、2500层祖先、真实失败IO/查询/编辑保留历史、双标签、安装失败实际订阅释放和退出释放。P2-6在360fac0干净副本复验399项、raw A/B和final字节回放，并补 [实际提交差异](../evidence/phase2/p2-5-committed-diff.json) 与 [历史增量](../../docs/metrics/tree-star-integration.md)。

@@ -1,5 +1,7 @@
 # 历史源码指标
 
+P2-6最终源码数据：[phase2-source.md](phase2-source.md) / [JSON](phase2-source.json)，读取真实final→`360fac0c68711a954d27213989fb735eeaec5adc`。同时补 [tree-star-integration.md](tree-star-integration.md) / [JSON](tree-star-integration.json) 的1d1b646→360fac0增量，core不变、host仅加2代码行。CLI总代码行1936→3093、函数复杂度683→1158；VSCode单列143代码行/49复杂度，不能把内置迁移当功能净删减。JSON包含物理行/代码行/逐函数明细/职责和固定计数口径。最终报告提交/p2须保持生产源码相同，再运行 `node scripts/verify-phase2-delivery.mjs --revision p2 --metrics --remote` 从真实p2重算比对全部文件指标与增量；源码SHA与报告SHA的区别见 [发布流程](../phase2/RELEASE.md)。下文早期“待提交”属于对应历史节点。
+
 入口：`npm.cmd run metrics -- BEFORE AFTER --output docs/metrics/name`。读取 Git tree/blob 并解析历史源码，不修改工作区源码、不 checkout、不创建提交。无效 revision 或缺少支持的 core/host 源码布局时失败。输出 JSON 和 Markdown，JSON 包含完整 SHA、文件清单/职责、物理行数、代码行数、函数复杂度、顶层分支和分类差值。
 
 分类和口径保存在 scripts/metrics-rules.json，计数实现为 scripts/lib/source-metrics.mjs（TypeScript 7.0.2 native AST/scanner）：

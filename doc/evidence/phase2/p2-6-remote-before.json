@@ -1,0 +1,17 @@
+{
+  "queriedAtUtc": "2026-11-17T15:23:25.323545+00:00",
+  "remote": "origin",
+  "refs": {
+    "refs/heads/master": "8dc8e39174e1953550f46de3a34c3ac0e5c0e291"
+  },
+  "localFinalTagObject": "7d178c98f5038950b8ece6fcc6d204dcaf5a9879",
+  "localFinalCommit": "2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d",
+  "localSourceCommit": "360fac0c68711a954d27213989fb735eeaec5adc",
+  "published": false,
+  "pending": [
+    "master fast-forward",
+    "existing final tag",
+    "box proof branches",
+    "reviewed report commit and p2 tag"
+  ]
+}

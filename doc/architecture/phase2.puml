@@ -1,0 +1,56 @@
+@startuml
+title Phase 2 runtime source 360fac0 - actual package dependencies
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam ranksep 35
+skinparam nodesep 25
+
+package "src/host" as HOST {
+  component "main / bootstrap" as ENTRY
+  component "composition (A)" as COMPOSE
+  component "configuration / resolver / loader (B)" as LOAD
+  component "PluginInstaller / staged registries / resources" as INSTALL
+  component "CLI / generic formatters" as CLI
+  component "SVG I/O / NodeDirectoryAdapter" as ADAPTERS
+}
+package "plugins/*" as PLUGINS {
+  component "builtin-commands\nbuiltin-shapes" as BUILTINS
+  component "command-stats\ncommand-dir" as QUERYPLUGINS
+  component "shape-box\ntree-star" as LABELPLUGINS
+}
+component "@svgframe/core (public package root)\ndomain / Composite / local ChangeSet\nsession / history / transactions / immutable scene + events\nfour extension contracts / registries\nSVG I/O / Directory / Construction ports" as CORE
+ENTRY --> COMPOSE
+ENTRY --> CLI
+COMPOSE --> INSTALL : defaults + A
+COMPOSE --> LOAD : B replaces optional A list
+COMPOSE --> ADAPTERS
+COMPOSE --> PLUGINS : imports default class instances for A
+LOAD --> INSTALL : module export + same manifest
+LOAD ..> PLUGINS : generic dynamic import
+INSTALL --> CORE : registries + services
+CLI --> CORE : commands / results
+ADAPTERS --> CORE : implements ports
+PLUGINS --> CORE : public API only
+
+package "extensions/vscode-svg (independent VSIX)" as VSCODE {
+  component "FileDecorationProvider / badge policy" as BADGE
+  component "DocumentSymbolProvider / syntax parser" as OUTLINE
+}
+component "VSCode Extension API" as API
+component "saxes (XML parser)" as SAXES
+BADGE --> API
+OUTLINE --> API
+OUTLINE --> SAXES
+ADAPTERS --> SAXES
+note bottom of PLUGINS
+Every plugin imports only @svgframe/core public.
+No plugin-to-plugin imports; box and star do not know each other.
+Default order: stats, dir, box, tree-star.
+No concrete plugin names in core, loader or formatter.
+end note
+note bottom of VSCODE
+No CLI/core imports; syntax-only, preserves source ranges.
+VSIX bundles saxes; vscode is the only external import.
+end note
+@enduml

@@ -1,4 +1,8 @@
-# Phase 1 原始回放基线
+# 原始回放基线与Phase 2完整验收
+
+最终入口：`node scripts/verify-phase2-release.mjs`（先build），也可用`--source <干净构建目录>`。它用真实default A/root配置B回放六份四插件会话，原始stdout/stderr和目录内/外生成物逐字节一致；最终 `cli-2-star-release.txt` 在被列目录外保存和读回SVG，保留原star会话作过程回归。目录初始内容重置、日志位于cwd外，原始比较不去提示符/trim/改换行；手工预期语义检查是独立一层。各历史stats/commands/box/star plan继续由verify:assemblies回归。
+
+禁用可选插件与final比较时，先把SVG_CLI_ENTRY设为`test/fixtures/entries/no-optional.mjs`再运行verify:baseline。仅源码快照不含Git根时，从实际仓库运行历史导出器，并把该变量设为干净构建目录的no-optional.mjs绝对路径。完整命令及证据见 [P2-6报告](../../docs/phase2/P2-6_REPORT.md)。以下保留最初的Phase1基线约定。
 
 输入 TXT 仅含命令/注释，UTF-8、LF；不能粘贴 svg> 或输出。
 
