@@ -16,7 +16,7 @@
 
 开发一个可在 VSCode 中运行的扩展，使 Explorer 中的 `.svg` 文件旁显示 `[]` 标记。标记是界面附加信息，不修改文件名或文件内容；非 SVG 文件和目录不加标记。
 
-![SVG 文件标记的真实运行效果](docs/images/vscode-svg-badge.jpg)
+![SVG 文件标记的真实运行效果](images/vscode-svg-badge.jpg)
 
 *图 A.1：Explorer 中 `example.svg` 右侧显示 `[]`，普通文本文件和目录没有该标记，实际文件名不变。主题、图标和布局不要求与截图一致。*
 
@@ -26,7 +26,7 @@
 
 先观察 VSCode 现有大纲视图的行为，再实现上述效果。测试至少覆盖嵌套分组、无 id 元素、编辑更新和不完整 XML。
 
-![SVG 大纲与源码定位的真实运行效果](docs/images/vscode-svg-outline.jpg)
+![SVG 大纲与源码定位的真实运行效果](images/vscode-svg-outline.jpg)
 
 *图 A.2：左下方大纲展示 SVG 的嵌套层级，选中 `rect#start` 后定位到右侧第 3 行源码；无 id 的文本元素显示为 `text`。截图用于说明效果，界面样式不作统一要求。*
 

@@ -6,6 +6,9 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+# Local-only development archives, raw verification logs and packaging output.
 .tmp/
+# Legacy machine-specific evidence; report screenshots belong in doc/images/.
+/doc/evidence/
 .vscode-test/
 *.vsix

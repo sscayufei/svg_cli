@@ -1,6 +1,6 @@
 # ADR 002：复合容器保护与完整 SVG 恢复
 
-日期：2026-11-17。状态：通用能力已实现（P2-2b），真实 box 模板/恢复及接入验证通过（P2-4）。来源：D01、D04、D05。
+日期：2026-11-18。状态：已采用，实际验证结果在项目报告第8节填写。主题：复合结构保护与完整恢复。
 
 ## 问题与选择
 
@@ -35,4 +35,4 @@ SvgReader 先解析输入树，全局预留/检查显式 ID，再按原前序顺
 
 验证：`test/extensions/composites.test.ts` 的 FixtureComposite/FixtureProvider 仅为测试替身，覆盖公开构建端口、离线失败、全子树冲突、必要部件保护、嵌套/附加孩子、整体操作与身份恢复、三身份、SVG 往返、损坏拒绝、降级和降级前重复 ID；原 reader/writer 回归及 final 字节回放保留。
 
-P2-4 实际落点为 `plugins/shape-box/src/BoxShape.ts` 的三身份描述、verifyStructure/assertCanRelease/assertCanUngroup，以及 `BoxShapeProvider.ts` 的 create/restore。派生 ID 和必要 rect/text 规则完全位于插件；基础节点通过构建端口请求，以 SubtreeBuilder 一次离线组装。允许额外孩子/嵌套/同父调序，保护直接必要部件；整体编辑与精确撤销由现有 Composite 协议完成。旧 fromAttributes 不含子树，明确抛错。单包及真实 integration/box 验证合法样式往返、无 provider 降级、损坏拒绝及失败保持来源/redo。core 和 XML 适配未加 box 分支，见 [P2-4 报告](../../docs/phase2/P2-4_REPORT.md)。
+实际落点为 `plugins/shape-box/src/BoxShape.ts` 的三身份描述、verifyStructure/assertCanRelease/assertCanUngroup，以及 `BoxShapeProvider.ts` 的 create/restore。派生 ID 和必要 rect/text 规则完全位于插件；基础节点通过构建端口请求，以 SubtreeBuilder 一次离线组装。允许额外孩子/嵌套/同父调序，保护直接必要部件；整体编辑与精确撤销由现有 Composite 协议完成。旧 fromAttributes 不含子树，明确抛错。单包及真实 integration/box 验证合法样式往返、无 provider 降级、损坏拒绝及失败保持来源/redo。core 和 XML 适配未加 box 分支，见 [项目报告](../README.md)。

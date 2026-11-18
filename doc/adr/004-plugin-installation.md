@@ -1,6 +1,6 @@
 # ADR 004：清单校验与插件安装回滚
 
-日期：2026-11-17。状态：通用安装路径已实现并冻结于1ff4352，stats/dir/box/star真实接入已完成；P2-6干净环境复验通过，调用与回滚机制不变。依据：D08、D09。
+日期：2026-11-18。状态：已采用，实际验证结果在项目报告第8节填写。主题：共同安装事务、清单与失败隔离。
 
 ## 选择与原因
 
@@ -34,4 +34,5 @@ ctx.events 的订阅在提交前休眠，ctx.resources.add 接管其他可释放
 | host/loading/PluginConfiguration、PluginLoader | 整体配置校验与有序逐项加载/继续 |
 | host/composition、bootstrap、main | 默认内置、A/B 选择、统一 REPL/输出 |
 
-路径前缀 core=src/core，host=src/host。`test/loading/PluginInstaller.test.ts` 覆盖四贡献、回滚、前后插件可用、内部/外部重名、捕获错误后仍拒绝、集合排序、默认导出、异步拒绝、资源绑定失败与后类别提交失败；`PluginLoader.test.ts` 覆盖各加载失败、路径、禁用、options 和真实编译入口。正式插件和真实Git接入已单独验证，fixture不替代它们；完整SHA与证据见 [Phase2报告](../PHASE2_REPORT.md)，六份四插件A/B原始字节在P2-6通过。
+
+路径前缀core=src/core、host=src/host。test/loading/PluginInstaller.test.ts覆盖四贡献、回滚、前后插件、重名锁存、集合排序、无效默认对象、异步拒绝、资源绑定和后类别提交失败；PluginLoader.test.ts覆盖解析、各加载失败、禁用/options和编译入口。fixture测试不替代真实插件接入边界检查，结果在 [项目报告](../README.md) 第8节填写。

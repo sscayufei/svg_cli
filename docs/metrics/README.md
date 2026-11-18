@@ -1,26 +1,27 @@
 # 历史源码指标
 
-P2-6最终源码数据：[phase2-source.md](phase2-source.md) / [JSON](phase2-source.json)，读取真实final→`360fac0c68711a954d27213989fb735eeaec5adc`。同时补 [tree-star-integration.md](tree-star-integration.md) / [JSON](tree-star-integration.json) 的1d1b646→360fac0增量，core不变、host仅加2代码行。CLI总代码行1936→3093、函数复杂度683→1158；VSCode单列143代码行/49复杂度，不能把内置迁移当功能净删减。JSON包含物理行/代码行/逐函数明细/职责和固定计数口径。最终报告提交/p2须保持生产源码相同，再运行 `node scripts/verify-phase2-delivery.mjs --revision p2 --metrics --remote` 从真实p2重算比对全部文件指标与增量；源码SHA与报告SHA的区别见 [发布流程](../phase2/RELEASE.md)。下文早期“待提交”属于对应历史节点。
+保留的最终源码快照为 [phase2-source.md](phase2-source.md) / [JSON](phase2-source.json)，由脚本读取真实final提交与 `360fac0c68711a954d27213989fb735eeaec5adc` 生成。它记录历史源码，不包含未提交改动，也不代表本轮人工测试已完成；验证与最终结论在 [项目报告](../../doc/README.md) 第8节填写。开发期间的中间指标已移入本地过程归档。
 
-入口：`npm.cmd run metrics -- BEFORE AFTER --output docs/metrics/name`。读取 Git tree/blob 并解析历史源码，不修改工作区源码、不 checkout、不创建提交。无效 revision 或缺少支持的 core/host 源码布局时失败。输出 JSON 和 Markdown，JSON 包含完整 SHA、文件清单/职责、物理行数、代码行数、函数复杂度、顶层分支和分类差值。
+## 生成与更新
 
-分类和口径保存在 scripts/metrics-rules.json，计数实现为 scripts/lib/source-metrics.mjs（TypeScript 7.0.2 native AST/scanner）：
+在仓库根目录、安装依赖后执行，BEFORE和AFTER替换为真实revision：
 
-- core：final 的 src/domain、src/application；新架构的 src/core。
-- host：final 的 src/cli、src/infrastructure；新架构的 src/host。
-- plugins：plugins 的生产 .ts；VSCode 的 src 单列。
-- 排除 test/tests/fixtures/dist/node_modules、声明产物、脚本和非生产源码；CLI 总量合计前三类。
+```powershell
+npm.cmd run metrics -- BEFORE AFTER --output .tmp/verification/comparison
+```
 
-换行先统一为 LF，末尾换行不额外增加物理行；代码行按非空非注释 token 标记。AST 的字符串、正则及 template 片段保护扫描器，不用正则剥注释，避免把字符串中的 // 或多行 template 当注释。
+例如以 `final HEAD` 代替起止版本。确认用于报告的源码版本后，可将output设为 `docs/metrics/phase2-source` 更新最终JSON/Markdown；不要手改生成数字或用工作区估算冒充Git历史。输出包括完整SHA、工具版本、文件职责、物理/代码行、逐函数复杂度、顶层分支与分类增量。
 
-每个有函数体的函数/方法/构造器/accessor/箭头基础值为 1；if、各种循环、非 default case、catch、三元表达式及 &&/||/?? 和对应逻辑赋值各加 1。嵌套函数独立统计，不计入外层；文件顶层基础为 0，else/default/try/可选链不额外加值。这是本项目固定口径，不声称等同其他复杂度工具。
+## 计数范围与口径
 
-`test/tools/framework-tools.test.ts` 用真实 AST 验证注释/字符串/正则/template、空文件、嵌套函数与顶层分支；历史指标调用与规则版本随报告保留。
+- core：原架构的domain/application，新架构的src/core。
+- host：原cli/infrastructure，新架构的src/host。
+- plugins：plugins中的生产TypeScript；CLI总量合计前三类。
+- VSCode：extensions/vscode-svg/src单列，不混入CLI增量。
+- 排除test/tests/fixtures/dist/node_modules、声明产物、脚本和非生产源码。
 
-首轮 [p2-2c-initial.md](p2-2c-initial.md) / [JSON](p2-2c-initial.json) 对比 final `2054ec5…` 与 P2-2b 已提交的 `4a4ed73…`。这不是尚未提交的 P2-2c 全量指标，也不是最终 p2 指标。内置命令/图形迁入插件会重新分配分类数字，必须一起看 cliTotal，不能把迁移当功能净删除。
+规则为scripts/metrics-rules.json，实现为scripts/lib/source-metrics.mjs，使用固定TypeScript AST/scanner。换行统一LF，末尾换行不多计一行；代码行按非空非注释token标记，保护字符串/正则/template，不用正则盲删注释。
 
-P2-3a 开始时已确认框架冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，生成 [framework-freeze.md](framework-freeze.md) / [JSON](framework-freeze.json)。该报告只包含冻结框架，不包含本轮未提交 stats；工具仍直接读取历史 Git blob。最终先确定运行源码终态 SHA，再产出报告提交，并在 final/p2 上重算验证运行源码一致。不得手改生成 JSON/Markdown 数字。
+每个有函数体的函数基础复杂度为1；if、循环、非default case、catch、条件表达式、逻辑运算及逻辑赋值增加1；嵌套函数分开，顶层基础0，else/default/try/可选链不额外加值。这是本项目明确口径，不声称与其他工具完全一致。
 
-P2-4 已取得真实共同基线 F=`f5236b500194d129345479799d149e22d18acb52`，及两个授权的本地证明提交。由冻结工具生成 [box-code-integration.md](box-code-integration.md) / [JSON](box-code-integration.json)（F→C_A=f20745a）、[box-config-integration.md](box-config-integration.md) / [JSON](box-config-integration.json)（F→C_B=9a8aeb6）。core 均不变；A host 增2代码行，B host不变；新插件增102代码行/48函数复杂度。两包完全一致，完整提交与验证见 [P2-4 报告](../phase2/P2-4_REPORT.md)。这些是接入指标，不是最终 final→p2 交付统计。
-
-P2-5从P2-4整合提交1d1b646新增tree-star，本地399项测试和双标签字节回放通过，当前变更待用户提交。未从工作区伪造历史指标；用户提交后以1d1b646→实际接入SHA生成本插件增量，并在P2-6取得源码终态后生成final→终态指标。当前边界和待办见 [P2-5报告](../phase2/P2-5_REPORT.md)。
+内置命令和形状迁到独立插件会重新分配分类数字，应同时看CLI总量，不能把移动文件当成功能净删除或整体复杂度降低。最终标签与指标所记录源码不同时，应先检查生产源码是否相同并重算，而不是只改SHA文字。

@@ -1,6 +1,6 @@
 # ADR 001：属性分派与受控事务
 
-日期：2026-11-17。状态：通用能力已实现（P2-2b），真实 box 处理器及 A/B 接入验证通过（P2-4）。来源：设计决策 D02、D03。
+日期：2026-11-18。状态：已采用，实际验证结果在项目报告第8节填写。主题：属性匹配、反馈与失败原子性。
 
 ## 问题与选择
 
@@ -32,4 +32,4 @@ handler 可返回已应用/撤销反馈，框架在事务内复制、校验并�
 
 验证：`test/extensions/transactions.test.ts` 覆盖多部件单单元、局部抛错、第二次属性非法、反馈失败、不变量失败、execute/undo/redo 结果失败、保留来源与已有 redo、记录重放及门面关闭；`contracts.test.ts` 覆盖零/单/多命中和默认规则。
 
-P2-4 实际落点为 `plugins/shape-box/src/BoxFillHandler.ts`、`BoxLabelHandler.ts` 的 handles/apply：语义 box 上的 fill 只写本矩形，label 只写本文本，通过 edits.read/setAttribute 工作，返回已应用和撤销反馈。旧值以 JSON 字符串或 `(unset)` 表示，空 label 和转义可恢复。没有处理器时保留普通 g 属性规则。单包 `plugins/shape-box/test/box.test.ts` 与真实 `test/integration/box.test.ts` 验证两属性、重放、冲突和人为两部件修改后失败的回滚，未修改通用事务。真实提交、回放与证据见 [P2-4 报告](../../docs/phase2/P2-4_REPORT.md)。
+实际落点为 `plugins/shape-box/src/BoxFillHandler.ts`、`BoxLabelHandler.ts` 的 handles/apply：语义 box 上的 fill 只写本矩形，label 只写本文本，通过 edits.read/setAttribute 工作，返回已应用和撤销反馈。旧值以 JSON 字符串或 `(unset)` 表示，空 label 和转义可恢复。没有处理器时保留普通 g 属性规则。单包 `plugins/shape-box/test/box.test.ts` 与真实 `test/integration/box.test.ts` 验证两属性、重放、冲突和人为两部件修改后失败的回滚，未修改通用事务。真实提交、回放与证据见 [项目报告](../README.md)。

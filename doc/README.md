@@ -1,573 +1,305 @@
-# Lab1 — SVG 编辑器 Phase 1 / Phase 2 实验报告
+# SVG CLI 项目报告
 
-Phase 2正式入口：[完整报告](PHASE2_REPORT.md)、[扩展点清单](EXTENSION_POINTS.md)、[装配/配置说明](PLUGIN_LOADING.md)、[VSCode实践与A.3](VSCODE_EXTENSION.md)、[五份ADR](adr/001-attribute-transactions.md)、[历史指标](../docs/metrics/README.md)。运行源码终态为360fac0；本轮干净环境399项主测试、8项扩展单测、四独立插件和两个真实宿主通过，六份全集合A/B及三份final会话原始字节一致。最终过程见 [P2-6报告](../docs/phase2/P2-6_REPORT.md) 与 [审阅发布顺序](../docs/phase2/RELEASE.md)。发布状态以实际远端refs核对结果为准。
+本文整理SVG编辑器的扩展点、插件装配、架构重构、设计决策及AI协作检查。操作说明见 [用户指南](../README.md)，需求依据为 [第一阶段](../docs/phase_cli_1.md) 和 [第二阶段](../docs/phase_cli_2.md) 需求。
 
-## Phase 2 当前架构与验收
+整理日期：2026-11-18。**本轮插件/加载器测试、兼容性验证及VSCode运行结果由作者完成后填写**。下文描述设计与实现，历史指标注明来源；第8节预留实际命令、结论和截图位置，不将旧开发记录作为本轮结果。阶段计划、重复过程报告、旧日志和截图已归入本地 `.tmp/`，不作为报告附件。
 
-| 内核扩展点 | 实际调用 | 正式实现与缺省 |
-|---|---|---|
-| ShapeProvider | ShapeFactory.create/restore/help，CreateCommand及SvgReader | 六内置provider及BoxShapeProvider；未知创建报错，未知g语义标记静默降级，已安装但损坏拒绝 |
-| Command/CommandDefinition | CommandDispatcher.parse、CommandExecutor/History | 十九内置及Stats/Dir类；缺可选命令报unknown，query不建历史 |
-| AttributeHandler | AttributeService.resolve、EditTransaction | BoxFillHandler/BoxLabelHandler；零匹配原规则，多匹配拒绝，失败逆序恢复且不回退 |
-| TreeDecorator | SceneQuery.tree/suffixes、NodeFormatter.tree | BoxTypeDecorator/ModifiedStarDecorator；无标签原输出不变，默认`(box) *`，状态各自封装 |
+## 1. 项目目标与结构
 
-源码分core、host、独立plugins与独立VSIX；插件只依赖core公开包根。Composite/Command/Iterator与局部ChangeSet保留，内置实现从固定分支迁入注册包。dir的Target为DirectoryPort，NodeDirectoryAdapter将Node readdir/Dirent适配为冻结name/kind，DirCommand排序/格式化；两种装配共用同一启动目录端口，不跟随链接/递归/改cwd。
+第一阶段实现内置图形、Composite分组、Command撤销重做、文档遍历和SVG读写。第二阶段在保留这些能力的基础上，建立四个稳定扩展点、独立插件包、代码/配置双装配，并实现独立VSCode扩展。
 
-A在composition追加对象，B以`--config plugins.config.json`替换可选列表；根配置依次为@svgframe/command-stats、@svgframe/command-dir、@svgframe/shape-box、@svgframe/tree-star。两路共用manifest校验与安装回滚，支持options/enabled及相对配置目录解析，非法配置只用内置启动。完整字段/错误见 [装配说明](PLUGIN_LOADING.md)。
-
-重构前后实际依赖图均由PlantUML渲染，源码为 [final.puml](architecture/final.puml) / [phase2.puml](architecture/phase2.puml)：
-
-![final架构](architecture/final.svg)
-
-![Phase2架构](architecture/phase2.svg)
-
-详细契约、真实截图、A.3模式/复用、全部测试证据、五个ADR、过程提交与指标在 [Phase2正式报告](PHASE2_REPORT.md)。[final→源码终态指标](../docs/metrics/phase2-source.md)读取真实Git历史，CLI总代码行1936→3093/函数复杂度683→1158，VSCode单列；最终p2须通过交付工具重算比对。
-
-以下保留第一阶段正式报告及两阶段过程记录。旧目录/“待提交”文字属于当时的历史状态，当前架构和验收以Phase 2正式报告及最新阶段记录为准。
-
-## Phase 1 历史报告
-
-本项目使用 TypeScript、Node.js 和面向对象设计，实现六种内置 SVG 图形、19 条命令、嵌套分组、精确 Undo/Redo 及 SVG 读写。原始需求为 [phase_cli_1.md](../docs/phase_cli_1.md)，优先于设计建议。本文记录真实实现和分阶段协作过程，不依赖被忽略的本地设计文件才能理解方案。
-
-2026-10-17，M8 本地自动验收完成：构建通过，24 个测试文件、214 项测试通过；编译后完整会话与浏览器预览通过。M8 用户验收、最终 Git 提交、推送及 final 标签仍待用户完成。
-
-## 架构方案
-
-### 模块划分
-
-| 模块 | 主要类/接口 | 职责 |
-|---|---|---|
-| `src/domain` | SvgNode、五种叶子、SvgGroup、SvgDocument、SceneEditor、GeometryState、ChangeSet、ShapeFactory | 封装几何/样式、树和 ID 不变量、统一操作、跨节点事务及局部可逆变更；不依赖 XML/文件系统 |
-| `src/application` | EditorSession、CommandExecutor、CommandHistory、SceneQuery | 文档和来源生命周期、用例执行边界、历史状态和查询投影 |
-| `src/application/commands` | Command、EditCommand、NodeEditCommand、具体命令 | 封装请求及执行记录，委托 Receiver，不承担 CLI 解析或 XML 操作 |
-| `src/application/ports` | SvgReadPort、SvgSavePort | 应用拥有的窄文件接口；返回完整候选及警告 |
-| `src/infrastructure/svg` | SvgReader、SvgWriter、SvgFileStore、AtomicFileWriter | XML 解析/序列化、UTF-8、来源路径解析及文件替换，实现应用端口 |
-| `src/cli` | SvgCli、CommandTokenizer、CommandDispatcher、NodeFormatter、ResultFormatter、main | REPL、参数解析、命令构造、结果显示；main 装配具体依赖 |
-| `test`、`examples` | 分层测试、精确会话基线、demo.cli | 独立回归证据和可复现示例，不参与生产依赖 |
-
-```drawio
-<mxfile>
-  <diagram id="GBQr5sh85MB8I5eZ5CNh" name="第 1 页">
-    <mxGraphModel dx="1287" dy="1693" grid="1" gridSize="10" guides="1" tooltips="0" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <UserObject label="" plantUmlData="{&#xa;  &quot;data&quot;: &quot;@startuml\nskinparam packageStyle rectangle\npackage \&quot;cli\&quot; as CLI {\n  component \&quot;main (composition root)\&quot; as MAIN\n}\npackage \&quot;application\&quot; as APP {\n  package \&quot;ports\&quot; as PORTS\n}\npackage \&quot;domain\&quot; as DOMAIN\npackage \&quot;infrastructure/svg\&quot; as INFRA\nCLI ..&gt; APP : requests / results\nMAIN ..&gt; INFRA : construction / injection\nAPP ..&gt; DOMAIN : receivers / model\nPORTS ..&gt; DOMAIN : document contract\nINFRA ..&gt; PORTS : implements\nINFRA ..&gt; DOMAIN : parse / serialize\n@enduml&quot;,&#xa;  &quot;config&quot;: null&#xa;}" id="plantuml-1">
-          <mxCell connectable="0" parent="1" style="group;transparentBounds=1;editIcon=1;lockedGroup=0;groupPadding=10;" vertex="1">
-            <mxGeometry as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="cli" plantUmlId="c_0" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" plantUmlBaseValue="cli" id="c_0">
-          <mxCell parent="plantuml-1" style="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" vertex="1">
-            <mxGeometry height="95" width="225" x="16" y="6" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="main (composition root)" plantUmlId="n_1" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=6;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;whiteSpace=wrap;" plantUmlBaseValue="main (composition root)" id="n_1">
-          <mxCell parent="c_0" style="rounded=1;absoluteArcSize=1;arcSize=6;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;whiteSpace=wrap;" vertex="1">
-            <mxGeometry height="49" width="195" x="15" y="34" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" plantUmlId="ci_2" plantUmlBaseStyle="rounded=0;fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_2">
-          <mxCell parent="c_0" style="rounded=0;fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
-            <mxGeometry height="10" width="15" x="190" y="39" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" plantUmlId="ci_3" plantUmlBaseStyle="fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_3">
-          <mxCell parent="c_0" style="fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
-            <mxGeometry height="2" width="4" x="188" y="41" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="" plantUmlId="ci_4" plantUmlBaseStyle="fillColor=#F1F1F1;strokeColor=#181818;" plantUmlBaseValue="" id="ci_4">
-          <mxCell parent="c_0" style="fillColor=#F1F1F1;strokeColor=#181818;" vertex="1">
-            <mxGeometry height="2" width="4" x="188" y="45" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="application" plantUmlId="c_5" plantUmlBaseStyle="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" plantUmlBaseValue="application" id="c_5">
-          <mxCell parent="plantuml-1" style="rounded=1;absoluteArcSize=1;arcSize=5;fillColor=none;strokeColor=#181818;verticalAlign=top;align=center;spacingTop=2;fontSize=14;fontStyle=1;whiteSpace=wrap;" vertex="1">
-            <mxGeometry height="104.97" width="107" x="22.35" y="266.5" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="ports" plantUmlId="n_6" plantUmlBaseStyle="shape=folder;tabWidth=60;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="ports" id="n_6">
-          <mxCell parent="c_5" style="shape=folder;tabWidth=60;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
-            <mxGeometry height="40" width="77" x="15" y="34" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="domain" plantUmlId="n_7" plantUmlBaseStyle="shape=folder;tabWidth=72;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="domain" id="n_7">
-          <mxCell parent="plantuml-1" style="shape=folder;tabWidth=72;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
-            <mxGeometry height="40" width="89" x="82.81" y="416.22" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="infrastructure/svg" plantUmlId="n_8" plantUmlBaseStyle="shape=folder;tabWidth=151;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" plantUmlBaseValue="infrastructure/svg" id="n_8">
-          <mxCell parent="plantuml-1" style="shape=folder;tabWidth=151;tabHeight=23;tabPosition=left;html=1;whiteSpace=wrap;fillColor=#F1F1F1;strokeColor=#181818;fontSize=14;align=left;verticalAlign=top;spacingLeft=6;spacingTop=1;" vertex="1">
-            <mxGeometry height="40" width="168" x="143.39" y="164.75" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="requests / results" plantUmlId="e_9" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="requests / results" id="e_9">
-          <mxCell edge="1" parent="plantuml-1" source="c_0" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="c_5">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="60" y="11" as="offset" />
-              <Array as="points">
-                <mxPoint x="68.84" y="135" />
-                <mxPoint x="-20.61" y="176.75" />
-                <mxPoint x="54.45" y="235.39" />
-              </Array>
-              <mxPoint x="68.84" y="98.4" as="sourcePoint" />
-              <mxPoint x="54.45" y="273.09" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="construction / injection" plantUmlId="e_10" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="construction / injection" id="e_10">
-          <mxCell edge="1" parent="plantuml-1" source="n_1" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_8">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="89" y="8" as="offset" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="receivers / model" plantUmlId="e_11" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="receivers / model" id="e_11">
-          <mxCell edge="1" parent="plantuml-1" source="c_5" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="39" y="-4" as="offset" />
-              <Array as="points">
-                <mxPoint x="-19.19" y="386.12" />
-              </Array>
-              <mxPoint x="54.45" y="360.76" as="sourcePoint" />
-              <mxPoint x="105.06" y="416.22" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="document contract" plantUmlId="e_12" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="document contract" id="e_12">
-          <mxCell edge="1" parent="plantuml-1" source="n_6" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="90" y="14" as="offset" />
-              <Array as="points">
-                <mxPoint x="75.85" y="366.49" />
-                <mxPoint x="127.31" y="386.12" />
-              </Array>
-              <mxPoint x="75.85" y="340.5" as="sourcePoint" />
-              <mxPoint x="127.31" y="416.22" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="implements" plantUmlId="e_13" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="implements" id="e_13">
-          <mxCell edge="1" parent="plantuml-1" source="n_8" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=0;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_6">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="63" y="-17" as="offset" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-        <UserObject label="parse / serialize" plantUmlId="e_14" plantUmlBaseStyle="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" plantUmlBaseValue="parse / serialize" id="e_14">
-          <mxCell edge="1" parent="plantuml-1" source="n_8" style="strokeColor=#181818;fontColor=#000000;fontSize=12;html=1;labelBackgroundColor=#FFFFFF;endArrow=classicThin;endFill=1;dashed=1;dashPattern=7 7;curved=1;rounded=0;endSize=6;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;" target="n_7">
-            <mxGeometry relative="1" as="geometry">
-              <mxPoint x="53" y="-30" as="offset" />
-              <Array as="points">
-                <mxPoint x="254.1" y="235.39" />
-                <mxPoint x="254.1" y="310.99" />
-                <mxPoint x="273.81" y="391.36" />
-              </Array>
-              <mxPoint x="255.39" y="204.75" as="sourcePoint" />
-              <mxPoint x="149.56" y="416.22" as="targetPoint" />
-            </mxGeometry>
-          </mxCell>
-        </UserObject>
-      </root>
-    </mxGraphModel>
-  </diagram>
-</mxfile>
-
+```text
+src/core/                 领域模型、应用服务、公开扩展契约与端口
+src/host/                 CLI、装配、插件加载、XML和文件系统适配
+plugins/builtin-*/        内置图形和命令
+plugins/command-stats/    图形统计
+plugins/command-dir/      启动目录列表
+plugins/shape-box/        复合box、属性处理器、类型标签
+plugins/tree-star/        内容差异星号
+extensions/vscode-svg/   SVG文件标记与原生Outline
+test/                    核心、宿主、加载器和集成测试
+doc/transcript/          可复用会话、预期和回放fixture
+doc/adr/                 设计决策记录
+doc/architecture/        架构图源码与最终渲染
+doc/images/              本轮报告截图
+docs/metrics/            脚本生成的历史源码指标
+.tmp/                    本地过程归档、原始日志，不提交
 ```
 
-### 设计模式及具体角色
+领域层不依赖宿主、Node或具体插件；插件只导入 `@svgframe/core` 的公开包根。宿主负责实例装配、模块解析和外部IO，VSCode包不依赖CLI领域模型。
 
-| 设计思想 | 采用方式与理由 |
-|---|---|
-| Command（必选） | Command 定义请求，EditCommand 定义可逆协议。ConcreteCommand 为 Create/Move/Scale/SetAttribute/Delete/Group/Ungroup/AddTo/Front/Back 及文档、查询、历史命令。CommandDispatcher/main 为 Client；CommandExecutor 为 Invoker；SvgNode、SvgDocument、SceneEditor、EditorSession、SceneQuery 等为业务 Receiver；Undo/Redo 命令以 CommandHistory 为 Receiver。请求与业务规则分离，编辑记录可进入历史。 |
-| Composite | SvgNode 是共同 Component，五种图形为叶子，SvgGroup 为 Composite。容器把 move/scale 准备工作委托给孩子，叶子通过自身几何声明完成操作；set 保持统一接口及属性白名单，普通组样式按 SVG 继承。SvgDocument 是画布聚合根。 |
-| Iterator 思想 | SvgNode/SvgDocument 实现前序 Iterable，查询、序列化和分组顺序复用受控遍历；外部只获得冻结的 children 快照，不依赖内部数组。 |
-| Visitor | 本期不引入封闭的逐形状访问接口。统一几何/属性描述已满足显示与序列化；未来插件增加形状时，封闭 Visitor 会增加修改面。 |
-| Observer | 本期只有顺序执行的 CLI，无多个实时视图，不建立事件总线。未来 GUI 可在 Session/Executor 的成功提交边界发布事件。 |
-| Decorator | 没有动态叠加行为的当前需求，不引入装饰层。后续输出诊断、日志等若有实际需要再评估。 |
+## 2. 重构前后的架构
 
-ShapeFactory 和 CommandDispatcher 是仅有的两处按名称选择实现的位置，均已标注待重构：未来可分别演进为 ShapeProvider 注册与命令注册。Reader 通过 ShapeFactory.fromAttributes 复用同一类型表；格式器按结果 DTO 和通用几何描述展示，不再次按图形 tag 分派。
+### 2.1 重构前
 
-### 树、事务与历史
+具体命令在应用层，ShapeFactory识别固定类型，入口直接装配已知能力。新增命令、形状或显示行为容易涉及既有工厂、分发和输出逻辑。
 
-- SvgNode 封装 ID、父级、归属、几何及样式；只读查询返回冻结快照。SvgDocument 统一检查 ID 唯一、父容器归属、重复挂接、环和有序位置。内部 Symbol 写入协议仅由 SvgDocument/SvgGroup/SvgNode 引用，属于包内约定。
-- SceneEditor 处理跨父 group、ungroup、addto 和同级顺序；通过文档行为准备变更。group 先验证全部输入，再插入空组并转移成员；ungroup 提升孩子后删除空组，逆序恢复位置。
-- ChangeSet 组合原子的 apply/revert 步骤；中途失败回滚已完成步骤，撤销失败也恢复已撤销步骤。单个步骤自身必须原子；本项目采用受控赋值与文档校验后的结构操作，不向插件开放任意回调。
-- move/scale 保存受影响字段的旧/新值，避免反向浮点运算误差；set 保存单属性及缺席状态；结构操作保存相关节点身份、父级、索引。生产撤销不复制整个文档。
-- CommandHistory 独占双栈及禁用标志。Executor 只在编辑成功后记账；Undo/Redo 先执行成功再移栈。每条成功编辑为一个单元，新编辑清空 Redo。查询与失败命令不改历史；成功 init/read/save/canvas 修改清空双栈并禁用，下一条成功编辑开启新历史。
-- read 在候选文档中完成解析、ID 预留/补号和全部校验，再提交 Session；警告只在成功结果中发布。save 先完整序列化，再写同目录临时文件、fsync、关闭后 rename，失败保留会话和已有目标文件。
+![重构前依赖](architecture/final.svg)
 
-### 依赖方向规则
+图源码：[final.puml](architecture/final.puml)。
 
-| 来源 | 允许依赖 | 理由 |
+### 2.2 重构后
+
+core持有模型、协议和通用服务，内置实现同样通过注册提供。host选择代码对象列表或配置模块列表，两者共用安装事务。输出使用通用结果、几何描述和后缀，核心与渲染器无需按具体插件名分派。
+
+![重构后依赖](architecture/phase2.svg)
+
+图源码：[phase2.puml](architecture/phase2.puml)。
+
+| 方面 | 重构前 | 重构后 |
 |---|---|---|
-| domain | 本层模块及 TS 基础类型 | 图形/树规则可脱离 CLI、XML 和文件系统测试 |
-| application | domain、本层命令/端口 | 用例依赖抽象保存/读取能力，不知道具体存储实现 |
-| infrastructure/svg | domain、application/ports、Node I/O、saxes | 适配外部格式，不能反向调用 CLI 或具体命令 |
-| cli | application、本层、Node readline/stream；main 可依赖 infrastructure | 保持输入输出与业务分离，把具体实现集中在装配根 |
-| production | 不依赖 test | 测试只能依赖生产模块 |
+| 图形创建 | 固定工厂识别类型 | ShapeFactory查询ShapeProvider |
+| 命令分发 | 既有具体命令 | CommandDefinition提供语法/help/build，分发器查注册表 |
+| 属性编辑 | 节点原有规则 | AttributeHandler可接管，缺省仍走原白名单 |
+| 树显示 | 固定基础格式 | TreeDecorator追加后缀，通用formatter组合 |
+| 具体实现 | 领域/应用目录内 | builtin-shapes、builtin-commands及独立可选包 |
+| 加载 | 固定入口装配 | A代码对象或B配置模块，共同校验与回滚 |
+| IO依赖 | 应用拥有文件端口 | 保留端口，并补Directory/Construction端口 |
+| 包边界 | 单CLI工程 | core、插件、host与独立VSIX，通过public exports使用 |
 
-`test/architecture/dependencies.test.ts` 守卫现有静态导入边界、内部结构符号和一类一文件规则；人工抽查再核对运行时控制流和名称分派。
+Composite、Command、Iterator和局部ChangeSet继续使用；不是重新实现一套领域模型。容器仍支持整体操作，成功编辑保存可逆记录，查询通过只读快照投影。
 
-### 已确认语义与变化点
+## 3. 四个扩展点
 
-图形尺寸/半径为有限非负数，画布宽高为正数；init 单参数只指定宽度，高度默认 600；canvas 修改必须同时给出宽高。scale 改变全部几何位置和尺寸，不改变 stroke-width 或文本。普通 g 的样式只写在组上，继承随父级改变；结构编辑保留几何和显式样式。
+接口主要位于 `src/core/extensions/Contracts.ts` 和 `src/core/application/commands/Command.ts`。四类注册表独立管理稳定名称和注册顺序，插件获得窄注册接口与受控服务。
 
-group 的新组使用首参数节点的原父级/位置，成员按修改前文档前序排列；同父摘除后校正位置。ungroup 禁止根级组，嵌套组的孩子占据原组位置。front/back 分别移到同级列表末尾/开头，末尾后绘制。
+| 扩展点 | 职责 | 调用位置 | 正式类实现 | 缺省/失败 |
+|---|---|---|---|---|
+| ShapeProvider | 离线创建、完整恢复、help及反馈 | ShapeFactory.create/restore/help，CreateCommand与SvgReader消费服务 | 六内置provider、BoxShapeProvider | 未知创建类型报错，未知g标记降级；已安装但损坏拒绝 |
+| Command / CommandDefinition | 命令语法、构建、执行和可逆协议 | CommandDispatcher.parse、CommandExecutor.execute、CommandHistory | 内置命令、Stats/Dir的Definition与Command | 缺可选命令报unknown；query不建历史 |
+| AttributeHandler | 纯匹配，经AttributeEdits修改部件 | AttributeService.resolve、EditTransaction、SetAttributeCommand | BoxFillHandler、BoxLabelHandler | 零匹配原规则，多匹配先拒绝；失败不回退 |
+| TreeDecorator | 读取冻结行上下文，返回可选后缀 | SceneQuery.tree/suffixes、NodeFormatter.tree | BoxTypeDecorator、ModifiedStarDecorator | 空表保持原格式；异常使本次查询失败 |
 
-输入采用经用户确认的有限子集：UTF-8 XML 1.0、六类型及嵌套 g；根正数 width/height 可带 px，viewBox 可省略或必须匹配 `0 0 width height`；图形几何缺省 0。允许 SVG 命名空间/前缀、注释及 CDATA；transform、未知属性/元素、叶子子元素、DTD/处理指令明确失败。补 ID 前预留全部显式 ID；空 ID 视作缺失，按类型序号跳过冲突。
+详细方法、文件路径和错误见 [扩展点参考](EXTENSION_POINTS.md)。public出口不暴露内部树操作符号，插件不导入host、core内部文件或其他具体插件。
 
-成功 read 记录绝对来源路径；无参数 save 使用该来源，显式 save 不更新来源；成功 init 清除来源，canvas 和编辑保留来源。没有来源时要求显式保存路径。计数含全部图形和 g，不含根 svg。
+### 3.1 属性事务
 
-| 未来变化点 | 当前预留/不预留的决定 |
-|---|---|
-| 新图形及 box 插件 | 统一节点协议、唯一工厂表与结构化属性；不实现 ShapeProvider 加载器或 box，避免提前确定插件协议 |
-| 新命令或其他入口 | Command/Executor 与 CLI 分离；唯一 Dispatcher 可演进为注册，不创建 GUI/网络服务 |
-| XML 范围扩展或其他存储 | Read/Save 端口与 Reader/Writer 独立；完整 SVG/transform 支持须另行设计，当前明确失败 |
-| 更多视图或日志 | 成功提交边界可作为事件接入点；无当前需求，不增加 Observer/Decorator |
-| 历史策略 | 局部可逆记录和集中历史服务可扩展；不实现持久化历史或复杂分支时间线 |
+`handles`只读匹配。单命中时，处理器只获得目标冻结视图和 `AttributeEdits.read/setAttribute`，没有任意可写文档、commit/rollback或外部回调步骤。每个已完成原子变更即时记录；处理器、反馈生成或不变量校验失败时逆序恢复。
 
-## 过程记录
+一次set仅进入一个历史单元，redo重放既有记录与反馈，不重跑处理器。无匹配保留原节点能力；失败不能悄悄重试默认路径。验证时需比较文档、来源、双栈，并实际undo/redo确认栈中对象可用。
 
-开发由用户与 Codex 结对进行，每阶段先检查、补测试、实现、验证，再由用户验收提交；以下保留各阶段发生的取舍与修正。
+### 3.2 box与完整恢复
 
-### M0 — 2026-10-17 — 工程骨架
+BoxShape继承公开SvgGroup，领域语义为box、树基础标题为g、XML为g加data-kind。provider通过ShapeConstructionPort请求rect/text，再由SubtreeBuilder一次组装完整离线子树，不跨插件导入基础实现。
 
-- 授权范围：用户授权实施 M0，仅工程配置、最小 CLI 与 smoke test。
-- 模块：`src/cli/SvgCli.ts` 封装输入输出生命周期；`main.ts` 只装配并启动。
-- 架构取舍：Command/Composite 在后续指定里程碑落实；M0 不建立占位模型或历史机制。临时 help 判断在 M2 迁入唯一 CommandDispatcher。
-- 工程选择：Node.js 24、TypeScript strict、ESM、tsx、Vitest；依赖由锁文件固定。
-- 过程发现：PowerShell 阻止 npm.ps1，因此使用 npm.cmd；保留三份本地设计文档的 Git 忽略规则，阶段证据写入本文。
-- 开发中发现并修复：首版在最后一行没有换行、直接 EOF 时，异步迭代拿到最后一行之前 readline 已关闭，再次 prompt 触发错误退出。保留对应回归测试，通过 close 事件跟踪关闭状态，关闭后不再 prompt。
-- 测试环境：Windows PowerShell，Node.js v24.14.0、npm 11.9.0。npm 安装与 Vitest 启动最初受到沙箱缓存/子进程限制，获得权限后执行；未通过改动测试规避限制。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 为 1 个测试文件、4 个测试全部通过；`'help' | npm.cmd run cli` 与 `'help' | node dist/cli/main.js` 都显示提示符和帮助并正常退出；`git diff --check` 通过。
-- 测试范围：空输入 EOF、CRLF 空行/整行注释、未实现命令报错后继续 help、无末尾换行的最后一行。尚未人工验证实体终端的 Ctrl+Z 按键行为。
-- 架构符合性：仅 cli 模块引用 Node readline/stream；输入输出通过构造函数注入并封装。没有 domain/application/infrastructure 实现，没有 switch(tag)、any 或公共字段数据袋。Command/Composite 按计划留到后续阶段。
-- 设计偏差：正式报告路径提前建立阶段记录草稿；未改动被忽略的设计基线，也未将待确认建议当作已批准决策。
-- Git commit SHA：`020cc5a`（搭建运行环境）。
-- 验收状态：用户已验收并提交，随后授权 M1。
+必要直接孩子ID为 `<id>-rect`、`<id>-label`。删除、移出或group收编必要部件拒绝，同父调序和普通编辑允许；整个box可以移动、缩放、迁移、分组或删除。fill只修改本box矩形，label只修改本文本，不向嵌套box递归传播。
 
-### M1 — 2026-10-17 — 领域模型与 Composite
+读取先验证完整候选子树，再替换会话。provider已注册但结构损坏直接拒绝；未安装provider时未知g标记静默降为普通组，保留合法样式/孩子并移除标记。重复ID在路由前检查，不能因降级被忽略。
 
-- 起点：M0 提交 `020cc5a`，工作区干净。
-- 授权范围：六种内置图形模型、SvgDocument、ID 索引、完整父子约束与领域测试；不进入 M2。
-- 用户确认：图形宽高/半径允许 0，画布宽高必须为正；所有几何数值有限。stroke-width 为有限非负数。
-- 实现：SvgNode 为统一抽象；RectShape/CircleShape/EllipseShape/LineShape/TextShape 封装各自几何字段；SvgGroup 持有有序子节点；SvgDocument 管理根、索引和整体归属。
-- Composite/Iterator：叶子和组都提供只读 children、getGeometry/getAttributes 和前序 Iterable；叶子没有孩子。领域对象不生成 CLI 文本或 XML。
-- 树结构规则：append/insert 只接收未归属的子树根，父容器必须属于当前文档；拒绝重复 ID、重复归属、环和非法插入位置；先验证整棵子树，成功后统一写入。remove 注销全部子孙 ID，保留摘除子树内部的父子关系和对象身份，重新插入后完整恢复登记。
-- 封装决策：字段采用 ECMAScript 私有字段；对外属性和 children 为冻结快照。TypeScript 没有包级 friend，internal/TreeAccess.ts 用 Symbol 提供聚合内部结构写入协议，仅 SvgDocument 调用，应用/CLI 禁止导入；该协议属于包内约定，不是防恶意调用的安全边界。
-- 初始方案复核：样式参数采用结构类型，额外 x 字段可能覆盖查询结果中的几何属性，因此构造时拒绝三种公共样式以外的字段，并增加回归测试。
-- 阶段边界说明：架构中的几何接口本轮落实为多态只读查询；move/scale/set 的变更行为按 M3 计划实现，未添加空方法或“尚未实现”异常占位。树结构仅提供聚合基础操作，未实现 group/ungroup/addto/front/back 用例或 Command/History。
-- 目录细化：增加 SvgAttributes.ts 类型文件和 internal/TreeAccess.ts，仍位于 domain 内；未修改 CLI、依赖或工程配置。
-- 测试过程：先写两份领域测试，在授权的沙箱外运行中因缺失模型模块失败；实现后首轮完整回归 42/42 通过，随后针对样式覆盖和嵌套容器恢复补充测试。
-- 最终证据：`npm.cmd run build` 通过；`npm.cmd test` 为 3 个文件、44 项全部通过（40 项领域测试 + 4 项 M0 CLI 回归）；Node 直接加载 dist/domain 编译产物，执行嵌套创建、遍历、子树摘除和重新插入的 smoke check 通过；`git diff --check` 通过。
-- 依赖复核：domain 只导入本层模块；SvgNode 对 SvgDocument/SvgGroup 的引用为 type-only，避免运行时循环；没有 Node I/O、CLI/XML、switch(tag) 或 any。
-- Git commit SHA：`4c6aea4`（建立领域模型，设置统一 Node 抽象，实现六种内置图形模型）。
-- 验收状态：用户已验收并提交，随后授权 M2。
+### 3.3 内容差异和标签
 
-### M2 — 2026-10-17 — 命令入口与基础查询
+modified-star按“与最近成功save/read/init内容不一致”判断，而不是编辑次数或历史栈位置。新节点立即标星，undo或普通编辑回原内容消星；失败保存和查询不更新基线。
 
-- 起点：M1 已由用户验收，提交 `4c6aea4`，工作区干净。
-- 本轮范围：Tokenizer/Dispatcher、基础 Command/Executor/Session、六类型 create（含 in）、init、canvas、tree/show/help；不进入 M3。
-- 用户确认补充：本轮补入 canvas 尺寸修改；canvas 无参数查询，两个参数修改，单参数报语法错误。init 一个参数指定宽度且高度为 600，无参数为 800×600。
-- 分派约束：CommandDispatcher 对命令名、ShapeFactory 对类型名；均标记为未来重构点。格式器只解释结果和通用几何描述，不按图形标签再次分派。
-- 设计细化：领域新增与 CLI 无关的点/线段/属性集合几何描述；独立 CLI 格式器输出 tree/show。CreateCommand 保存原节点、文档、父容器及插入位置并提供 undo/redo 协议，本轮不建立历史栈或启用 undo/redo 命令。
-- 角色对应：Command/EditCommand 为请求协议；六个具体命令为 ConcreteCommand；Dispatcher 与 main 为 Client；CommandExecutor 为 Invoker；EditorSession、SvgDocument 和 SceneQuery 为 Receiver。命令不直接读写节点字段。
-- 解析规则：只把整行起始的 # 作为注释；双引号保留空文本和引号元数据；引号内支持转义引号/反斜杠，其他反斜杠原样保留。只有未加引号的尾部 in 被识别为父容器子句。数值统一使用有限十进制/指数解析。
-- 测试过程：先确认缺失模块与未实现会话导致的失败基线，再实现；首轮 64 项通过，针对小数/指数、文本转义和多根连接线补测后最终 6 个文件、66 项全部通过。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 66/66 通过；`node dist/cli/main.js` 会话验证创建、tree/show、canvas 修改及 box 错误；UTF-8 管道下中文往返通过；`git diff --check` 通过。Vitest 按既有环境要求在授权的沙箱外执行。
-- 初始方案复核：SceneQuery 的父引用联合类型采用结构收窄，避免不安全强转；帮助结果只复制 syntax/description，避免把 Dispatcher 的构造回调带入结果快照。M0 smoke test 保留启动/注释/错误恢复/EOF 检查，随现有支持范围更新断言。
-- 依赖审核：domain 仅依赖本层，application 依赖 domain，CLI 仅依赖 application 和本层；应用/CLI 不导入内部 TreeAccess。没有 switch(tag) 或新增形状类型分派。ResultFormatter 的结果联合类型分支只负责展示结果，不构造或路由命令。
-- 变更范围：新增应用层、Tokenizer/Dispatcher/格式器、ShapeFactory/SvgNumber 和三份测试；扩展模型查询/画布基础能力，更新现有 CLI 与 smoke test、README。未新增依赖、历史栈、文件读写或后续编辑命令。
-- 文档同步：按用户确认更新本地 ARCHITECTURE/DEVELOPMENT_PLAN/CODEX_PROMPT，保留三文件原有 Git 忽略规则；关键决定在本文中受版本控制。
-- Git commit SHA：`7bf0221`（M2 命令入口）。
-- 验收状态：用户已验收并提交，随后授权 M3。
+比较几何、显式属性/文本、类型、父归属、孩子/根顺序及画布。变化传播当前祖先与SVG根；删除/移出由旧父孩子序列体现，单纯画布变化只标根。基线与缓存为每个实例私有字段，成功提交后才接收生命周期通知。
 
-### M3 — 2026-10-17 — 基础编辑与失败原子性
+box-type-label先于modified-star注册，输出 `g#id (box) *`。两者互不调用、互不读状态。这里是独立装饰管线，不等同于经典同接口对象包装Decorator。
 
-- 起点：M2 提交 `7bf0221`，工作区干净；只实施 M3。
-- 用户确认：普通 g 的 fill/stroke/stroke-width 仅写在组上，按 SVG 继承，不覆盖孩子的显式样式；scale 只改变几何位置与尺寸，不改变 stroke-width 或文本内容。
-- 实现范围：新增 MoveCommand、ScaleCommand、SetAttributeCommand、DeleteCommand；NodeEditCommand 封装共同执行/撤销/重做状态；接入既有 Dispatcher、Executor 和 CLI 格式器。
-- 领域重构：GeometryState 为封装的几何值对象，形状类声明本类型的坐标轴及非负尺寸字段；统一数值校验与字段局部变更，避免五类叶子重复实现。SvgGroup 以 Composite 委托子节点准备变更，不根据 tag 分派。
-- 原子性：先准备并校验全部子孙的改动，再应用 ChangeSet。每个步骤本身原子；若后续步骤失败，回滚已完成步骤。revert 失败也回滚已撤销步骤，记录保持可重试。当前领域写入步骤为受控赋值或已预校验的树操作。
-- 撤销记录：move/scale 保存受影响字段的旧/新值，不依赖减位移或乘倒数；set 只保存单属性旧值/缺席状态；delete 保存同一节点/子树、父容器和原插入索引。不复制整份文档。
-- 复核修正：初版样式记录捕获整个样式对象，改为单属性旧值，防止还原 fill 时覆盖其他样式。新增样式独立记录、组继承和命令重复调用状态回归。
-- 测试过程：新增三个测试文件先验证失败基线；首轮实现 93/93 通过，复核补测后最终 9 个文件、95/95 通过（新增 29 项）。
-- 实际执行：`npm.cmd run build` 通过；`npm.cmd test` 95/95 通过；UTF-8 管道运行 `node dist/cli/main.js`，中文 set、组 move/scale、tree、整组 delete 及删除后子孙不可寻址均符合预期；`git diff --check` 通过。Vitest 使用已授权的沙箱外运行权限。
-- 依赖审核：domain 仅依赖本层；application 通过领域行为修改模型；CLI 只构建请求与显示结构化结果。两处名称分派仍为 Dispatcher/ShapeFactory；未向应用或 CLI 暴露 TreeAccess，也未引入 any。
-- 变更范围：两个领域类、五个命令层类、三份测试；更新领域几何封装、Dispatcher/结果协议、帮助阶段标记和项目说明。没有新增依赖，没有实现 M4 的分组重排或 M5 历史栈。
-- 文档偏差：增加 GeometryState、ChangeSet 和 NodeEditCommand，已记录理由并同步本地架构/提示文档；保留这些本地文件既有忽略规则。
-- Git commit SHA：`687818c`（新增 move、scale、set、delete 命令）。
-- 验收状态：用户已验收并提交，随后授权 M4。
+## 4. 插件装配和加载器
 
-### M4 — 2026-10-17 — 层级与顺序
+### 4.1 方式A：代码装配
 
-- 起点：M3 已验收并提交为 `687818c`，工作区干净。
-- 用户确认：group 新组置于首参数节点的原父级/原位置，成员按修改前文档前序排列。同父选中节点被摘除后自然校正插入位置。例如 A=[a,b]、B=[c,d]，group g c a 得到 A=[b]、B=[g,d]、g=[a,c]。
-- 用户确认：group/ungroup/addto 仅改变树结构，不改几何和显式样式；继承随新父级变化，解组带样式的容器可能改变子节点外观。
-- 实施范围：SceneEditor、五类结构命令、文档内受控转移、局部事务记录与测试；不实现历史栈或 SVG I/O。
-- 测试先行：新增领域、应用、CLI 三份测试并确认缺失模块/命令导致的失败基线。
-- 实现：SceneEditor 负责多节点结构规则；SvgDocument.planRelocate 原子更新父引用/有序列表，文档内转移不注销子树 ID；五个具体命令封装请求并保存局部 ChangeSet。
-- 事务策略：group 预校验全部 ID、重复参数和祖先冲突，再插入空组并按原顺序转移；ungroup 先依次提升孩子，再删除空组。每次转移捕获该步骤执行前的父级/索引，逆序恢复；中途失败由既有 ChangeSet 回滚。记录只保存相关对象及局部位置，不复制文档。
-- 复核修正：除 TypeScript 类型约束外，转移入口增加运行时容器检查，避免动态调用传入叶子后发生部分摘除。测试快照显式记录 parentId/childIds，避免私有字段对象的深比较掩盖结构差异。
-- 测试过程：先确认三个新增测试文件的失败基线；首轮 115 项通过，补测非空根子树、动态非法目标、撤销中途失败及重试后，最终 12 个测试文件、117/117 通过（本轮新增 22 项）。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 117/117 通过；UTF-8 管道运行 `node dist/cli/main.js`，验证跨父 group g c a、中文文本、ungroup、addto 和 front 的树输出；`git diff --check` 通过。Vitest 仍使用授权的沙箱外子进程权限。
-- 依赖检查：SceneEditor 只依赖 domain；具体命令仅调用领域服务；CLI 无 domain 直接依赖，TreeAccess 未暴露给服务外层。两处名称分派维持 Dispatcher/ShapeFactory；没有新增形状类型分派、Node I/O 反向依赖或公共数据袋。
-- 变更概览：新增 SceneEditor、五个命令和三份测试；更新 SvgDocument、命令结果、Dispatcher/格式器、两份现有测试的帮助阶段标记，以及 README/本记录。未新增依赖，未引入历史栈或后续 I/O。
-- 文档同步：将已确认的跨父分组和原生结构语义写入本地架构/计划/提示文档；保留三份文件的 Git 忽略规则，关键决策在本文受版本控制。
-- Git commit SHA：`ef7673c`（实现 group、ungroup、addto、front、back 命令）。
-- 验收状态：用户已验收并提交，随后授权 M5。
+`src/host/composition.ts` 的optionalPlugins返回 `{ module, plugin, options? }` 列表。不带--config时使用它，内置包与可选包都通过PluginInstaller；代码方式也读取同一包清单并校验贡献。
 
-### M5 — 2026-10-17 — Undo/Redo 与历史边界
+默认顺序为stats、dir、box、tree-star。新增业务通过顶层装配点与必要依赖接入，不应修改core、loader、formatter或已有插件。
 
-- 起点：M4 提交 `ef7673c`，工作区干净；只实施 M5。
-- 用户确认：成功 init、canvas 修改（以及后续 read/save）清空双栈并禁用 undo/redo，下一条成功编辑开启新历史。查询及失败命令保留历史和禁用状态。
-- 实现：CommandHistory 封装双栈与禁用标志；UndoCommand/RedoCommand 调用历史并返回原命令的结果；CommandExecutor 成功执行编辑后才入栈，成功执行文档命令后才设边界。main 创建唯一历史实例，显式注入 Executor 和 Dispatcher。
-- 架构细化（ADR-009）：草案曾把历史状态同时分配给 Session 与 History，现由 History 独占，避免状态不同步。Command.kind 增加 history，撤销/重做不会再次入栈。未改变 domain，也未增加图形或命令名分派点。Visitor/Observer/Decorator 仍无本轮必要场景。
-- 原子性与记录：沿用 M2～M4 的节点身份、局部属性旧/新值、原父级/索引和 ChangeSet；没有生产用全量文档快照。历史先完成 undo/redo，再移动栈项；异常保留两栈，允许修复外部冲突后重试。每条成功编辑均为一个单元，包含无效果的合法编辑；新的成功编辑清空 Redo。
-- 错误约定：历史禁用时 undo 和 redo 均使用原需求的 `undo not allowed after io command`；未初始化时沿用 no document；未禁用且空栈时分别为 `nothing to undo` / `nothing to redo`。
-- 测试先行：新增历史测试，确认 CommandHistory 模块缺失导致失败基线。首轮完整运行 127/128 通过，唯一失败为新增测试误写既有 box 错误文案；核对原需求后修正断言，保留生产错误文本。
-- 回归证据：所有十类编辑逐前缀反向撤销、正向重做，检查精确属性、节点身份、父引用、兄弟顺序及 ID 索引；覆盖六种形状、跨父 group、嵌套子树 delete/restore、属性缺席、小数恢复。另有游标时间线状态机、失败与查询保留 Redo、分叉、文档边界、空栈、真实 undo/redo 失败重试、复合撤销中途失败回滚与重试。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 最终 14 个文件、130/130 通过（本轮新增 13 项）；UTF-8 管道回放 `node dist/cli/main.js`，圆形 100→130→100→130、中文文本撤销、整组删除恢复及 group 撤销后的原父级输出均通过；`git diff --check` 通过。Vitest 使用授权的沙箱外子进程权限。
-- 依赖检查：domain 无 application/CLI/Node I/O 反向依赖；CLI 不直接导入 domain；TreeAccess 未泄漏到应用层。CommandHistory 只管理请求历史，业务仍由领域对象/服务完成。
-- 变更范围：新增三个应用类及两份测试；更新执行器、命令分类、入口装配、Dispatcher/help、现有三份测试与 README/本记录。没有依赖变更或 SVG 文件读写。
-- 文档同步：本地架构/计划/提示文档记录 ADR-009 和确认的历史规则，保留原 Git 忽略规则；关键决定在本文受版本控制。
-- Git commit SHA：`4774476`（接入 undo/redo 双栈）。
-- 验收状态：用户已验收并提交，随后授权 M6。
-
-### M6 — 2026-10-17 — SVG 保存
-
-- 起点：M5 提交 `4774476`，工作区干净；只实施 M6，不实现 read。
-- 用户确认：无参数 save 只回到成功 read 的来源路径，显式 save 不更新默认路径；相对路径按进程工作目录解析。本阶段没有 read，需显式指定目标，默认来源状态留到 M7。
-- 用户确认：提示计数包含全部图形/g，排除根 svg。复核修正此前 AI 的误计：§6.1 实际有 3 个 g、2 个 rect、2 个 text、1 个 line，共 8 个；原示例没有计数错误。已纠正本记录的待确认项。
-- 实现及职责：应用层 SvgSavePort 定义保存接口；SaveCommand 只执行用例、校验前提并映射标准文件错误；SvgWriter 纯序列化；AtomicFileWriter 处理文件替换；SvgFileStore 组合两者，main 装配注入。保留同步 Command 契约，无新增依赖。
-- 序列化：通过文档 Iterable、节点公开属性和父引用输出所有六种形状及嵌套组，祖先栈避免递归栈溢出；无按 tag 的新增分派。输出 XML 声明、namespace、width/height/viewBox、有序元素、text 子文本和显式样式，缺席样式不补默认值。转义特殊字符，处理 XML 属性空白规范化，非法字符/孤立代理项明确失败，不静默替换。
-- 文件保护：完整序列化后才创建同目录唯一临时文件，wx 写入 UTF-8、fsync、关闭后 rename 替换；失败时尽力清理，不先截断原文件。不自动创建缺失目录；不承诺进程崩溃或断电后的清理。
-- 历史边界：SaveCommand 分类为 document，沿用 Executor 成功后清空并禁用历史。保存失败不改变文档/历史；无默认路径、序列化失败和真实文件写入失败均测试保留 Redo。成功保存不修改任何默认路径状态。
-- 测试先行：先新增 SvgWriter 测试并确认缺失模块失败基线；序列化/原子写入首轮 15/15 通过。接入 SaveCommand 后完整 151/151 通过，补入讲义示例回放后最终 18 个文件、152/152 通过（本轮新增 22 项）。
-- 测试覆盖：全部六类型、嵌套顺序、空画布/空文本、缺席样式、中文/Emoji/特殊字符、非法 XML 字符、1500 层分组；Windows 真实覆盖、部分写入与 rename 失败的旧文件保护及临时文件清理；相对/绝对/空格/中文路径、缺失路径、保存边界、失败保留两栈；讲义 8 元素示例。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 152/152 通过；编译后 CLI 回放 examples/demo.cli 生成 demo.svg，提示 8 elements；独立 .NET XML 解析核对 namespace、viewBox、节点数及中文。隐藏无头 Chrome 实际渲染并检查截图，两个彩色节点、连线和中文布局符合讲义；`git diff --check` 及新增文件空白检查通过。Vitest 和浏览器使用已授权的沙箱外执行权限。
-- 依赖复核（ADR-010）：domain 未修改，无反向 I/O 依赖；应用仅依赖保存端口，具体基础设施仅在 main 引用；内部 TreeAccess 未暴露，名称分派仍集中于 Dispatcher/ShapeFactory。Visitor/Observer/Decorator 未引入。
-- 变更范围：新增五份生产文件（一个接口、四个类）、四份测试、demo.svg 及 examples/demo.cli；更新结果协议、命令装配/分发/格式器、现有测试帮助标记、README 与本记录。未安装依赖，未实现 SVG 读取、来源路径替换、transform 导入或 M7 功能。
-- 文档同步：本地架构/计划/提示文档记录已确认路径、计数与 ADR-010，保留原有 Git 忽略规则；关键决策由本文跟踪。
-- Git commit SHA：`c7d4b04`（实现 save <file.svg> 命令）。
-- 验收状态：用户已验收并提交，随后授权 M7。
-
-### M7 — 2026-10-17 — SVG 读取与来源路径
-
-- 起点：M6 提交 `c7d4b04`，工作区干净；只实施 M7。
-- 用户确认输入范围：六类型及嵌套 g；transform、未知元素/属性（含 style/font-size/data-*）、叶子中的子元素整次失败。允许 XML 声明、注释、CDATA、SVG 命名空间；拒绝 DTD。根 width/height 必须为正，可带 px；viewBox 可缺省，存在时必须匹配 0 0 width height。图形几何缺省 0；空 ID 视作缺失，先预留所有显式 ID，再按前序和每类型序号补 ID。
-- 具体适配边界：UTF-8 XML 1.0，可接受 BOM；根只接收 width/height/viewBox 与命名空间声明，接受 SVG 前缀或无命名空间文件。外来命名空间、不支持的处理指令和非 UTF-8 明确失败。读写往返保留模型语义，格式与命名空间前缀会规范化。
-- 用户批准依赖：新增固定运行时 saxes@6.0.0（带入 xmlchars）；沙箱内安装遇到 ENOTCACHED，使用获批网络权限完成安装。XML 库仅出现在基础设施层。
-- 编译兼容修正：首次 build 报错全部来自 saxes 声明，涉及 TS7 泛型约束与 exactOptionalPropertyTypes。提出方案后，用户明确批准 skipLibCheck:true；源码 strict/exactOptionalPropertyTypes/noUncheckedIndexedAccess 及调用处类型检查继续开启。未更改 node_modules 声明或降低源码严格性。
-- 实现职责（ADR-011）：SvgReader 解析为前序输入记录，完成根/命名空间检查、显式 ID 预留和候选树构建。ShapeFactory 在原唯一类型表中补充几何元数据，提供通用 fromAttributes，使 CLI 和读取复用类型创建/校验，不增加标签分派。SvgFileStore 负责读取字节、UTF-8 解码及绝对路径；SvgReadPort 返回候选文档/警告/来源。ReadCommand 完整成功后调用 EditorSession.load；Executor 随后触发历史边界。
-- 原子性：失败候选不触及当前文档、路径、双栈；候选警告只在成功结果中发布。重复 ID 保持原需求的 id already exists 文案，文件读取失败保持 cannot read file，XML 语法错误带 invalid SVG 诊断。
-- 来源生命周期：成功 read 替换为绝对路径，成功 init 清空；失败 read/init 保留。编辑、canvas 修改及显式 save 保留来源；无参数 save 回到来源，新的成功 read 更新默认目标。读入文档继续支持同一组编辑与 Undo/Redo，无单独的导入节点类型。
-- 测试先行：新增 Reader 测试确认模块缺失失败基线；首轮 Reader 36/36 通过。首次完整回归 200/201 通过，唯一失败为新增测试漏算对同一缺 ID 原文件再次读取的警告；修正断言，并验证保存后的副本不再补号。补入编码/命名空间边界后最终 22 个文件、204/204 通过（本轮新增 52 项）。
-- 覆盖：全文后置显式 ID、空 ID、大小写、七元素原需求 fixture、六类型/嵌套/样式/文本往返、CDATA/实体、XML 错误、DTD、未知内容、非法几何、px/viewBox、命名空间、XML 版本、无效 UTF-8、默认来源与复制保存、失败后继续 Undo/Redo、替换成功后的历史清理。
-- 实际验证：`npm.cmd run build` 通过；`npm.cmd test` 204/204 通过；编译后 CLI 在 dist/m7-verification 内回放原需求 other.svg，读取→编辑→撤销/重做→无参数保存→重新读取→整组删除恢复→另存→再读取均通过；独立 .NET XML 解析核对 7 元素与几何值，保存后不再告警。`git diff --check` 和新增文件空白检查通过。Vitest 使用授权的沙箱外子进程权限。
-- 依赖复核：domain 不依赖 XML/fs/application；基础设施依赖领域及端口；CLI 仅装配入口引用具体基础设施。ShapeFactory 仍为唯一图形类型注册表，Dispatcher 为唯一命令名称分派；未引入 Visitor/Observer/Decorator 或插件。
-- 变更范围：新增 SvgReadPort、ReadCommand、SvgReader、四份测试及原需求 fixture；扩展 Session/SaveCommand/FileStore/Factory、结果和 CLI 装配契约；更新 package/lock、获准的 tsconfig 兼容选项、既有帮助测试和说明。未修改 demo.svg，未实施 M8 总验收/正式报告。
-- 文档同步：本地架构/计划/提示文档记录输入规则和 ADR-011，保留原有 Git 忽略规则；关键决策在本文跟踪。
-- Git commit SHA：`5e70d51`（实现 read <file.svg> 接口）。
-- 验收状态：用户已验收并提交，随后授权 M8。
-
-### M8 — 2026-10-17 — 综合验收与正式报告
-
-- 起点：M7 提交 `5e70d51`，工作区干净；范围为精确完整会话、架构守卫和本正式报告，无新产品功能。
-- 新增三份完整会话输出基线：原需求 §6 典型会话、覆盖六类型和结构/顺序操作的往返会话、§6.1 流程图。基线独立编写，测试只规范换行、移除提示符和首尾空白，保留树连接线、属性与错误全文。
-- 初轮会话 3/4 通过；帮助测试把 EOF 说明误当命令，修正为识别小写命令名称并单独断言 EOF 说明，生产代码未修改。
-- 新增六项架构检查：domain、application、CLI 装配边界、基础设施端口依赖、内部 TreeAccess、类名/文件名。结合人工审查未发现本轮需修改的生产实现。
-- 最终验证：`npm.cmd run build` 通过；`npm.cmd test` 为 24 个文件、214/214 通过（新增 10 项）。三份会话用编译后的 `node dist/cli/main.js` 在隔离目录重新精确比对 stdout/stderr，全部通过。独立 .NET XML 解析确认流程图 8 元素及中文；无头 Chrome 实际渲染截图，人工检查两彩色节点、连线和中文布局正常。
-- 文档完成：本文补齐四个规定部分与 PlantUML 包图、设计模式角色、变化点、完整命令证据矩阵、限制及交付状态；保留 M0～M7 的过程证据。
-- Git 检查：起点分支 master，本地 origin/master 引用显示领先 9 次提交，final 标签不存在；未联网核验远端。没有执行提交、推送或创建标签。
-- 变更范围：两份测试文件、六份会话/输出 fixture，以及根 README/本文；三份本地设计文件同步但继续保持 Git 忽略。无源码、依赖或编译配置变更。
-- Git commit SHA：待用户验收后提交。
-- 验收状态：本地验证通过，待用户验收及完成最终 Git 手续。
-
-## 一致性自查
-
-### 模块划分是否一致
-
-实际保留了 cli/application/domain/infrastructure 四层。随迭代新增 GeometryState、ChangeSet、NodeEditCommand、application/ports、SvgFileStore、AtomicFileWriter 及 domain/internal，均已在 M1/M3/M6/M7 记录原因；这些是对职责的细化。Session 曾被草案分配历史标志，M5 调整为 History 独占，已记 ADR-009。M7 新增语义属性恢复入口复用唯一工厂，已记 ADR-011。
-
-所有导出的生产类各占一个同名文件，接口和结果类型可独立成文件；main 是装配脚本。图形拥有行为及私有状态，公开结构化 DTO/冻结快照用于边界传值。未实现 box、GUI、HTTP、完整 SVG 或强行引入额外模式。
-
-### 依赖方向是否一致
-
-静态守卫与人工抽查均未发现反向依赖：domain 只引用本层；application 引用领域及本层端口；SvgFileStore 实现端口；只有 main 装配具体基础设施。TreeAccess 仅由三个聚合内部类引用。项目唯一 switch 位于 ResultFormatter，分支依据结果联合类型，未按图形 tag 或命令名称分派。
-
-名称分派仍集中在 Dispatcher 与 ShapeFactory 两张表。Reader 的类型恢复使用 Factory；XML 标签字符串只用于解析根/命名空间与输出，不建立另一份形状构造表。CommandHistory 管理双栈，ChangeSet 管理局部事务，SvgDocument 管理树/索引，各自承担独立责任。
-
-### 限制和已知取舍
-
-- 输入仅支持已确认的 SVG 子集；背景知识中的 transform 示例会明确拒绝。样式继承随结构改变，解组不保证外观不变。
-- 读写保留模型语义，XML 声明、注释、前缀和格式会规范化；没有实现完整 SVG 保真编辑。
-- 文件 I/O 同步执行，适合本期顺序 CLI。临时文件替换在当前 Windows 环境实测；未承诺断电/进程崩溃后的清理或其他平台文件替换行为。
-- skipLibCheck 经用户确认用于 saxes 与 TS7 声明兼容，跳过声明文件内部检查；源码严格检查继续开启。内部结构符号按模块约定隔离，不是防恶意调用机制。
-- 未测量行/分支覆盖率，测试通过数不等同于穷尽证明。未人工操作实体终端 Ctrl+Z；真实 Node 子进程 EOF/无末尾换行退出已覆盖。
-
-## 质量保证手段
-
-### 需求到实现及测试的对应
-
-下表测试列省略 `test/` 前缀和 `.test.ts` 后缀；原有分层测试补充精确会话无法观察的对象身份、索引、缺席属性和失败重试。
-
-| 需求 | 实现位置 | 主要测试证据 |
-|---|---|---|
-| init 默认/单参数/失败原子性 | InitCommand、EditorSession | application/commands、ReadCommand；integration/cli.m2、cli.acceptance |
-| canvas 查询/修改/历史边界 | CanvasCommand、SvgDocument | application/commands、CommandHistory；integration/cli.m2、cli.acceptance |
-| 六类型 create、in、ID 唯一 | ShapeFactory、CreateCommand、SvgDocument | domain/shapes、SvgDocument；integration/cli.m2、cli.acceptance |
-| move | MoveCommand、SvgNode/GeometryState/SvgGroup | domain/edits；application/edits、CommandHistory；典型会话精确输出 |
-| scale | ScaleCommand、几何值对象/Composite | domain/edits；application/edits；六类型结构会话 |
-| set 白名单/继承/文本 | SetAttributeCommand、节点多态 | domain/edits；application/edits；integration/cli.m3、cli.acceptance |
-| delete 整棵子树 | DeleteCommand、SvgDocument | domain/SvgDocument；application/CommandHistory；integration/cli.m5、cli.acceptance |
-| group 跨父/顺序/原子性 | GroupCommand、SceneEditor | domain/SceneEditor；application/structure、CommandHistory；典型会话 |
-| ungroup 根级限制/提升 | UngroupCommand、SceneEditor | domain/SceneEditor；application/structure；integration/cli.m4、cli.acceptance |
-| addto 防循环/末尾挂接 | AddToCommand、SvgDocument.planRelocate | domain/SceneEditor；application/structure；结构会话 |
-| front/back 同级顺序 | FrontCommand/BackCommand、SceneEditor | domain/SceneEditor；application/structure；结构会话 |
-| tree 全文/子树内联属性 | SceneQuery、NodeFormatter | integration/cli.m2、cli.m4、cli.acceptance |
-| show parent/属性 | SceneQuery、NodeFormatter | integration/cli.m2、cli.m7、cli.acceptance |
-| help 全命令及 EOF | HelpCommand、Dispatcher、格式器 | integration/cli.smoke、cli.acceptance（19 个名称） |
-| undo/redo 粒度/分叉/失败 | CommandExecutor、CommandHistory、ChangeSet | application/CommandHistory（全部编辑逐前缀、时间线、失败重试）；integration/cli.m5 |
-| save 转义/旧文件保护 | SaveCommand、SvgWriter、AtomicFileWriter | infrastructure/SvgWriter、AtomicFileWriter；application/SaveCommand；integration/cli.m6 |
-| read 补 ID/失败候选/来源 | ReadCommand、SvgReader、SvgFileStore、Session | infrastructure/SvgReader、SvgFileStore；application/ReadCommand；integration/cli.m7 |
-| read/save/read 等价 | Reader/Writer、文件适配器 | infrastructure/SvgReader、SvgFileStore；integration/cli.m7、cli.acceptance |
-| 引号/空文本/注释/错误恢复 | Tokenizer、SvgCli | cli/CommandTokenizer；integration/cli.smoke、cli.m2 |
-| 精确标准错误及阶段范围 | 接收者/Executor/格式器 | integration/cli.m2～m7、cli.acceptance；box 明确 unknown shape type |
-| 结构、依赖与类组织 | 聚合、端口与装配根 | domain/SvgDocument、SceneEditor；architecture/dependencies |
-
-### 验证方法与实际结果
-
-环境：Windows PowerShell，Node v24.14.0、npm 11.9.0。依赖由 package-lock.json 固定。实际执行：
+### 4.2 方式B：配置装配
 
 ```powershell
-npm.cmd run build
-npm.cmd test
-git diff --check
+node dist/host/main.js --config plugins.config.json
 ```
 
-构建通过；24 个测试文件、214 项测试全部通过。测试包括领域单元、命令/历史状态机、真实文件失败注入、XML 往返、真实 CLI 子进程、三份精确完整会话及架构守卫。Vitest 因环境子进程限制使用用户授权的沙箱外执行权限。
+```json
+{
+  "plugins": [
+    { "module": "@svgframe/command-stats" },
+    { "module": "@svgframe/command-dir" },
+    { "module": "@svgframe/shape-box" },
+    { "module": "@svgframe/tree-star" }
+  ]
+}
+```
 
-编译产物另外用三份脚本回放并比较输出，隔离产物位于被忽略的 dist/m8-verification，不污染示例或测试 fixture。采用独立 .NET XML 解析器检查流程图，并用独立 Chrome 配置无头渲染后查看截图。交付的 [demo.svg](../demo.svg) 与 examples/demo.cli 生成结果一致，浏览器可直接打开。
+显式配置替换A可选列表，内置能力仍安装。条目支持module、enabled、options，相对模块以配置目录为基准，包名遵守该目录Node解析上下文。通用resolver处理包名、目录和明确JS入口；disabled完全不求值，options交给插件判断。
 
-复现单项验收：
+### 4.3 清单校验与失败隔离
+
+package.json的contributes声明shapes、commands、attributes、decorators名称，省略为空。流程为：整体配置校验 → 逐项解析 → 暂存注册/休眠订阅 → 同步activate → 方法/重名/贡献集合检查 → 绑定资源并提交。
+
+当前插件失败时释放其订阅并恢复已提交类别，保留前面成功的插件，继续后续项；重复注册即使被捕获也会使安装失效。退出按逆序释放资源。非法配置只使用内置能力启动，模块缺失/无default/清单不符/激活失败等有固定反馈，见 [装配参考](PLUGIN_LOADING.md)。
+
+loader不含具体插件导入或名称映射。A/B行为一致性与Git接入边界是两种证据：前者比较同集合/顺序/options/cwd下原始输出，后者检查真实接入提交和实际存在的受保护路径，不能仅以工作区空输出证明。
+
+## 5. 目录Adapter与VSCode实践
+
+### 5.1 dir的Adapter角色
+
+Target是公开DirectoryPort，Adapter是NodeDirectoryAdapter，Adaptee是Node readdirSync/Dirent。适配器冻结name/kind和startup path；DirCommand负责点项过滤、分组排序与两空格输出。
+
+目录/文件/链接/其他依次输出，组内使用JS字符串序，隐藏项保留，不递归、不跟随链接、不改变cwd。dir不要求SVG初始化，不改变文档、来源、保存基线或历史；read/save不改变启动目录。
+
+### 5.2 VSCode职责、调用与复用
+
+VSCode负责激活、文件系统、Explorer/Outline展示及导航。扩展注册FileDecorationProvider与DocumentSymbolProvider类实例，宿主按需回调，体现控制反转；ExtensionLifecycle统一管理释放。
+
+文件装饰返回 `[]` 元数据，并未包装文件对象，因此与经典Decorator结构不同。SvgOutlineParser生成保留原始ID和UTF-16范围的语法树，SvgDocumentSymbolProvider将其适配为DocumentSymbol/Position/Range，是较直接的Adapter。
+
+复用saxes和显式栈遍历思路，不直接复用CLI的SvgReader、SvgDocument或历史：大纲应接受无ID、任意合法元素和未保存文本，不补ID或施加课程图形白名单。取消/版本变化时丢弃结果；XML不完整清空，补全后重建。
+
+安装、Text Editor关联、F5和独立宿主方法见 [扩展README](../extensions/vscode-svg/README.md)。实际运行截图与A.3观察结果在第8.4节填写。
+
+## 6. 设计决策
+
+| 决策 | 选择和原因 | 记录 |
+|---|---|---|
+| 属性失败原子性 | 冻结目标+受控同步事务+局部记录；不接受任意回调冒充原子步骤 | [ADR001](adr/001-attribute-transactions.md) |
+| 复合容器与读回 | 通用结构策略、完整后序恢复；仅缺provider的未知g标记降级 | [ADR002](adr/002-composite-restore.md) |
+| dirty与标签 | 内容差异、当前祖先传播、box在star前，状态实例私有 | [ADR003](adr/003-lifecycle-and-labels.md) |
+| 安装与清单 | A/B共用暂存校验与回滚，禁用不求值 | [ADR004](adr/004-plugin-installation.md) |
+| API与宿主边界 | public exports、端口适配、通用构建/解析不枚举新包名 | [ADR005](adr/005-public-api-and-host.md) |
+
+增加注册/事务/加载层会增加代码量和复杂度，换取接入边界，不保证整体更短。策略/处理器要求可信插件遵守同步、纯检查、原子变更契约，不是恶意插件沙箱；不实现热卸载或完整SVG规范。box标题采用固定模板偏移，不声称文字自适应居中。
+
+## 7. AI协作时的检查与修正
+
+以下是开发时检查过的建议，不替代第8节的本轮验证结果。
+
+| AI建议或初始假设 | 核验依据 | 采纳或修正 | 本轮应补证据 |
+|---|---|---|---|
+| 规范化输出足以证明兼容 | 去提示符/trim/改换行可能隐藏差异 | 增加Buffer级两流和生成物比较 | 第8.3节原始回放 |
+| dirty可用编辑次数或历史位置 | 同值、回保存点、canvas历史屏障语义不同 | 内容比较，实例保存基线/缓存 | 第8.1节同值/undo/redo/失败保存 |
+| box只需在delete/ungroup按名字保护 | move/group/跨父操作也能破坏部件 | 用通用容器结构策略 | 第8.1节各破坏路径 |
+| 先建空组再恢复复合部件 | provider会看见半成品 | 完整离线组装后验证/挂接 | 第8.1节损坏拒绝与原状态保留 |
+| Node ESM可直接导入目录 | 目录入口与exports、清单归属有区别 | 通用resolver解析目录/入口/manifest | 第8.2节各路径及依赖失败 |
+| 大纲可直接复用SvgReader | CLI补ID/领域校验与语法范围需求冲突 | 仅复用解析库，独立语法DTO和Adapter | 第8.4节无ID/异常恢复 |
+| XML列号可直接作编辑器列号 | CRLF/emoji涉及UTF-16偏移 | 用document.positionAt转换偏移 | 第8.4节源码范围与定位 |
+| API恢复等同Outline已恢复 | 数据与原生视图刷新有时序差异 | 等待真实可见节点再截图 | 第8.4节恢复截图 |
+| 最新类型包一定适合本机 | 类型版本可能高于固定宿主 | 固定兼容依赖并由真实宿主验证 | 第8.4节版本记录 |
+| 中间源码指标等同最终标签 | 报告提交与运行源码SHA不同 | 指标明确revision，最后重算并检查源码差异 | 第8.5节最终SHA/命令 |
+
+作者补充记录：
+
+| 日期/建议 | 检查依据 | 采纳/修正 | 实际结果或材料 |
+|---|---|---|---|
+| 待填写 | 待填写 | 待填写 | 待填写 |
+
+## 8. 测试与验证材料（作者填写）
+
+本节等待作者完成本轮测试、运行并截图后填写。保留命令、日期、版本、退出码和失败修正，不能只填“通过”。原始日志建议放 `.tmp/verification/`，需要提交的截图放 `doc/images/`；不要把机器绝对路径、下载缓存或整个运行目录作为报告附件。
+
+### 8.0 环境
+
+| 项目 | 实际填写 |
+|---|---|
+| 日期、操作系统、终端 | 待填写 |
+| 分支、完整提交SHA | 待填写 |
+| Node.js / npm / TypeScript / Vitest | 待填写 |
+| VSCode / 扩展版本 | 待填写 |
+| 安装、构建命令与退出码 | 待填写 |
+
+准备命令：`npm.cmd ci`、`npm.cmd run build:all`、`npm.cmd run check:tests`。以下PowerShell命令在仓库根执行，其他平台使用npm。
+
+### 8.1 插件与业务功能
 
 ```powershell
-npm.cmd test -- test/integration/cli.acceptance.test.ts test/architecture/dependencies.test.ts
-$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-Get-Content -Encoding UTF8 examples/demo.cli | node dist/cli/main.js
+npm.cmd test --workspace @svgframe/command-stats
+npm.cmd test --workspace @svgframe/command-dir
+npm.cmd test --workspace @svgframe/shape-box
+npm.cmd test --workspace @svgframe/tree-star
 ```
 
-### Git 演化与最终交付状态
-
-| 阶段 | 已存在提交 | 当时通过测试数 |
+| 检查项 | 预期观察 | 实际结果、日志或截图 |
 |---|---|---|
-| M0 | 020cc5a | 4 |
-| M1 | 4c6aea4 | 44 |
-| M2 | 7bf0221 | 66 |
-| M3 | 687818c | 95 |
-| M4 | ef7673c | 117 |
-| M5 | 4774476 | 130 |
-| M6 | c7d4b04 | 152 |
-| M7 | 5e70d51 | 204 |
-| M8 | 待用户验收提交 | 214 |
+| stats | 首次类型顺序、根排除、空容器、查询无副作用 | 待填写 |
+| dir | 替身/真实目录、隐藏项/排序/链接、失败继续、read/save不变cwd | 待填写 |
+| box | 模板/ID冲突、整体操作、部件保护、fill/label与undo/redo | 待填写 |
+| SVG恢复 | 完整往返、损坏拒绝、未安装降级、重复ID及失败保留来源/redo | 待填写 |
+| 属性事务 | 零/单/多命中，局部失败回滚，一次set一个单元 | 待填写 |
+| modified-star | 新建/保存/再编辑/undo/redo/分叉/失败保存/祖先/画布/多会话 | 待填写 |
+| 双标签 | `(box) *`顺序、独立禁用、根/子树显示 | 待填写 |
 
-本地已有分阶段提交，M8 没有自动提交。检查时分支为 master，已配置 origin，本地 origin/master 引用显示领先 9 次提交；没有联网核验远端最新状态，final 标签尚不存在。
+**截图预留：插件功能与Undo/Redo截图待插入。** 建议文件名：`doc/images/plugins.png`、`doc/images/box-undo-redo.png`。
 
-用户需审阅本轮 diff 并验收，提交 M8 后确认提交 SHA、实际截止时间、远端和分支，推送提交并在最终提交创建/推送 final 标签；已有同名标签时先核查，不能强制覆盖。完成这些手续后再核对远端 final 是否指向已验证的最终提交。本轮未执行任何提交、推送或标签创建，不将本地测试通过写成远端交付完成。
+### 8.2 加载器与装配
 
-## Phase 2 过程记录
+```powershell
+npm.cmd test -- test/loading
+npm.cmd test -- test/architecture
+```
 
-2026-11-16 更新：上文保留 Phase 1 收尾时的历史记录。现已核对本地附注标签 final 指向 `2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d`；当前 HEAD 为新增第二阶段需求的 `0ebd382…`。第二阶段设计与执行入口见 [docs/phase2](../docs/phase2/README.md)。
+| 检查项 | 预期观察 | 实际结果、日志或截图 |
+|---|---|---|
+| A/B共同路径 | 均经过清单校验/安装事务，集合/顺序/options一致 | 待填写 |
+| 四类失败 | 缺模块、无default、清单不符、activate抛错后仍可运行 | 待填写 |
+| 重复/部分失败 | 当前全部回滚、前者保留、后者继续，资源无残留 | 待填写 |
+| 配置与路径 | 非法配置只启内置，disabled不求值，包名/目录/JS按配置目录解析 | 待填写 |
+| 内部依赖失败 | 入口存在但内部依赖/求值失败，不误报顶层缺模块 | 待填写 |
+| 接入边界 | 真正存在的core/loader/既有插件路径差异为空，解释装配/元数据 | 待填写 |
 
-P2-0 已完成扩展开发骨架、隔离调试配置、资源释放单测及真实 VSCode 宿主激活/释放烟测；CLI 严格编译和原 214 项测试通过。三份纯命令会话与 final 原始 stdout/stderr、生成文件逐字节一致。详细命令、环境问题的修正和证据见 [P2-0 记录](../docs/phase2/P2-0_REPORT.md)、[基线摘要](evidence/phase2/p2-0-baseline.json) 和 [宿主摘要](evidence/phase2/p2-0-host.json)。本节点尚待审阅提交；文件标记、大纲与 CLI 插件重构按后续节点实施。
+**截图预留：失败隔离与继续运行截图待插入。** 建议文件名：`doc/images/plugin-loading.png`。
 
-2026-11-17：P2-0 已提交为 e5ae494。P2-1a 已实现 Explorer SVG 文件标记，覆盖目录排除、文件变化刷新、取消/失败和释放；真实宿主核对文件名与内容不变，并保存 [SVG 标记截图](evidence/phase2/p2-1a-svg-badge.png)。实现前观察了内置 Outline 的嵌套、定位与编辑更新，最终重跑补齐折叠/展开验证；这不代表 SVG 大纲已实现。扩展四项单元测试、两种宿主场景、CLI 构建及四项既有综合验收通过。详见 [P2-1a 记录](../docs/phase2/P2-1a_REPORT.md)，本节点待审阅提交。
+### 8.3 功能兼容性与双装配
 
-### 第一部分交付：SVG 标记与原生大纲
+```powershell
+npm.cmd test -- --maxWorkers=4
+$env:SVG_CLI_ENTRY='test/fixtures/entries/no-optional.mjs'
+npm.cmd run verify:baseline
+Remove-Item Env:SVG_CLI_ENTRY
+node scripts/verify-phase2-release.mjs
+```
 
-P2-1a 已提交为 5a5bcbf；P2-1b 已完成本地验收，待提交。扩展 0.2.0 支持 SVG 根/容器/叶子层级、标签名#id、无 id、点击源码定位、未保存编辑更新和不完整 XML 后恢复；VSIX 已在仓库外独立目录安装并通过同一套真实宿主测试。CLI 214 项回归及扩展 8 项单测通过。
+基线工具需要本地正确final标签，会导出该版本并按历史锁安装构建，可能需要网络。A/B必须同实现/集合/顺序/options、初始文件和cwd；比较原始stdout/stderr，不去提示符/trim/改换行。dir会话的日志与保存文件应在被列目录外。
 
-完整安装/启动步骤、真实截图、接口/对象组合/调用关系、Decorator/Adapter 差异及 Phase 1 复用评估见 [VSCode 实践说明（A.3）](VSCODE_EXTENSION.md)。核心职责：VSCode 负责激活、视图渲染和导航；扩展注册类实例，由宿主回调并提供文件装饰与 DocumentSymbol。文件装饰没有包装同接口的文件 Component，不能仅凭名称等同于经典 Decorator；语法树到 DocumentSymbol 的转换体现 Adapter。大纲复用 saxes，独立保存源码偏移，不复用会补 ID/施加领域约束的 SvgReader/模型。
+| 检查项 | 作者填写 |
+|---|---|
+| 全量命令、退出码、文件/测试数量 | 待填写 |
+| final标签对象与提交SHA | 待填写 |
+| 无插件时与final原始两流和SVG对比 | 待填写 |
+| 四插件全集合A/B六份会话、输入/输出哈希与生成物 | 待填写 |
+| 实际生成SVG的浏览器查看 | 待填写 |
+| 失败、定位、修正和复测 | 待填写 |
 
-证据：[大纲第 3 行定位](evidence/phase2/p2-1b-svg-outline-navigation.png)、[异常 XML](evidence/phase2/p2-1b-svg-outline-incomplete.png)、[恢复](evidence/phase2/p2-1b-svg-outline-recovered.png)、[已安装宿主检查](evidence/phase2/p2-1b-outline-checks.json)。SVG 需使用文本编辑关联，示例工作区已有配置；扩展不修改全局偏好。详见 [P2-1b 记录](../docs/phase2/P2-1b_REPORT.md)。
+**截图预留：兼容性回放、A/B及SVG预览待插入。** 建议文件名：`doc/images/compatibility.png`、`doc/images/assembly-comparison.png`、`doc/images/svg-preview.png`。
 
-### P2-2a：注册式内核与包边界
+### 8.4 VSCode扩展与截图
 
-第一部分已提交 c093c7f。本轮迁移为 src/core、src/host、plugins/builtin-shapes、plugins/builtin-commands；四扩展点位于 core，内置十九条命令/六种图形经类实例注册。帮助由注册元数据生成，命令分发器与形状服务不再枚举具体实现。domain 只依赖自身，插件只依赖 core public，host 仅在组合根导入具体插件。
+```powershell
+npm.cmd run build:extension
+npm.cmd run test:extension:unit
+npm.cmd run test:extension
+npm.cmd run package:extension
+```
 
-本节点当时的 AttributeHandler 为纯 ChangeSet 计划契约，后续已在 P2-2b 升级。当前接口、调用位置、实现、缺省与契约错误见 [扩展点清单](EXTENSION_POINTS.md)；配置安装回滚和首次指标在 P2-2c，尚未冻结框架。
+还需手工Install from VSIX安装包，或用F5开发宿主运行；以Text Editor打开SVG，查看原生Outline。自动宿主固定1.143.1，首次可能下载；测试只编辑临时fixture，操作JSON与截图在该次 `.tmp/phase2/extension-*/`。安装版自动验证方法见扩展README。
 
-全工作区干净构建、测试源码类型检查通过；27文件/232项主测试、两个内置包各2项独立测试、扩展8项单测与真实宿主回归通过。三份 final 会话逐字节一致，见 [字节兼容摘要](evidence/phase2/p2-2a-baseline.json) 与 [P2-2a 记录](../docs/phase2/P2-2a_REPORT.md)。当前编译入口为 dist/host/main.js，首次安装后先构建本地包。本节点待审阅提交。
+| 场景 | 操作与预期 | 实际观察、版本及材料 |
+|---|---|---|
+| 文件标记 | 未打开SVG即见`[]`，普通文件/目录无标记，原文件不变 | 待填写 |
+| 原生大纲 | 根/容器/叶子/无ID层级正确 | 待填写 |
+| 点击定位 | Outline点击节点，编辑器定位对应源码范围 | 待填写 |
+| 未保存更新 | 修改ID/层级，视图无需先保存就更新 | 待填写 |
+| XML异常恢复 | 不完整时清空，补全后真实视图出现正确节点 | 待填写 |
+| 独立安装 | 版本/路径正确，不依赖仓库node_modules | 待填写 |
+| A.3实践 | 宿主回调、Decorator/Adapter角色及与CLI复用差异 | 待填写 |
 
-### P2-2b：事务、复合容器与生命周期
+**截图预留：本轮VSCode运行截图待插入。** 建议在 `doc/images/` 保存 `vscode-badge.png`、`vscode-outline.png`、`vscode-navigation.png`、`vscode-updated.png`、`vscode-incomplete.png`、`vscode-recovered.png`，然后用实际图片引用替换预留文字，并填写操作说明。
 
-P2-2a 已提交 dc27435。此阶段新增只读属性目标与 AttributeEdits 门面，多部件修改、反馈和不变量验证在同一边界内完成；异常恢复已完成步骤，redo 重放局部记录。NodeEdit/Create/Group 的结果与验证失败均恢复原状态，再决定是否推进命令和历史状态。
+文件准备好后可使用下面的Markdown引用；当前仅作填写示例，不预置运行截图：
 
-复合 provider 通过 ShapeConstructionPort 请求基本形状，以 SubtreeBuilder 构建完整离线子树。通用容器钩子集中保护挂接、删除、跨父迁移和分组；语义/显示/XML 三身份分离。读取在检查全文 ID 后后序恢复完整子树，已注册标记损坏即拒绝，未注册 data-kind 静默降级普通 g。核心没有真实业务插件名或派生 ID 规则。
+```markdown
+![SVG文件标记](images/vscode-badge.png)
+![原生大纲点击定位](images/vscode-navigation.png)
+![XML补全后的大纲恢复](images/vscode-recovered.png)
+```
 
-SessionSnapshot 提供复制冻结的场景，SessionEvents 在历史提交后通知七类成功操作；查询与失败无通知，订阅可释放，观察者异常单独记录诊断，不改变已成功保存的结果。正式 dirty 与祖先传播算法仍待 P2-5，此阶段仅以测试观察者和假标签验收协议。
+### 8.5 指标与结论
 
-正式决策：[ADR 001 属性事务](adr/001-attribute-transactions.md)、[ADR 002 复合与恢复](adr/002-composite-restore.md)、[ADR 003 生命周期与标签](adr/003-lifecycle-and-labels.md)。构建、测试源码检查、30文件/257项主测试、扩展8项单测通过；三份 final 回放逐字节一致，见 [验证摘要](evidence/phase2/p2-2b-checks.json)、[基线摘要](evidence/phase2/p2-2b-baseline.json) 及 [阶段报告](../docs/phase2/P2-2b_REPORT.md)。扩展源码未改，本阶段未重跑真实宿主、VSIX 或截图。未新增依赖、未执行 Git 写操作；待审阅提交后进入 P2-2c。
+已有 [源码指标](../docs/metrics/phase2-source.md) / [JSON](../docs/metrics/phase2-source.json) 是脚本从final到运行源码提交 `360fac0` 生成的历史快照，不是本轮验证结论。职责、物理/代码行和复杂度按core/host/plugins分开，VSCode单列；内置迁移会重分配分类，不能把core减少直接当功能净删减。
 
-### P2-2c：共同安装、配置加载与冻结准备
+更新时使用真实revision，例如 `npm.cmd run metrics -- final HEAD --output .tmp/verification/final-to-head`；需要纳入报告的最终结果再放入 `docs/metrics/`，不要手改生成数字。口径见 [指标说明](../docs/metrics/README.md)。
 
-P2-2b 已提交 4a4ed73。默认内置及代码/配置两种装配现统一进入宿主 installer：四类注册与订阅先暂存、清单集合核对后提交；重名锁存、激活/清单/提交失败均恢复当前插件，已成功及后续插件仍可用。注册批量候选与恢复收据覆盖提交阶段失败；资源作用域覆盖订阅及其他 dispose，退出逆序释放。
-
-配置整体校验后按序加载，disabled 不解析，错误时继续内置交互。包目录、包名、显式编译 JS 使用原生 ESM 条件解析与所属清单，内部依赖/求值失败不误报顶层模块找不到。DirectoryPort 由 NodeDirectoryAdapter 适配启动目录与冻结条目，链接不跟随，未来 DirCommand 单测可注入同接口替身；排序/显示属于命令，不混入 Adapter。
-
-完整入口/配置/错误/端口说明见 [PLUGIN_LOADING](PLUGIN_LOADING.md)，设计依据见 [ADR 004](adr/004-plugin-installation.md)、[ADR 005](adr/005-public-api-and-host.md) 和 [扩展点清单](EXTENSION_POINTS.md)。实际前后模块依赖图（相邻 .puml 可编辑）：
-
-![final 实际架构](architecture/final.svg)
-
-![P2-2c 实际框架](architecture/phase2-framework.svg)
-
-34文件/286项主测试、扩展8项单测、构建/类型检查通过；三份 final 原始字节一致。工具 fixture 验证 A/B 同实现/options/cwd 的两输出流/生成 SVG、未知 workspace 拓扑及编译后加载、Git 允许/拒绝路径和 peer 比较。见 [验证摘要](evidence/phase2/p2-2c-checks.json)、[字节摘要](evidence/phase2/p2-2c-baseline.json)、[A/B 摘要](evidence/phase2/p2-2c-assemblies.json) 及 [阶段报告](../docs/phase2/P2-2c_REPORT.md)。
-
-首轮 [历史指标](../docs/metrics/README.md) 由脚本真实读取 final→已提交4a4ed73，不包含本轮未提交源码。框架本地验收完成，冻结 SHA 须在用户审阅本轮普通提交后登记并重算指标；尚未实现真实业务插件、接入提交证明和最终 p2 指标，不以 fixture 或前置提交代替。未对项目执行 git add/commit/push/tag；合成 Git 提交仅用于隔离测试仓库。
-
-### P2-3a：stats 独立接入
-
-P2-2c 已提交，冻结 SHA 为 `1ff4352de83ac64943f36c9d51684101249fa1f6`，已补齐该 SHA 的 [指标](../docs/metrics/framework-freeze.md)。新增 command-stats workspace 仅依赖 core public，三个类分别负责 query 执行、参数/help 定义和注册。遍历使用现有文档 Iterator，以 isContainer 判定容器、Map 保留叶子类型首次出现顺序，根不计；无需修改核心或添加具体形状分支。
-
-默认 A 只在 composition 加入 StatsPlugin；B 用配置加载同一包/清单/类，都经过冻结 installer。root package/lock 只补本地工作区依赖，loader、formatter、构建编排和既有插件均无差异。原十九命令 help 精确验收显式使用空配置，原断言/预期保持不变。
-
-36文件/300项主测试、stats 单包11项、编译/类型检查通过。单包使用公开叶子/复合容器替身，不 import 其他插件或 host；集成验证真实形状和 A/B。新会话对手工语义预期检查，并以 raw 两输出流/生成 SVG 比较 A/B；无扩展三份旧会话仍与 final 逐字节一致。
-
-见 [P2-3a 报告](../docs/phase2/P2-3a_REPORT.md)、[验证摘要](evidence/phase2/p2-3a-checks.json)、[A/B 摘要](evidence/phase2/p2-3a-assemblies.json)、[边界摘要](evidence/phase2/p2-3a-boundary.json)。本轮未创建项目提交，stats 接入 SHA/正式提交差异证明待审阅提交后补齐；下一阶段为 dir，真实 box/星号及最终 p2 指标仍按计划推进。
-
-### P2-3b：dir 与命令插件完成节点
-
-stats 已提交为92cde9f，相对冻结1ff4352的 [真实接入差异检查](evidence/phase2/p2-3a-committed-diff.json) 通过。本阶段新增独立 command-dir，只依赖 core public 的目录端口，默认 A 在 stats 后启用 dir，B 可配置相同集合/顺序，也可分别启禁用。已有运行改动只在 composition；核心、NodeDirectoryAdapter、加载器、渲染器、构建编排及 stats 均未修改。
-
-Adapter 角色：DirCommand 是 Client，DirectoryPort 是 Target，NodeDirectoryAdapter 是 Adapter，Node fs.readdirSync/Dirent 是 Adaptee。宿主负责适配直接条目与 startup path；命令负责过滤点项、分组字符串排序与两空格输出，特殊链接/其他项分别标 [LINK]/[OTHER]。不依赖当前 SVG，不跟随链接/递归或改变 cwd；失败后仍可继续交互。
-
-38文件/319项主测试、dir单包9项、构建/类型检查通过。真实目录/链接和替身覆盖空/混合/隐藏/特殊项；成功与失败均比较场景/来源/保存点观察者/双栈/blocked 并实际 undo/redo。read/save 前后的六次列表在同一 cwd 保持相同；联合 A/B 两流 raw 字节及列目录 fixture 内容一致，日志和保存目标在目录外。stats-only 与三份无扩展 final 回放仍通过。
-
-见 [P2-3b 报告](../docs/phase2/P2-3b_REPORT.md)、[验证摘要](evidence/phase2/p2-3b-checks.json)、[A/B 摘要](evidence/phase2/p2-3b-assemblies.json)、[边界摘要](evidence/phase2/p2-3b-boundary.json)。命令插件节点本地验收就绪，未创建项目提交；dir 提交后补接入 SHA/差异，下一步在 box 开发前独立准备一致 A/B 清单及演示基线 F，正式 modified-star 仍待 P2-5。
-
-### Box 前置：共同演示基线准备
-
-dir 已提交为8dc8e39，实际接入差异检查通过，见 [提交证据](evidence/phase2/p2-3b-committed-diff.json)。本轮将根配置与代码装配对齐为 stats、dir；无扩展测试独立使用固定空配置，原断言保留。新增真实根配置的共同命令回放及回归，不修改生产源码、插件实现/manifest、依赖或构建工具。
-
-39文件/323项测试、构建/类型检查、真实根配置 raw A/B 与三份无扩展 final 回放通过。证据：[检查摘要](evidence/phase2/p2-4-prep-checks.json)、[A/B](evidence/phase2/p2-4-prep-assemblies.json)、[边界](evidence/phase2/p2-4-prep-boundary.json)。本轮是独立的 F 候选准备，未实现 box、未创建项目提交或分支；实际 F 要在本轮提交后记录，再以它为 C_A/C_B 的共同父提交。范围和操作顺序见 [基线准备记录](../docs/phase2/P2-4_BASELINE_PREPARATION.md)。
-
-### P2-4：真实 box 双装配接入
-
-共同基线已由用户提交为 F=f5236b500194d129345479799d149e22d18acb52。新增独立 shape-box，依公开 Composite、构建端口、受控属性事务及树装饰接口完成模板/部件保护/完整恢复、fill/label 与 `(box)` 类型标签；冻结 core/loader/渲染器/内置包/stats/dir 均未修改。类型标签与假星号的顺序组合通过，正式 modified-star 仍待 P2-5。
-
-用户授权创建本地证明分支并各提交一次：C_A=f20745a82f12765a95b415b12893f8605cb52a4d（phase2/box-a-f5236b5，仅 composition 接入），C_B=9a8aeb65f21f14abd807c4e1c2f27dad40d0519a（phase2/box-b-f5236b5，仅根配置接入）。唯一父提交均为 F，完整 box 包一致，各24个变更路径/零违反项；两侧独立构建、类型检查和365项测试通过，真实 main/root 配置逐字节回放两流及两份SVG一致。主工作区同时整合两种装配，HEAD仍为F、整合未提交，未 push/tag；两证明分支保留可达。
-
-主工作区41文件/365项测试、单包27项和三份无扩展 final 字节回放通过。初次并行测试的资源竞争超时与串行限worker重跑均有日志；未修改超时或原断言，未重跑未改动的GUI/VSIX。ADR001～003与扩展点已补真实调用位置，metrics分别从F→C_A/C_B的真实Git blob生成（core增量0；A host增2代码行，B host增量0）。
-
-详见 [P2-4 报告](../docs/phase2/P2-4_REPORT.md)、[检查摘要](evidence/phase2/p2-4-checks.json)、[提交/包校验](evidence/phase2/p2-4-proof.json)、[实际跨工作区回放](evidence/phase2/p2-4-assemblies.json) 与 [历史指标说明](../docs/metrics/README.md)。本阶段本地退出条件满足，当前整合变更由用户审阅提交，随后进行 P2-5。
-
-### P2-5：内容差异星号与两个标签并存
-
-P2-4已整合提交1d1b64628860d619e24b561bc49b2eeb435c29cc。本阶段新增独立tree-star，只依赖core public。ModifiedStarDecorator实例保存基线签名与dirty缓存，订阅成功init/read/save/edit/undo/redo/canvas；新建即标星、回保存内容消星、变化向当前祖先传播，旧祖先通过孩子序列反映删除/迁移，画布尺寸只标根。路径/对象身份/历史位置不参与，查询和失败不更新基线。订阅由冻结安装器暂存及释放。
-
-默认A与根B在box之后追加modified-star，输出`g#p (box) *`；两标签互不调用、两个包互不依赖，完整box包/core/渲染器/loader均未修改。真实目录路径配置、独立star/禁用star、子树显示、安装失败释放和多会话均验证。独立22项、真实集成12项，全量43文件/399项通过；同集合/顺序/options/cwd的raw A/B两流、两SVG及fixture树一致，三份禁用可选插件的final会话逐字节一致。
-
-正式状态机和关键取舍落在 [ADR003](adr/003-lifecycle-and-labels.md)，实测过程见 [P2-5报告](../docs/phase2/P2-5_REPORT.md)、[检查摘要](evidence/phase2/p2-5-checks.json)、[边界](evidence/phase2/p2-5-boundary.json) 与 [字节回放](evidence/phase2/p2-5-assemblies.json)。本地开发验收完成，当前变更待用户审阅提交，实际接入SHA/差异/历史指标在提交后补验；不以工作区检查代替提交证明。P2-6进行综合验收和最终交付，本阶段未重跑未改动的GUI/VSIX、未执行Git写操作。
+| 最终材料 | 作者填写 |
+|---|---|
+| 起止完整SHA、版本与生成命令 | 待填写 |
+| 实际接入提交和差异说明 | 待填写 |
+| 截图/日志清单与尚存限制 | 待填写 |
+| 实际完成情况与结论 | 待填写 |
