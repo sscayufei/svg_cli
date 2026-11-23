@@ -171,6 +171,8 @@ npm.cmd run package:extension
 
 若默认打开为图片，使用 **Reopen Editor With… → Text Editor**。扩展不修改原文件；XML 不完整时暂时清空大纲，补全后恢复。也可选择调试配置 **SVG extension development host**，按 F5 启动开发宿主。详细方法见 [扩展 README](extensions/vscode-svg/README.md)。
 
+只看到 `[]`、不清楚其他功能的入口时，按 [VSCode插件人工测试指南](doc/VSCODE_MANUAL_TEST.md) 打开原生大纲，并逐项检查导航、未保存更新和异常恢复。
+
 ## 注意事项
 
 - 几何数值必须有限；尺寸和半径可为零，画布宽高及缩放比例必须为正。不接受 NaN、Infinity 或 CLI 几何参数中的单位。
@@ -196,8 +198,8 @@ npm.cmd run package:extension
 
 ## 文档与检查入口
 
-- [项目报告](doc/README.md)：扩展点、双装配、架构变化、设计决策、AI协作检查，以及待填写的测试和截图位置。
+- [项目报告](doc/README.md)：扩展点、双装配、架构变化、设计决策、AI协作检查，以及测试结果与运行截图。
 - [扩展点参考](doc/EXTENSION_POINTS.md)、[装配参考](doc/PLUGIN_LOADING.md)、[设计决策ADR](doc/adr/001-attribute-transactions.md)。
 - [第二阶段需求](docs/phase_cli_2.md)、[第一阶段需求](docs/phase_cli_1.md)、[历史源码指标](docs/metrics/README.md)。
 
-可用 `npm.cmd test -- --maxWorkers=4`、`npm.cmd run check:tests` 自检；插件、加载器、兼容性和扩展运行的分项步骤见项目报告。真实宿主测试会打开隔离VSCode窗口，首次运行可能下载固定版本。
+可用 `npm.cmd test -- --maxWorkers=1`、`npm.cmd run check:tests` 自检；本轮并发测试中的Git工具用例曾触发默认超时，串行复测通过，详情见项目报告。插件、加载器、兼容性和扩展运行的分项步骤也见报告。真实宿主测试会打开隔离VSCode窗口，首次运行可能下载固定版本。

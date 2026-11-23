@@ -2,7 +2,7 @@
 
 Before: 2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d
 
-After: 360fac0c68711a954d27213989fb735eeaec5adc
+After: 474bedee351f42b2124b0e7730fe44787a25aabb
 
 Historical Git blobs only. Moving built-in commands/shapes into plugins redistributes categories; compare cliTotal too. VSCode is separate. This snapshot does not include uncommitted work.
 

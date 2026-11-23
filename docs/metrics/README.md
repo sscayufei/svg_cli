@@ -1,6 +1,8 @@
-# 历史源码指标
+# 源码指标
 
-保留的最终源码快照为 [phase2-source.md](phase2-source.md) / [JSON](phase2-source.json)，由脚本读取真实final提交与 `360fac0c68711a954d27213989fb735eeaec5adc` 生成。它记录历史源码，不包含未提交改动，也不代表本轮人工测试已完成；验证与最终结论在 [项目报告](../../doc/README.md) 第8节填写。开发期间的中间指标已移入本地过程归档。
+交付的源码快照为 [phase2-source.md](phase2-source.md) / [JSON](phase2-source.json)，于2026-11-23由脚本读取真实final提交与收尾前HEAD `474bedee351f42b2124b0e7730fe44787a25aabb` 生成。该提交与原运行源码提交`360fac0c68711a954d27213989fb735eeaec5adc`在指标统计范围内没有差异，本轮重算数值一致。它不包含未提交改动；环境、测试及结论见 [项目报告](../../doc/README.md) 第8节。开发期间的中间指标已移入本地过程归档。
+
+指标文件作为收尾提交的一部分，记录的是提交前的真实源码采样版本，不能把其SHA手工替换成包含该文件的未来提交。创建最终`p2`标签后，按下节命令只读重算`final p2`，核对统计范围内源码和完整测量结果一致；原始结果仅在`.tmp/`保留，不为回填提交SHA移动既有标签。如果收尾期间修改了生产源码，应在打最终标签前重新采样、验证和提交。
 
 ## 生成与更新
 
@@ -11,6 +13,21 @@ npm.cmd run metrics -- BEFORE AFTER --output .tmp/verification/comparison
 ```
 
 例如以 `final HEAD` 代替起止版本。确认用于报告的源码版本后，可将output设为 `docs/metrics/phase2-source` 更新最终JSON/Markdown；不要手改生成数字或用工作区估算冒充Git历史。输出包括完整SHA、工具版本、文件职责、物理/代码行、逐函数复杂度、顶层分支与分类增量。
+
+本轮生成命令为：
+
+```powershell
+node scripts/metrics.mjs final HEAD --output docs/metrics/phase2-source
+```
+
+最终`p2`标签创建后执行：
+
+```powershell
+npm.cmd run metrics -- final p2 --output .tmp/verification/final-p2
+git diff --exit-code 474bedee351f42b2124b0e7730fe44787a25aabb p2 -- src plugins extensions/vscode-svg/src
+```
+
+Git差异应为空且退出码为0；重算JSON的`baseline/current`内`totals`与`files`及`delta`应分别与交付快照一致。`current.revision`和`current.sha`应指向最终`p2`，与采样快照的提交说明区别记录。此处是标签创建后的验收步骤，不表示尚未创建的标签已经通过检查。
 
 ## 计数范围与口径
 

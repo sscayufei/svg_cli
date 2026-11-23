@@ -2,7 +2,7 @@
 
 本文整理SVG编辑器的扩展点、插件装配、架构重构、设计决策及AI协作检查。操作说明见 [用户指南](../README.md)，需求依据为 [第一阶段](../docs/phase_cli_1.md) 和 [第二阶段](../docs/phase_cli_2.md) 需求。
 
-整理日期：2026-11-18。**本轮插件/加载器测试、兼容性验证及VSCode运行结果由作者完成后填写**。下文描述设计与实现，历史指标注明来源；第8节预留实际命令、结论和截图位置，不将旧开发记录作为本轮结果。阶段计划、重复过程报告、旧日志和截图已归入本地 `.tmp/`，不作为报告附件。
+整理日期：2026-11-18；验收截图与验证记录更新日期：2026-11-23。本文已补齐环境、插件与加载器测试、兼容性回放、VSIX独立安装及指标记录。第8.4节保留作者提供的六张VSCode人工截图，自动补验结果另行注明，不推定截图中的宿主版本或安装方式。阶段计划、重复过程报告、旧日志和截图已归入本地 `.tmp/`，本轮原始日志同样仅在本地保留。
 
 ## 1. 项目目标与结构
 
@@ -145,7 +145,7 @@ VSCode负责激活、文件系统、Explorer/Outline展示及导航。扩展注�
 
 复用saxes和显式栈遍历思路，不直接复用CLI的SvgReader、SvgDocument或历史：大纲应接受无ID、任意合法元素和未保存文本，不补ID或施加课程图形白名单。取消/版本变化时丢弃结果；XML不完整清空，补全后重建。
 
-安装、Text Editor关联、F5和独立宿主方法见 [扩展README](../extensions/vscode-svg/README.md)。实际运行截图与A.3观察结果在第8.4节填写。
+安装、Text Editor关联、F5和独立宿主方法见 [扩展README](../extensions/vscode-svg/README.md)。实际运行截图与A.3实践观察记录见第8.4节。
 
 ## 6. 设计决策
 
@@ -163,7 +163,7 @@ VSCode负责激活、文件系统、Explorer/Outline展示及导航。扩展注�
 
 以下是开发时检查过的建议，不替代第8节的本轮验证结果。
 
-| AI建议或初始假设 | 核验依据 | 采纳或修正 | 本轮应补证据 |
+| AI建议或初始假设 | 核验依据 | 采纳或修正 | 本轮核验证据 |
 |---|---|---|---|
 | 规范化输出足以证明兼容 | 去提示符/trim/改换行可能隐藏差异 | 增加Buffer级两流和生成物比较 | 第8.3节原始回放 |
 | dirty可用编辑次数或历史位置 | 同值、回保存点、canvas历史屏障语义不同 | 内容比较，实例保存基线/缓存 | 第8.1节同值/undo/redo/失败保存 |
@@ -176,27 +176,29 @@ VSCode负责激活、文件系统、Explorer/Outline展示及导航。扩展注�
 | 最新类型包一定适合本机 | 类型版本可能高于固定宿主 | 固定兼容依赖并由真实宿主验证 | 第8.4节版本记录 |
 | 中间源码指标等同最终标签 | 报告提交与运行源码SHA不同 | 指标明确revision，最后重算并检查源码差异 | 第8.5节最终SHA/命令 |
 
-作者补充记录：
+本轮补充检查记录：
 
 | 日期/建议 | 检查依据 | 采纳/修正 | 实际结果或材料 |
 |---|---|---|---|
-| 待填写 | 待填写 | 待填写 | 待填写 |
+| 2026-11-23：并发全测一次通过即可作为结果 | 4 worker时Git树工具用例超过默认5秒，398项通过、1项超时 | 保留失败日志，不调整断言或超时；改用1 worker复测 | 43文件、399项全部通过；见第8.3节与日志03/04 |
+| 2026-11-23：仓库内相对文档链接可以直接打入VSIX | vsce无法为`../../doc/VSCODE_MANUAL_TEST.md`推导发布地址，打包退出1 | 扩展README改为明确的仓库文件路径；重新打包、独立安装 | 重打包退出0；安装版标记、大纲及释放检查通过，见日志17—19 |
+| 2026-11-23：六张人工截图已证明全部运行条件 | 截图没有展示未打开SVG时的激活、文件哈希和安装路径 | 保留原图及可见事实，通过真实宿主补验这些条件 | 两种宿主的badge-checks/outline-checks/host记录及bundle一致性核对，见第8.4节 |
 
-## 8. 测试与验证材料（作者填写）
+## 8. 测试与验证记录
 
-本节等待作者完成本轮测试、运行并截图后填写。保留命令、日期、版本、退出码和失败修正，不能只填“通过”。原始日志建议放 `.tmp/verification/`，需要提交的截图放 `doc/images/`；不要把机器绝对路径、下载缓存或整个运行目录作为报告附件。
+以下命令与自动补验均于2026-11-23执行。作者提供的人工截图用于说明界面现象；自动测试用于补充状态、字节和安装边界断言。命令、退出码及完整输出索引保存在本地 `.tmp/verification/report-2026-11-23/index.json`，下文“日志NN”对应同目录编号JSON。原始过程材料不提交，报告截图保存在 `doc/images/`。
 
 ### 8.0 环境
 
-| 项目 | 实际填写 |
+| 项目 | 实际记录 |
 |---|---|
-| 日期、操作系统、终端 | 待填写 |
-| 分支、完整提交SHA | 待填写 |
-| Node.js / npm / TypeScript / Vitest | 待填写 |
-| VSCode / 扩展版本 | 待填写 |
-| 安装、构建命令与退出码 | 待填写 |
+| 日期、操作系统、终端 | 2026-11-23（UTC+8）；Windows 11家庭版中文版，64位，10.0.26200/build 26200；Windows PowerShell 5.1.26100.9818 |
+| 分支、完整提交SHA | `master`，`474bedee351f42b2124b0e7730fe44787a25aabb`；本轮文档更新尚未提交，运行源码与该提交一致 |
+| Node.js / npm / TypeScript / Vitest | `v24.14.0` / `11.9.0` / `7.0.2` / `5.0.5` |
+| VSCode / 扩展版本 | 自动开发宿主和独立安装宿主均为`1.143.1`；SVG CLI Companion `0.2.0`；宿主内Node `24.21.0`、Electron `43.7.7`。作者截图未显示版本，故不据图推定 |
+| 安装、构建命令与退出码 | 沿用已有依赖安装，`npm.cmd ls --depth=0`退出0（日志05），本轮未重复`npm ci`；`npm.cmd run build:all`、`npm.cmd run check:tests`均退出0（日志01/02）；VSIX打包复测退出0（日志18） |
 
-准备命令：`npm.cmd ci`、`npm.cmd run build:all`、`npm.cmd run check:tests`。以下PowerShell命令在仓库根执行，其他平台使用npm。
+全新环境准备命令：`npm.cmd ci`、`npm.cmd run build:all`、`npm.cmd run check:tests`。以下PowerShell命令在仓库根执行，其他平台使用npm。
 
 ### 8.1 插件与业务功能
 
@@ -209,38 +211,38 @@ npm.cmd test --workspace @svgframe/tree-star
 
 | 检查项 | 预期观察 | 实际结果、日志或截图 |
 |---|---|---|
-| stats | 首次类型顺序、根排除、空容器、查询无副作用 | 待填写 |
-| dir | 替身/真实目录、隐藏项/排序/链接、失败继续、read/save不变cwd | 待填写 |
-| box | 模板/ID冲突、整体操作、部件保护、fill/label与undo/redo | 待填写 |
-| SVG恢复 | 完整往返、损坏拒绝、未安装降级、重复ID及失败保留来源/redo | 待填写 |
-| 属性事务 | 零/单/多命中，局部失败回滚，一次set一个单元 | 待填写 |
-| modified-star | 新建/保存/再编辑/undo/redo/分叉/失败保存/祖先/画布/多会话 | 待填写 |
-| 双标签 | `(box) *`顺序、独立禁用、根/子树显示 | 待填写 |
+| stats | 首次类型顺序、根排除、空容器、查询无副作用 | 独立包11项通过、退出0（日志06）；全量集成验证查询不改变文档和历史 |
+| dir | 替身/真实目录、隐藏项/排序/链接、失败继续、read/save不变cwd | 独立包9项通过、退出0（日志07）；真实CLI目录会话与失败继续由全量测试及commands回放覆盖 |
+| box | 模板/ID冲突、整体操作、部件保护、fill/label与undo/redo | 独立包27项通过、退出0（日志08）；完整业务集成见`test/integration/box.test.ts`，回放生成保存及读回SVG |
+| SVG恢复 | 完整往返、损坏拒绝、未安装降级、重复ID及失败保留来源/redo | 全量399项中的`SvgReader.test.ts`、`box.test.ts`和`box-baseline.test.ts`通过；box回放两种装配的生成文件逐字节相同（日志04/14） |
+| 属性事务 | 零/单/多命中，局部失败回滚，一次set一个单元 | 全量应用层与box集成断言通过（日志04），包含失败前后状态、来源、历史及真实undo/redo；不只比较错误文案 |
+| modified-star | 新建/保存/再编辑/undo/redo/分叉/失败保存/祖先/画布/多会话 | 独立包22项通过、退出0（日志09）；`test/integration/tree-star.test.ts`的生命周期、失败保存和多会话断言通过（日志04） |
+| 双标签 | `(box) *`顺序、独立禁用、根/子树显示 | tree-star集成验证box后接星号、仅star和显式禁用；全集合A/B的labels会话原始两流及文件一致（日志04/14） |
 
-**截图预留：插件功能与Undo/Redo截图待插入。** 建议文件名：`doc/images/plugins.png`、`doc/images/box-undo-redo.png`。
+上述独立包测试是全量测试的子集，不能与399相加。插件和Undo/Redo采用可复现会话与状态断言记录，本轮没有另造终端截图；实际生成的box浏览器截图见第8.3节。
 
 ### 8.2 加载器与装配
 
 ```powershell
-npm.cmd test -- test/loading
-npm.cmd test -- test/architecture
+npm.cmd test -- --maxWorkers=1 test/loading
+npm.cmd test -- --maxWorkers=1 test/architecture
 ```
 
 | 检查项 | 预期观察 | 实际结果、日志或截图 |
 |---|---|---|
-| A/B共同路径 | 均经过清单校验/安装事务，集合/顺序/options一致 | 待填写 |
-| 四类失败 | 缺模块、无default、清单不符、activate抛错后仍可运行 | 待填写 |
-| 重复/部分失败 | 当前全部回滚、前者保留、后者继续，资源无残留 | 待填写 |
-| 配置与路径 | 非法配置只启内置，disabled不求值，包名/目录/JS按配置目录解析 | 待填写 |
-| 内部依赖失败 | 入口存在但内部依赖/求值失败，不误报顶层缺模块 | 待填写 |
-| 接入边界 | 真正存在的core/loader/既有插件路径差异为空，解释装配/元数据 | 待填写 |
+| A/B共同路径 | 均经过清单校验/安装事务，集合/顺序/options一致 | 加载器2文件22项、架构1文件6项均通过、退出0（日志10/11）；六组四插件A/B回放一致（日志14） |
+| 四类失败 | 缺模块、无default、清单不符、activate抛错后仍可运行 | `PluginLoader.test.ts`逐类断言错误并验证后续插件和交互命令可继续（日志10） |
+| 重复/部分失败 | 当前全部回滚、前者保留、后者继续，资源无残留 | `PluginInstaller.test.ts`验证四类注册共同提交、捕获重复仍失败、后类别提交失败恢复、订阅失败释放及退出释放（日志10） |
+| 配置与路径 | 非法配置只启内置，disabled不求值，包名/目录/JS按配置目录解析 | 目录入口、明确JS、import-only exports、显式配置覆盖A、禁用项不解析及非法配置回退全部通过（日志10） |
+| 内部依赖失败 | 入口存在但内部依赖/求值失败，不误报顶层缺模块 | 加载测试分别断言依赖缺失和模块求值失败，保留与顶层模块缺失的诊断区别（日志10） |
+| 接入边界 | 真正存在的core/loader/既有插件路径差异为空，解释装配/元数据 | stats、dir、box A/B真实Git提交审计均0违规；tree-star另核对双入口接入、9组实际存在的受保护路径无变化，见第8.5节 |
 
-**截图预留：失败隔离与继续运行截图待插入。** 建议文件名：`doc/images/plugin-loading.png`。
+失败隔离的证据为加载器真实模块fixture、子进程交互断言及日志10；Git差异审计保存在同一日志目录的 `git-{stats,dir,box-a,box-b,star}.json`，不以终端截图代替回滚和资源断言。
 
 ### 8.3 功能兼容性与双装配
 
 ```powershell
-npm.cmd test -- --maxWorkers=4
+npm.cmd test -- --maxWorkers=1
 $env:SVG_CLI_ENTRY='test/fixtures/entries/no-optional.mjs'
 npm.cmd run verify:baseline
 Remove-Item Env:SVG_CLI_ENTRY
@@ -249,18 +251,22 @@ node scripts/verify-phase2-release.mjs
 
 基线工具需要本地正确final标签，会导出该版本并按历史锁安装构建，可能需要网络。A/B必须同实现/集合/顺序/options、初始文件和cwd；比较原始stdout/stderr，不去提示符/trim/改换行。dir会话的日志与保存文件应在被列目录外。
 
-| 检查项 | 作者填写 |
+| 检查项 | 实际记录 |
 |---|---|
-| 全量命令、退出码、文件/测试数量 | 待填写 |
-| final标签对象与提交SHA | 待填写 |
-| 无插件时与final原始两流和SVG对比 | 待填写 |
-| 四插件全集合A/B六份会话、输入/输出哈希与生成物 | 待填写 |
-| 实际生成SVG的浏览器查看 | 待填写 |
-| 失败、定位、修正和复测 | 待填写 |
+| 全量命令、退出码、文件/测试数量 | `npm.cmd test -- --maxWorkers=1`退出0，43文件、399项通过，Vitest记录25.03秒（日志04）；独立VSCode单元测试8项通过、退出0（日志12） |
+| final标签对象与提交SHA | 本地附注标签对象`7d178c98f5038950b8ece6fcc6d204dcaf5a9879`，提交`2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d`；本轮只读核对，未移动标签 |
+| 无插件时与final原始两流和SVG对比 | 退出0，`cli-1-basics.txt`、`cli-1-flowchart.txt`、`cli-1.txt`三份会话的stdout/stderr与保存SVG逐字节一致；原始数据和哈希见本地`.tmp/phase2/baseline-vffLrx/result.json`（日志13） |
+| 四插件全集合A/B六份会话、输入/输出哈希与生成物 | 退出0，basics/lecture/flowchart/box/commands/labels六组全部一致；每组输入、原始两流和全部文件SHA-256见本地`.tmp/phase2/release-fV1cEA/result.json`（日志14）；两种装配都启用相同顺序的stats/dir/box/tree-star |
+| 实际生成SVG的浏览器查看 | Chrome以独立临时配置打开box回放的`flowchart-box.svg`；“开始”和“处理数据”两框、中文文字与连接线正常显示，见图8-0；该SVG的SHA-256为`746e10d9af7eb5c483d98e51dc5a325f40d933c3e9e91f567ef0a33b18cd9b56` |
+| 失败、定位、修正和复测 | 初次`--maxWorkers=4`退出1：42文件通过、1文件失败，398项通过、1项Git树工具用例超过默认5000ms（实测5138ms，日志03）。仅改为1 worker复测即全部通过，源码、断言及超时配置未改；并发负载可能影响该用例，尚不能据此确定根因。另有VSIX文档链接打包失败及修复，见第7节与日志17/18 |
 
-**截图预留：兼容性回放、A/B及SVG预览待插入。** 建议文件名：`doc/images/compatibility.png`、`doc/images/assembly-comparison.png`、`doc/images/svg-preview.png`。
+![本轮box会话实际生成SVG的浏览器渲染](images/svg-preview.png)
+
+*图8-0：本轮A/B回放生成的box流程图在Chrome中的实际渲染。蓝色“开始”框与橙色“处理数据”框之间显示连接线；本例没有绘制箭头头部。该图为自动补验截图，与第8.4节作者提供的人工截图分别记录。*
 
 ### 8.4 VSCode扩展与截图
+
+逐项操作请先阅读 [VSCode插件人工测试指南](VSCODE_MANUAL_TEST.md)，其中包含“只能看到[]”的入口排查、完整测试SVG、操作步骤、预期结果及截图清单。
 
 ```powershell
 npm.cmd run build:extension
@@ -269,37 +275,79 @@ npm.cmd run test:extension
 npm.cmd run package:extension
 ```
 
-还需手工Install from VSIX安装包，或用F5开发宿主运行；以Text Editor打开SVG，查看原生Outline。自动宿主固定1.143.1，首次可能下载；测试只编辑临时fixture，操作JSON与截图在该次 `.tmp/phase2/extension-*/`。安装版自动验证方法见扩展README。
+人工运行可用Install from VSIX安装包，或按F5启动开发宿主；以Text Editor打开SVG，查看原生Outline。本轮自动补验分别运行开发模式和隔离安装模式，固定宿主1.143.1，均退出0（日志16/19）。开发模式材料位于本地`.tmp/phase2/extension-uxwkUj/`；独立安装使用操作系统临时目录，关键JSON已复制到本地日志目录的`installed/`。测试只编辑临时fixture，未改作者的人工测试文件。
+
+独立安装复现命令如下；在没有设置可执行文件覆盖时，测试框架会下载固定宿主。本轮使用已缓存的同版本`Code.exe`，通过`SVG_VSCODE_EXECUTABLE`指定。
+
+```powershell
+$env:SVG_TEST_VSIX='.tmp/phase2/svg-cli-companion-0.2.0.vsix'
+npm.cmd run test:extension
+Remove-Item Env:SVG_TEST_VSIX
+```
 
 | 场景 | 操作与预期 | 实际观察、版本及材料 |
 |---|---|---|
-| 文件标记 | 未打开SVG即见`[]`，普通文件/目录无标记，原文件不变 | 待填写 |
-| 原生大纲 | 根/容器/叶子/无ID层级正确 | 待填写 |
-| 点击定位 | Outline点击节点，编辑器定位对应源码范围 | 待填写 |
-| 未保存更新 | 修改ID/层级，视图无需先保存就更新 | 待填写 |
-| XML异常恢复 | 不完整时清空，补全后真实视图出现正确节点 | 待填写 |
-| 独立安装 | 版本/路径正确，不依赖仓库node_modules | 待填写 |
-| A.3实践 | 宿主回调、Decorator/Adapter角色及与CLI复用差异 | 待填写 |
+| 文件标记 | 未打开SVG即见`[]`，普通文件/目录无标记，原文件不变 | 图8-1中example.svg显示`[]`，plain.txt和folder.svg目录无该标记；两种自动宿主均记录`noSvgOpened: true`、自动激活成功及fixture前后名称/哈希一致，创建/修改/重命名/删除刷新、取消和释放通过 |
+| 原生大纲 | 根/容器/叶子/无ID层级正确 | 图8-2显示svg、g#flow、rect#start、g#nested及无ID的text节点 |
+| 点击定位 | Outline点击节点，编辑器定位对应源码范围 | 图8-3中大纲选中rect#start，源码同时定位到第3行的rect起始标签 |
+| 未保存更新 | 修改ID/层级，视图无需先保存就更新 | 图8-4中编辑器仍有未保存圆点，大纲已显示rect#updated与新增rect#extra |
+| XML异常恢复 | 不完整时清空，补全后真实视图出现正确节点 | 图8-5中不完整XML使大纲显示找不到符号；图8-6中完整XML与对应节点树重新出现 |
+| 独立安装 | 版本/路径正确，不依赖仓库node_modules | VSIX 0.2.0安装至仓库外的独立临时扩展目录，未携带node_modules；真实窗口标记、大纲、点击第3行、未保存更新、异常恢复、取消、过期版本丢弃、UTF-16范围及释放均通过（日志19）。安装模式仅用空驱动启用测试，不把SVG源码目录作为开发扩展加载 |
+| A.3实践 | 宿主回调、Decorator/Adapter角色及与CLI复用差异 | `activate`注册两个provider，VSCode按需调用装饰与符号接口；图8-1体现元数据装饰，图8-2—6体现语法树→DocumentSymbol的Adapter及宿主展示/导航。CLI的领域读回会补ID和施加领域约束，因此只复用saxes与显式栈遍历思路，不复用会话/历史；无ID和未保存文本由真实宿主测试覆盖，详见第5.2节 |
 
-**截图预留：本轮VSCode运行截图待插入。** 建议在 `doc/images/` 保存 `vscode-badge.png`、`vscode-outline.png`、`vscode-navigation.png`、`vscode-updated.png`、`vscode-incomplete.png`、`vscode-recovered.png`，然后用实际图片引用替换预留文字，并填写操作说明。
+打包复测生成6个ZIP条目，19519字节；VSIX SHA-256为`0235e14f292da5c704bcb9a37a7fb65ed3a28655c20684ec4bfdfac68cf6cdd3`。开发构建、包内及已安装的`extension.cjs`逐字节相同，bundle SHA-256为`baf51b25bfcb0a6f46f740940de90d6f6d5b3996d808ddeda3f62e4c0d8808c3`；清单、等值检查及node_modules排除记录见本地`bundle-verification.json`。这些记录证明本轮自动测试产物，不用于反推作者截图的安装来源。
 
-文件准备好后可使用下面的Markdown引用；当前仅作填写示例，不预置运行截图：
+#### 文件标记
 
-```markdown
-![SVG文件标记](images/vscode-badge.png)
-![原生大纲点击定位](images/vscode-navigation.png)
-![XML补全后的大纲恢复](images/vscode-recovered.png)
-```
+![SVG文件标记与普通文件、目录的对照](images/vscode-badge.png)
+
+*图8-1：Explorer中example.svg右侧显示`[]`，plain.txt和folder.svg目录没有该标记。编辑器中的文件名仍为example.svg。此图展示文件类型区分；自动激活和文件内容不变由本节另述的真实宿主操作记录佐证。*
+
+#### 原生大纲层级
+
+![SVG根、容器、叶子及无ID文本的大纲层级](images/vscode-outline.png)
+
+*图8-2：以文本编辑器打开example.svg后，原生大纲展示svg根、g#flow、rect#start和嵌套的g#nested；没有ID的文本元素仅显示为text。层级与右侧XML结构对应。*
+
+#### 点击定位源码
+
+![大纲选中rect#start并定位到源码第3行](images/vscode-navigation.png)
+
+*图8-3：manual.svg的大纲选中rect#start时，编辑器定位到第3行的rect起始标签；同时保留g#scene、g#nested及其子节点的层级展示。*
+
+#### 未保存编辑更新
+
+![未保存状态下的ID修改和新增节点已反映在大纲中](images/vscode-updated.png)
+
+*图8-4：manual.svg标签上的圆点表示内容尚未保存。源码将start改为updated，并在嵌套组内新增extra矩形；大纲已同步显示rect#updated和rect#extra。*
+
+#### 不完整XML与恢复
+
+![不完整XML使原生大纲清空并提示找不到符号](images/vscode-incomplete.png)
+
+*图8-5：内容暂时改为未闭合的`<svg><g id="unfinished">`后，大纲显示“在文档manual.svg中找不到符号”，没有保留先前的节点树。文件仍可显示SVG类型标记。*
+
+![恢复完整XML后大纲重新显示节点树](images/vscode-recovered.png)
+
+*图8-6：恢复完整XML后，大纲重新显示g#scene、rect#updated、g#nested、text#caption、circle和rect#extra，与当前源码对应。此处恢复的是包含updated和extra的完整内容。*
 
 ### 8.5 指标与结论
 
-已有 [源码指标](../docs/metrics/phase2-source.md) / [JSON](../docs/metrics/phase2-source.json) 是脚本从final到运行源码提交 `360fac0` 生成的历史快照，不是本轮验证结论。职责、物理/代码行和复杂度按core/host/plugins分开，VSCode单列；内置迁移会重分配分类，不能把core减少直接当功能净删减。
+交付的 [源码指标](../docs/metrics/phase2-source.md) / [JSON](../docs/metrics/phase2-source.json) 已由脚本更新为final→收尾前HEAD `474bede`。`src/`、`plugins/`和VSCode源码在原运行源码提交`360fac0`到该HEAD之间无差异，完整测量结果与原快照一致。指标文件记录真实采样提交；最终`p2`创建后按指标说明只读重算并核对源码和测量结果，不手工改写生成的SHA或为回填数字移动标签。职责、物理/代码行和复杂度按core/host/plugins分开，VSCode单列；内置迁移会重分配分类，不能把core减少直接当功能净删减。
 
-更新时使用真实revision，例如 `npm.cmd run metrics -- final HEAD --output .tmp/verification/final-to-head`；需要纳入报告的最终结果再放入 `docs/metrics/`，不要手改生成数字。口径见 [指标说明](../docs/metrics/README.md)。
+| 分类 | 代码行：final→本轮HEAD | 函数复杂度合计：final→本轮HEAD |
+|---|---|---|
+| core | 1340→1321 | 445→475 |
+| host | 596→804 | 238→371 |
+| plugins | 0→968 | 0→312 |
+| CLI合计 | 1936→3093 | 683→1158 |
+| VSCode（独立统计） | 0→143 | 0→49 |
 
-| 最终材料 | 作者填写 |
+复杂度是脚本按函数基础值及条件/循环等分支累加的统计值，不代表运行耗时。结果说明核心职责外移、插件和通用装配层增加，不能据此宣称整体复杂度下降。生成规则见 [指标说明](../docs/metrics/README.md)。
+
+| 最终材料 | 实际记录 |
 |---|---|
-| 起止完整SHA、版本与生成命令 | 待填写 |
-| 实际接入提交和差异说明 | 待填写 |
-| 截图/日志清单与尚存限制 | 待填写 |
-| 实际完成情况与结论 | 待填写 |
+| 起止完整SHA、版本与生成命令 | `2054ec5667ad2e5f16b9b52ddd75a3435ed63c9d`→`474bedee351f42b2124b0e7730fe44787a25aabb`；Node v24.14.0、TypeScript 7.0.2；`npm.cmd run metrics -- final HEAD --output .tmp/verification/report-2026-11-23/metrics`退出0（日志15）；收尾时再执行`node scripts/metrics.mjs final HEAD --output docs/metrics/phase2-source`退出0，更新可提交材料，完整测量结果相同。脚本读取Git blob，未提交文档不计入 |
+| 实际接入提交和差异说明 | stats：`1ff4352`→`92cde9f`（37路径），dir：`92cde9f`→`8dc8e39`（39路径），单模式边界审计均0违规。box从共同基线`f5236b5`分别接入`f20745a`（A）及`9a8aeb6`（B），各24路径、单父提交，插件实现完全相同、互为peer检查通过。tree-star：`1d1b646`→`360fac0`共40路径，实际同时增加代码与配置装配，不冒称单模式证明；core、加载器、5个既有插件目录、scripts及extensions共9组路径无变化，根清单仅新增依赖、配置仅追加插件、composition仅增加导入与条目。其余为新插件、必要测试和报告，完整SHA与差异保存在`git-*.json` |
+| 截图/日志清单与尚存限制 | 图8-0为本轮浏览器补验，图8-1—6为作者提供的六张人工截图；日志01—19（含失败和复测）、Git审计、指标、bundle核对及安装版JSON保留在本地`.tmp/verification/report-2026-11-23/`，原始回放在本地`.tmp/phase2/`。没有补造插件终端截图；人工截图未展示的版本与安装来源不作推断。并发Git工具测试的默认5秒超时风险仍记录在第8.3节；可信插件、SVG子集及非热卸载限制见第6节 |
+| 实际完成情况与结论 | 本轮构建、类型检查、399项全量测试、8项扩展单测、三份final兼容会话、六组四插件A/B回放，以及开发/独立安装两种真实VSCode宿主验证均通过；状态断言、原始输出和界面材料相互补充，支持本报告描述的功能与架构结论。收尾材料已包含统一的串行测试说明和重算指标；截至本次整理，尚未提交、推送或创建p2。本地final标签保持不变；远端只读查询显示master为474bede，final/p2及两个box证明分支尚未发布，后续以最终提交和远端引用核对结果为准 |
